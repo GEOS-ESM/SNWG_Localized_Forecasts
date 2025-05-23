@@ -1,0 +1,54 @@
+<section class="wrapper image-wrapper bg-image bg-overlay bg-overlay-300">
+    <div id='map'></div>
+    <div id="map-hover-info" style="display:none; position:absolute; z-index:99999; pointer-events:none; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2); padding:8px; font-size:14px; min-width:120px;"></div>
+    <div id='replay-animation'>
+        <img src="geos-cf.gif"/>
+    </div>
+</section>
+
+<div class="forecasts_container"></div>
+
+<div class="locations-container">
+    <button id="toggle-locations-box" class="btn btn-soft-ash btn-sm rounded" style="position: relative;">
+        <i class="bi bi-chevron-down" id="toggle-locations-icon" style="margin-right: 6px;"></i>
+        <span>Hide Locations</span>
+    </button>
+    <div class="locations-box" data-margin="0" data-dots="true"
+        data-items-md="5" data-items-xs="1">
+        <ul class="pollutant_param list-inline mb-0"></ul>
+        <input type="text" id="filter-input" placeholder="Search" />
+        <div class="pollutants-banner">
+            <div class="pollutant-banner-o row gx-md-8 gy-8 swiper-desactivated"></div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="local_forecasts.js?v=1.4.0"></script>
+<script src="local_forecasts_assets.js?v=1.4.0"></script>
+
+<script>
+    $(document).on('click', '.btn-close', function(e) {
+        $('.forecasts_container').css('display', 'none');
+    });
+
+    $(function() {
+        let isVisible = true;
+        $('#toggle-locations-box').on('click', function() {
+            if (isVisible) {
+                $('.locations-box').slideUp(300);
+                $(this).find('span').text('Show Locations');
+                $('#toggle-locations-icon').removeClass('bi-chevron-down').addClass('bi-chevron-up');
+            } else {
+                $('.locations-box').slideDown(300);
+                $(this).find('span').text('Hide Locations');
+                $('#toggle-locations-icon').removeClass('bi-chevron-up').addClass('bi-chevron-down');
+            }
+            isVisible = !isVisible;
+        });
+    });
+
+</script>
