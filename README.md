@@ -14,31 +14,23 @@ A lightweight forecasting tool leveraging NASA GMAO’s GEOS-CF model integrated
 
 ## Aim and Scope
 
-- ✅ Enable high-resolution, site-specific air quality forecasts.
-- ✅ Make GEOS-CF modeling outputs actionable and localized using real-time observations.
-- ✅ Provide an accessible online platform to train, deploy, and evaluate forecast models per location.
+- Enable high-resolution, site-specific air quality forecasts.
+- Make GEOS-CF modeling outputs actionable and localized using real-time observations.
+- Provide an accessible online platform to train, deploy, and evaluate forecast models per location.
 
 ---
 
-## ⚙Core Features
+## Core Features
 
-- ✅ **Pretrained models**: Use existing models without retraining for immediate forecasting.
-- ✅ **Online training**: Train and deploy models for specific locations in real time.
-- ✅ **Configuration exploration**: View and modify location-specific forecast settings.
-- ✅ **Forecast visualization**: Generate and export forecast plots using built-in tools.
-- ✅ **Community contributions**: Support for saving models and sharing local data.
-- ✅ **Custom forecast generation**: One-call function to generate outputs in various formats:
+- **Pretrained models**: Use existing models without retraining for immediate forecasting.
+- **Online training**: Train and deploy models for specific locations in real time.
+- **Configuration exploration**: View and modify location-specific forecast settings.
+- **Forecast visualization**: Generate and export forecast plots using built-in tools.
+- **Community contributions**: Support for saving models and sharing local data.
+- **Custom forecast generation**: One-call function to generate outputs in various formats:
   - 📊 DataFrames
   - 📈 Forecast plots
   - 🧩 SHAP (SHapley Additive exPlanations) values for uncertainty and feature impact analysis
-
----
-
-## Complementary Components
-
-- 📍 **Pandora Sensor Network Expansion**: 20 new installations — 10 in rural U.S. areas and 10 at U.S. embassies in high-pollution regions.
-- ☁️ **PM2.5 Forecasts via CARES**: Combines machine learning, GEOS-FP, and ground observations for 72-hour forecasts.
-- 🕰️ **Historical Data Record**: Supports long-term air quality trend analysis and satellite data validation.
 
 ---
 
