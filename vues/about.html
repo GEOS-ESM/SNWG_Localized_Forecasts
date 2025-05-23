@@ -1,0 +1,95 @@
+
+    <header class="bg-dark py-5">
+      <div class="container px-5">
+        <div class="row gx-5 align-items-center justify-content-center">
+          <div class="col-lg-8 col-xl-7 col-xxl-6">
+            <div class="my-5 text-center text-xl-start text-white">
+              <h1 class="display-5 fw-bolder mb-2">Air Quality Forecasts and Distributed Pandora Sensors</h1>
+              <p class="lead fw-normal text-white-50 mb-4">
+                This NASA-backed initiative aims to improve the accuracy and availability of air quality data by combining Earth observations,
+                advanced modeling, and expanded ground-based sensor networks. A major part of the solution is the
+                <strong>GEOS-CF-based localized forecasting tool</strong>, which empowers localized air quality prediction capabilities.
+              </p>
+            </div>
+          </div>
+          <div class="col-xl-5 col-xxl-6 d-none d-xl-block text-center">
+            <img class="img-fluid rounded-3 my-5" src="https://earthdata.nasa.gov/s3fs-public/2024-10/earth-data-11.jpg?VersionId=Hq77PMM5qXe4v5zCbWH0iTbBcnHzR_7l" alt="Air Quality Illustration" />
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Features section-->
+    <section class="py-5" id="features">
+      <div class="container px-5 my-5">
+        <div class="row gx-5">
+          <div class="col-lg-4 mb-5 mb-lg-0">
+            <h2 class="fw-bolder mb-0">GEOS-CF Localized Forecasts</h2>
+            <p>A Lightweight Forecasting Tool leveraging NASA GMAO’s GEOS-CF model integrated with local observation data including OpenAQ.</p>
+          </div>
+          <div class="col-lg-8">
+            <div class="row gx-5 row-cols-1 row-cols-md-2">
+
+              <div class="col mb-5 h-100">
+                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3 d-flex align-items-center justify-content-center" style="height: 3rem; width: 3rem;">
+                  <i class="bi bi-broadcast-pin fs-4"></i>
+                </div>
+                <h3 class="h5">Aim and Scope</h3>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Enable high-resolution, site-specific air quality forecasts.</li>
+                  <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Make GEOS-CF modeling outputs actionable and localized using real-time observations.</li>
+                  <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Provide an accessible online platform to train, deploy, and evaluate forecast models per location.</li>
+                </ul>
+              </div>
+
+              <div class="col mb-5 h-100">
+                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3 d-flex align-items-center justify-content-center" style="height: 3rem; width: 3rem;">
+                  <i class="bi bi-gear-fill fs-4"></i>
+                </div>
+                <h3 class="h5">Core Features</h3>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Pretrained models:</strong> Use existing models without retraining for immediate forecasting.</li>
+                  <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Online training:</strong> Train and deploy models for specific locations in real time.</li>
+                  <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Configuration exploration:</strong> View and modify location-specific forecast settings.</li>
+                  <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Forecast visualization:</strong> Generate and export forecast plots using built-in tools.</li>
+                  <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Community contributions:</strong> Support for saving models and sharing local data.</li>
+                  <li class="list-group-item">
+                    <i class="bi bi-check2-circle text-success me-2"></i><strong>Custom forecast generation:</strong> Call a single function to create outputs in various formats:
+                    <ul class="mt-2 mb-0 ps-4">
+                      <li><i class="bi bi-file-earmark-spreadsheet me-2"></i>DataFrames</li>
+                      <li><i class="bi bi-bar-chart-line me-2"></i>Forecast plots</li>
+                      <li><i class="bi bi-puzzle-fill me-2"></i>SHAP (SHapley Additive exPlanations) values for uncertainty and feature impact analysis</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="col mb-5 h-100">
+                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3 d-flex align-items-center justify-content-center" style="height: 3rem; width: 3rem;">
+                  <i class="bi bi-globe2 fs-4"></i>
+                </div>
+                <h3 class="h5">Complementary Components</h3>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item"><i class="bi bi-geo-alt-fill me-2"></i><strong>Pandora Sensor Network Expansion:</strong> 20 new installations: 10 in rural U.S. areas and 10 at U.S. embassies in high-pollution regions.</li>
+                  <li class="list-group-item"><i class="bi bi-cloud-arrow-up-fill me-2"></i><strong>PM2.5 Forecasts via CARES:</strong> Machine learning + GEOS-FP + ground observations for forecasts up to 72 hours in advance.</li>
+                  <li class="list-group-item"><i class="bi bi-clock-history me-2"></i><strong>Historical Data Record:</strong> Supports long-term air quality trend analysis and satellite data validation.</li>
+                </ul>
+              </div>
+
+              <div class="col h-100">
+                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3 d-flex align-items-center justify-content-center" style="height: 3rem; width: 3rem;">
+                  <i class="bi bi-box-arrow-in-up-right fs-4"></i>
+                </div>
+                <h3 class="h5">Access and Integration</h3>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item"><i class="bi bi-wifi me-2"></i><strong>Pandora data:</strong> Via the Pandonia Global Network (PGN).</li>
+                  <li class="list-group-item"><i class="bi bi-phone-fill me-2"></i><strong>PM2.5 forecasts:</strong> Through this website</li>
+                  <li class="list-group-item"><i class="bi bi-globe fs-5 me-2"></i><strong>GEOS-CF localized forecast tool:</strong> Accessible online for real-time training and forecasting.</li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>

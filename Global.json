@@ -1,0 +1,7481 @@
+
+// OPENAQ locations
+{
+	"-102": {
+	"location_name": "Kenya_Nairobi",
+	"lat": 1.278822,
+	"lon": 36.817281,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Kenya_Nairobi_pm25.json",
+			"historical": "forecast_latest_Kenya_Nairobi_pm25_historical.json"
+
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Nairobi_data.csv",
+			"lname": "Kenya_Nairobi",
+			"time_col": "Time",
+			"val_col": "Conc (mg/m3)",
+			"l_name": "Kenya_Nairobi",
+			"lat": 1.278822,
+			"lon": 36.817281,
+			"coefficient_convert": 1000.0,
+			"unit": "ugm-3"
+		}
+
+
+	}
+},
+"-103": {
+	"location_name": "Uganda_Kampala_Bugolobi",
+	"lat": -1.286,
+	"lon": 36.817,
+	"status": "desactivated",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Bugolobi_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Bugolobi_pm25_historical.json"
+
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Uganda_Kampala_Bugolobi",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-104": {
+	"location_name": "Rwanda_Kigali_Gacuriro",
+	"lat": -1.9270086,
+	"lon": 30.0817766,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Rwanda_Kigali_Gacuriro_pm25.json",
+			"historical": "forecast_latest_Rwanda_Kigali_Gacuriro_pm25_historical.json"
+
+		},
+		"o3": {
+			"forecasts": "forecast_latest_Rwanda_Kigali_Gikomero_o3.json",
+			"historical": "forecast_latest_Rwanda_Kigali_Gacuriro_o3_historical.json"
+
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kigali_stations/Gacuriro_HourlyWRI.csv",
+			"val_col": "PM25",
+			"l_name": "Rwanda_Kigali_Gacuriro",
+			"lat": -1.944,
+			"lon": 30.059,
+			"unit": "ugm-3"
+		}
+	}
+},
+"-105": {
+	"location_name": "Ghana_Accra",
+	"lat": 5.55,
+	"lon": -0.2,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Ghana_Accra_pm25.json",
+			"historical": "forecast_latest_Ghana_Accra_pm25_historical.json"
+
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Accra_PM2.5_2021_YTD.csv",
+			"val_col": "NowCast Conc.",
+			"l_name": "Accra_Ghana",
+			"lat": 5.55,
+			"lon": -0.2,
+			"unit": "ugm-3"
+		}
+	}
+},
+"-106": {
+	"location_name": "Kampala_Bukasa",
+	"lat": 0.29875,
+	"lon": 32.615,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Bukasa_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Bukasa_pm25_historical.json"
+
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Uganda_Kampala_Bugolobi",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-107": {
+	"location_name": "Rwanda_Kigali_Gitega",
+	"lat": -1.94,
+	"lon": 30.06,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Rwanda_Kigali_Gitega_pm25.json",
+			"historical": "forecast_latest_Rwanda_Kigali_Gitega_pm25_historical.json"
+
+		},
+		"o3": {
+			"forecasts": "forecast_latest_Rwanda_Kigali_Gikomero_o3.json",
+			"historical": "forecast_latest_Rwanda_Kigali_Gacuriro_o3_historical.json"
+
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Uganda_Kampala_Bugolobi",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"3995": {
+	"location_name": "French Guiana (FR40008)",
+	"lat": 4.93784416911561,
+	"lon": -52.3209364190869,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_FR40008_pm25.json",
+			"historical": "forecast_latest_FR40008_pm25_historical.json"
+
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"8645": {
+	"location_name": "US Diplomatic Post: Kampala",
+	"lat": 4.93784416911561,
+	"lon": -52.3209364190869,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Kampala_USDiplomaticPost_pm25.json",
+			"historical": "forecast_latest_Kampala_USDiplomaticPost_pm25_historical.json"
+
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"5282": {
+	"location_name": "Parque D.Pedro II",
+	"lat": -23.54484566,
+	"lon": -46.62767559,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_ParqueDPedroII_pm25.json",
+			"historical": "forecast_latest_ParqueDPedroII_pm25_historical.json"
+
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"739": {
+	"location_name": "McMillan Reservoir",
+	"lat": 38.921848,
+	"lon": -77.013176,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_McMillanReservoir_pm25.json",
+			"historical": "forecast_latest_McMillanReservoir_pm25_historical.json"
+
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"807": {
+	"location_name": "Parklane",
+	"lat": 34.093899,
+	"lon": -80.962196,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_McMillanReservoir_pm25.json",
+			"historical": "forecast_latest_McMillanReservoir_pm25_historical.json"
+
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"-108": {
+	"location_name": "Banda, Kampala",
+	"lat": 0.341674,
+	"lon": 32.635306,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Banda_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Banda_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Banda, Kampala",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-109": {
+	"location_name": "Bbuto, Kira Municipality",
+	"lat": 0.39205,
+	"lon": 32.67298,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Bbuto_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Bbuto_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Bbuto, Kira Municipality",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-110": {
+	"location_name": "Bugolobi, Nakawa",
+	"lat": 0.3075,
+	"lon": 32.6206,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Bugolobi_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Bugolobi_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Bugolobi, Nakawa",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-111": {
+	"location_name": "Bukasa, Kira Municipality",
+	"lat": 0.29875,
+	"lon": 32.615,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Bukasa_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Bukasa_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Bukasa, Kira Municipality",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-112": {
+	"location_name": "Bukoto I, Kawempe",
+	"lat": 0.3517,
+	"lon": 32.591,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Bukoto I_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Bukoto I_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Bukoto I, Kawempe",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-113": {
+	"location_name": "Busabala, Wakiso",
+	"lat": 0.2182,
+	"lon": 32.6176,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Busabala_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Busabala_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Busabala, Wakiso",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-114": {
+	"location_name": "Busega, Rubaga",
+	"lat": 0.3101,
+	"lon": 32.516,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Busega_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Busega_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Busega, Rubaga",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-115": {
+	"location_name": "Butabika, Nakawa",
+	"lat": 0.30778,
+	"lon": 32.651449,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Butabika_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Butabika_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Butabika, Nakawa",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-116": {
+	"location_name": "Buwate, Kira Municipality",
+	"lat": 0.40532,
+	"lon": 32.62027,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Buwate_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Buwate_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Buwate, Kira Municipality",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-117": {
+	"location_name": "Bweyogerere, Kira Municipality",
+	"lat": 0.3501,
+	"lon": 32.6662,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Bweyogerere_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Bweyogerere_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Bweyogerere, Kira Municipality",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-118": {
+	"location_name": "Bweyogerere, Wakiso",
+	"lat": 0.354825,
+	"lon": 32.67781,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Bweyogerere_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Bweyogerere_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Bweyogerere, Wakiso",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-119": {
+	"location_name": "Civic Centre, Kampala Central",
+	"lat": 0.314,
+	"lon": 32.59,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_CivicCentre_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_CivicCentre_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Civic Centre, Kampala Central",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-120": {
+	"location_name": "Ggaba, Makindye",
+	"lat": 0.25776,
+	"lon": 32.63686,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Ggaba_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Ggaba_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Ggaba, Makindye",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-121": {
+	"location_name": "Kalerwe, Kawempe",
+	"lat": 0.3564,
+	"lon": 32.573,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Kalerwe_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Kalerwe_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kalerwe, Kawempe",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-122": {
+	"location_name": "Kasubi, Rubaga",
+	"lat": 0.344,
+	"lon": 32.553,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Kasubi_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Kasubi_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kasubi, Rubaga",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-123": {
+	"location_name": "Kawempe",
+	"lat": 0.35147,
+	"lon": 32.56223,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Kawempe_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Kawempe_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kawempe",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-124": {
+	"location_name": "Kawempe Industrial, Kawempe",
+	"lat": 0.374653,
+	"lon": 32.55744,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_KawempeIndustrial_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_KawempeIndustrial_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kawempe Industrial, Kawempe",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-125": {
+	"location_name": "Kibuli, Makindye",
+	"lat": 0.30852,
+	"lon": 32.59224,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Kibuli_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Kibuli_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kibuli, Makindye",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-126": {
+	"location_name": "Kireka, Kira Municipality",
+	"lat": 0.347014,
+	"lon": 32.64936,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Kireka_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Kireka_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kireka, Kira Municipality",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-127": {
+	"location_name": "Kirinya, Kira Municipality",
+	"lat": 0.33197,
+	"lon": 32.66903,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Kirinya_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Kirinya_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kirinya, Kira Municipality",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-128": {
+	"location_name": "Kisugu, Makindye",
+	"lat": 0.307489,
+	"lon": 32.611755,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Kisugu_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Kisugu_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kisugu, Makindye",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-129": {
+	"location_name": "Kiwatule, Nakawa",
+	"lat": 0.373078,
+	"lon": 32.628226,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Kiwatule_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Kiwatule_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kiwatule, Nakawa",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-130": {
+	"location_name": "Kizungu, Makindye",
+	"lat": 0.27602,
+	"lon": 32.59075,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Kizungu_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Kizungu_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kizungu, Makindye",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-131": {
+	"location_name": "Kyaliwajala, Kira Municipality",
+	"lat": 0.381576,
+	"lon": 32.647109,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Kyaliwajala_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Kyaliwajala_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kyaliwajala, Kira Municipality",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-132": {
+	"location_name": "Kyebando, Kampala",
+	"lat": 0.357987,
+	"lon": 32.5841,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Kyebando_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Kyebando_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Kyebando, Kampala",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-133": {
+	"location_name": "Lower Nsooba, Kawempe",
+	"lat": 0.34959,
+	"lon": 32.57644,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_LowerNsooba_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_LowerNsooba_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Lower Nsooba, Kawempe",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-134": {
+	"location_name": "Lukuli, Makindye",
+	"lat": 0.28368,
+	"lon": 32.60048,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Lukuli_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Lukuli_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Lukuli, Makindye",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-135": {
+	"location_name": "Luwafu, Makindye",
+	"lat": 0.2689,
+	"lon": 32.588,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Luwafu_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Luwafu_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Luwafu, Makindye",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-136": {
+	"location_name": "Makerere University Weather Station",
+	"lat": 0.333529,
+	"lon": 32.568643,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_MakerereUniversityWeatherStation_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_MakerereUniversityWeatherStation_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Makerere University Weather Station",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-137": {
+	"location_name": "Makerere University_01, Kawempe",
+	"lat": 0.3323,
+	"lon": 32.5698,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_MakerereUniversity_01_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_MakerereUniversity_01_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Makerere University_01, Kawempe",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-138": {
+	"location_name": "Makerere, Kawempe",
+	"lat": 0.33347,
+	"lon": 32.56854,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Makerere_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Makerere_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Makerere, Kawempe",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-139": {
+	"location_name": "Makindye Kcca division offices",
+	"lat": 0.29282,
+	"lon": 32.57132,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Makindye_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Makindye_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Makindye Kcca division offices",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-140": {
+	"location_name": "Makindye Nsambya/US Embassy",
+	"lat": 0.29926,
+	"lon": 32.59266,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_MakindyeNsambyaUSEmbassy_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_MakindyeNsambyaUSEmbassy_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Makindye Nsambya/US Embassy",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-141": {
+	"location_name": "Makindye, Lukuli Makindye",
+	"lat": 0.28904,
+	"lon": 32.58958,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Makindye_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Makindye_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Makindye, Lukuli Makindye",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-142": {
+	"location_name": "Mbalwa, Kira Municipality",
+	"lat": 0.3655,
+	"lon": 32.6468,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Mbalwa_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Mbalwa_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Mbalwa, Kira Municipality",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-143": {
+	"location_name": "Mbuya II, Nakawa",
+	"lat": 0.325346,
+	"lon": 32.632288,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_MbuyaII_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_MbuyaII_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Mbuya II, Nakawa",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-144": {
+	"location_name": "Mpererwe, Kawempe",
+	"lat": 0.380684,
+	"lon": 32.57651,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Mpererwe_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Mpererwe_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Mpererwe, Kawempe",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-145": {
+	"location_name": "Municipal Council, Kira Municipality",
+	"lat": 0.39738,
+	"lon": 32.64111,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_MunicipalCouncil_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_MunicipalCouncil_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Municipal Council, Kira Municipality",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-146": {
+	"location_name": "Mutundwe, Makindye Ssabagabo",
+	"lat": 0.269993,
+	"lon": 32.558017,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Mutundwe_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Mutundwe_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Mutundwe, Makindye Ssabagabo",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-147": {
+	"location_name": "Naguru II, Nakawa",
+	"lat": 0.3412,
+	"lon": 32.602,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_NaguruII_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_NaguruII_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Naguru II, Nakawa",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-148": {
+	"location_name": "Najera, Kira Municipality",
+	"lat": 0.391478,
+	"lon": 32.62583,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Najera_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Najera_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Najera, Kira Municipality",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-149": {
+	"location_name": "Nakasero II, Kampala",
+	"lat": 0.322108,
+	"lon": 32.576,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_NakaseroII_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_NakaseroII_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Nakasero II, Kampala",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-150": {
+	"location_name": "Nakasero II, Kampala",
+	"lat": 0.32232,
+	"lon": 32.5757,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_NakaseroII_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_NakaseroII_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Nakasero II, Kampala",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-151": {
+	"location_name": "Nakawa, Nakawa",
+	"lat": 0.33261,
+	"lon": 32.61005,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Nakawa_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Nakawa_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Nakawa, Nakawa",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-152": {
+	"location_name": "Nansana east ward, Wakiso",
+	"lat": 0.3759,
+	"lon": 32.528,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Nansanaeastward_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Nansanaeastward_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Nansana east ward, Wakiso",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-153": {
+	"location_name": "Nansana west ward, Wakiso",
+	"lat": 0.363,
+	"lon": 32.529,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Nansanawestward_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Nansanawestward_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Nansana west ward, Wakiso",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-154": {
+	"location_name": "Nsambya/US Embassy, Makindye",
+	"lat": 0.299358,
+	"lon": 32.59274,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_MakindyeNsambyaUSEmbassy_pm25.json ",
+			"historical": "forecast_latest_Uganda_Kampala_MakindyeNsambyaUSEmbassy_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Nsambya/US Embassy, Makindye",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-155": {
+	"location_name": "Nsawo, Kira Municipality",
+	"lat": 0.39205,
+	"lon": 32.67296,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Nsawo_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Nsawo_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Nsawo, Kira Municipality",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-156": {
+	"location_name": "Ntinda, Nakawa",
+	"lat": 0.360209,
+	"lon": 32.610756,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Ntinda_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Ntinda_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Ntinda, Nakawa",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-157": {
+	"location_name": "Rubaga, Kampala",
+	"lat": 0.295314,
+	"lon": 32.553682,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Rubaga_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Rubaga_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Rubaga, Kampala",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-158": {
+	"location_name": "Seguku, Makindye-Ssabagabo",
+	"lat": 0.2336,
+	"lon": 32.5635,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Seguku_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Seguku_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "Seguku, Makindye-Ssabagabo",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-159": {
+	"location_name": "St.Ponsiano primary school, makindye",
+	"lat": 0.25562,
+	"lon": 32.60538,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_Makindye_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_Makindye_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "St.Ponsiano primary school, makindye",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+"-160": {
+	"location_name": "wabigalo",
+	"lat": 0.30991,
+	"lon": 32.60045,
+	"status": "active",
+	"observation_source": "s3",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "forecast_latest_Uganda_Kampala_wabigalo_pm25.json",
+			"historical": "forecast_latest_Uganda_Kampala_wabigalo_pm25_historical.json"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"file": "Kampala/kampala_all.csv",
+			"time_col": "timestamp",
+			"time_parser": "%Y-%m-%d %H:%M:%S UTC",
+			"val_col": "pm2_5_calibrated_value",
+			"l_name": "wabigalo",
+			"lat_col": "latitude",
+			"lon_col": "longitude",
+			"unit": "ugm-3"
+		}
+	}
+},
+
+"162": {
+	"location_name": "Houston Deer Park C3",
+	"lat": 29.670025,
+	"lon": -95.128508,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"173": {
+	"location_name": "Houston Westhollow C",
+	"lat": 29.7233,
+	"lon": -95.6358,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"186": {
+	"location_name": "Houston Aldine C8",
+	"lat": 29.9011,
+	"lon": -95.3261,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"187": {
+	"location_name": "Houston Bayland Park",
+	"lat": 29.6958,
+	"lon": -95.4992,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"191": {
+	"location_name": "Seabrook Friendship",
+	"lat": 29.5831,
+	"lon": -95.0156,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"212": {
+	"location_name": "ROLAND",
+	"lat": 35.408138,
+	"lon": -94.524414,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"213": {
+	"location_name": "Twin Falls PM25",
+	"lat": 42.565089,
+	"lon": -114.494717,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"216": {
+	"location_name": "South Bend-Shields D",
+	"lat": 41.696667,
+	"lon": -86.214722,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"218": {
+	"location_name": "Ogden Dunes",
+	"lat": 41.617814,
+	"lon": -87.199533,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"220": {
+	"location_name": "Larwill",
+	"lat": 41.169722,
+	"lon": -85.629444,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"221": {
+	"location_name": "Indpls-Washington Pa",
+	"lat": 39.810833,
+	"lon": -86.114444,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"222": {
+	"location_name": "Terre Haute-Lafayett",
+	"lat": 39.485987,
+	"lon": -87.401312,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"223": {
+	"location_name": "Gary-IITRI",
+	"lat": 41.606563,
+	"lon": -87.305015,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"227": {
+	"location_name": "Kokomo - E. Vaile Av",
+	"lat": 40.481347,
+	"lon": -86.109688,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"233": {
+	"location_name": "Spokane-E Broadway A",
+	"lat": 47.663962,
+	"lon": -117.25765,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"234": {
+	"location_name": "Enterprise - US Fore",
+	"lat": 45.426351,
+	"lon": -117.296066,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"239": {
+	"location_name": "Alamo Lake",
+	"lat": 34.243889,
+	"lon": -113.558611,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"240": {
+	"location_name": "Waterbury",
+	"lat": 41.5503,
+	"lon": -73.0442,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"242": {
+	"location_name": "POTAWATOMI",
+	"lat": 45.5639,
+	"lon": -88.81,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"274": {
+	"location_name": "Reading Airport",
+	"lat": 40.3833,
+	"lon": -75.9686,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"293": {
+	"location_name": "Garden",
+	"lat": 61.205861,
+	"lon": -149.8246,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"305": {
+	"location_name": "Smithfield",
+	"lat": 41.842778,
+	"lon": -111.85194,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"314": {
+	"location_name": "Indpls - I-70 E",
+	"lat": 39.787933,
+	"lon": -86.13088,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"321": {
+	"location_name": "Temple Georgia C1045",
+	"lat": 31.122527,
+	"lon": -97.431158,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"326": {
+	"location_name": "Jackson NCORE",
+	"lat": 32.329042,
+	"lon": -90.182659,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"331": {
+	"location_name": "Lindon",
+	"lat": 40.3414,
+	"lon": -111.7136,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"339": {
+	"location_name": "Waco C1037",
+	"lat": 31.6531,
+	"lon": -97.0706,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"341": {
+	"location_name": "St. Marks Wildlife R",
+	"lat": 30.0842,
+	"lon": -84.1617,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"342": {
+	"location_name": "Lancaster",
+	"lat": 40.0467,
+	"lon": -76.2833,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"344": {
+	"location_name": "Sunrise Acres",
+	"lat": 36.163962,
+	"lon": -115.11393,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"358": {
+	"location_name": "Albemarle HS",
+	"lat": 38.07657,
+	"lon": -78.50397,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"361": {
+	"location_name": "Tonawanda II",
+	"lat": 42.9981,
+	"lon": -78.8993,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"362": {
+	"location_name": "CHICOPEE",
+	"lat": 42.194401,
+	"lon": -72.555603,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"365": {
+	"location_name": "Hamshire C64",
+	"lat": 29.863952,
+	"lon": -94.3178,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"366": {
+	"location_name": "Shuttlesworth",
+	"lat": 33.565278,
+	"lon": -86.796389,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"381": {
+	"location_name": "Rockland Cty",
+	"lat": 41.182079,
+	"lon": -74.028191,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"383": {
+	"location_name": "Malta",
+	"lat": 48.317507,
+	"lon": -107.862471,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"384": {
+	"location_name": "CCNY",
+	"lat": 40.8197,
+	"lon": -73.9481,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"385": {
+	"location_name": "Newburgh",
+	"lat": 41.4994,
+	"lon": -74.0097,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"397": {
+	"location_name": "Thompson Falls HS",
+	"lat": 47.594395,
+	"lon": -115.323746,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"410": {
+	"location_name": "West Phoenix",
+	"lat": 33.483799,
+	"lon": -112.142601,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"415": {
+	"location_name": "Rifle Particulate",
+	"lat": 39.531799,
+	"lon": -107.782303,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"424": {
+	"location_name": "CHI_COM",
+	"lat": 41.7547,
+	"lon": -87.7136,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"426": {
+	"location_name": "Burdens Creek",
+	"lat": 35.889402,
+	"lon": -78.8747,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"442": {
+	"location_name": "North Phoenix",
+	"lat": 33.560299,
+	"lon": -112.066299,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"446": {
+	"location_name": "Narragansett",
+	"lat": 41.4942,
+	"lon": -71.4219,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"448": {
+	"location_name": "Boston - Roxbury",
+	"lat": 42.329399,
+	"lon": -71.082497,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"449": {
+	"location_name": "Haverhill",
+	"lat": 42.7708,
+	"lon": -71.1028,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"452": {
+	"location_name": "Boston-Von Hillern",
+	"lat": 42.325197,
+	"lon": -71.056056,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"455": {
+	"location_name": "Bozeman High School",
+	"lat": 45.683765,
+	"lon": -111.056282,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"459": {
+	"location_name": "Rossiter Pump House",
+	"lat": 46.6588,
+	"lon": -112.0131,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"465": {
+	"location_name": "Broadus",
+	"lat": 45.440295,
+	"lon": -105.37028,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"466": {
+	"location_name": "Brockton",
+	"lat": 42.065119,
+	"lon": -71.012686,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"469": {
+	"location_name": "Hamilton PS 46",
+	"lat": 46.243621,
+	"lon": -114.158889,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"472": {
+	"location_name": "Portsmouth",
+	"lat": 43.075371,
+	"lon": -70.748017,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"480": {
+	"location_name": "LYNN",
+	"lat": 42.474701,
+	"lon": -70.971901,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"484": {
+	"location_name": "Butte Greely School",
+	"lat": 46.002399,
+	"lon": -112.500893,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"486": {
+	"location_name": "Columbia Falls",
+	"lat": 48.363694,
+	"lon": -114.189272,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"494": {
+	"location_name": "Seeley Elementary Sc",
+	"lat": 47.17563,
+	"lon": -113.476182,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"499": {
+	"location_name": "W Greenwich",
+	"lat": 41.615,
+	"lon": -71.7197,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"500": {
+	"location_name": "French Town - Beckwi",
+	"lat": 47.012907,
+	"lon": -114.224273,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"507": {
+	"location_name": "Worcester",
+	"lat": 42.263901,
+	"lon": -71.794701,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"512": {
+	"location_name": "NCORE",
+	"lat": 46.8505,
+	"lon": -111.987164,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"514": {
+	"location_name": "South Phoenix",
+	"lat": 33.4033,
+	"lon": -112.0731,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"521": {
+	"location_name": "BOSTON-KENMORE",
+	"lat": 42.3489,
+	"lon": -71.097702,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"524": {
+	"location_name": "Greenfield",
+	"lat": 42.605816,
+	"lon": -72.596689,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"526": {
+	"location_name": "Tempe",
+	"lat": 33.4124,
+	"lon": -111.9347,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"530": {
+	"location_name": "WARE",
+	"lat": 42.298302,
+	"lon": -72.334396,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"534": {
+	"location_name": "Missoula Boyd Park",
+	"lat": 46.842297,
+	"lon": -114.020549,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"535": {
+	"location_name": "Great Falls Overlook",
+	"lat": 47.494318,
+	"lon": -111.303317,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"541": {
+	"location_name": "Mesa - Brooks Reserv",
+	"lat": 33.4105,
+	"lon": -111.8651,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"542": {
+	"location_name": "Lewistown",
+	"lat": 47.048537,
+	"lon": -109.455315,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"548": {
+	"location_name": "Grass Valley",
+	"lat": 39.234402,
+	"lon": -121.055603,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"550": {
+	"location_name": "Glendale Community C",
+	"lat": 33.5694,
+	"lon": -112.1915,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"557": {
+	"location_name": "E Providence",
+	"lat": 41.840302,
+	"lon": -71.361702,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"559": {
+	"location_name": "Fall River",
+	"lat": 41.6833,
+	"lon": -71.169701,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"560": {
+	"location_name": "Libby Courthouse",
+	"lat": 48.391672,
+	"lon": -115.55228,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"564": {
+	"location_name": "Durango Complex",
+	"lat": 33.4265,
+	"lon": -112.1181,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"596": {
+	"location_name": "Utica",
+	"lat": 43.0994,
+	"lon": -75.225,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"603": {
+	"location_name": "Yuma Supersite",
+	"lat": 32.690277,
+	"lon": -114.614441,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"605": {
+	"location_name": "Phoenix JLG Supersit",
+	"lat": 33.503601,
+	"lon": -112.095001,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"616": {
+	"location_name": "Nogales Post Office",
+	"lat": 31.337204,
+	"lon": -110.936722,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"622": {
+	"location_name": "Colfax",
+	"lat": 39.1003,
+	"lon": -120.9528,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"624": {
+	"location_name": "Rochester",
+	"lat": 43.1461,
+	"lon": -77.5481,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"625": {
+	"location_name": "Manhattan/IS143",
+	"lat": 40.8492,
+	"lon": -73.9319,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"626": {
+	"location_name": "Bronx - IS52",
+	"lat": 40.816101,
+	"lon": -73.902199,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"627": {
+	"location_name": "Woodland",
+	"lat": 38.661239,
+	"lon": -121.732683,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"628": {
+	"location_name": "Maspeth",
+	"lat": 40.7269,
+	"lon": -73.8933,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"631": {
+	"location_name": "Queens",
+	"lat": 40.7375,
+	"lon": -73.8244,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"633": {
+	"location_name": "Whiteface Mtn",
+	"lat": 44.39308,
+	"lon": -73.8589,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"634": {
+	"location_name": "White Plains",
+	"lat": 41.0522,
+	"lon": -73.7642,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"635": {
+	"location_name": "Vacaville",
+	"lat": 38.356556,
+	"lon": -121.949853,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"637": {
+	"location_name": "ATHENS",
+	"lat": 35.4511,
+	"lon": -84.5992,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"638": {
+	"location_name": "Pinehurst",
+	"lat": 47.536712,
+	"lon": -116.236867,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"639": {
+	"location_name": "HVILLE",
+	"lat": 36.2975,
+	"lon": -86.6525,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"643": {
+	"location_name": "Chester BAM",
+	"lat": 40.301899,
+	"lon": -121.235001,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"645": {
+	"location_name": "E Syracuse",
+	"lat": 43.0528,
+	"lon": -76.0597,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"646": {
+	"location_name": "Pinnacle State Park",
+	"lat": 42.0972,
+	"lon": -77.2103,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"647": {
+	"location_name": "Holtsville",
+	"lat": 40.8278,
+	"lon": -73.0575,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"648": {
+	"location_name": "Bklyn - PS 314",
+	"lat": 40.641819,
+	"lon": -74.018707,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"650": {
+	"location_name": "Tahoe City",
+	"lat": 39.166,
+	"lon": -120.1488,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"653": {
+	"location_name": "Truckee BAM",
+	"lat": 39.3386,
+	"lon": -120.170303,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"654": {
+	"location_name": "Albany",
+	"lat": 42.6425,
+	"lon": -73.7547,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"655": {
+	"location_name": "Auburn",
+	"lat": 38.93568,
+	"lon": -121.09959,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"656": {
+	"location_name": "Buffalo",
+	"lat": 42.8781,
+	"lon": -78.8094,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"659": {
+	"location_name": "Portola",
+	"lat": 39.8134,
+	"lon": -120.4707,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"661": {
+	"location_name": "Eisenhower Park",
+	"lat": 40.7447,
+	"lon": -73.5869,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"663": {
+	"location_name": "Hanford - S. Irwin S",
+	"lat": 36.3144,
+	"lon": -119.6436,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"664": {
+	"location_name": "Bklyn - PS274",
+	"lat": 40.694401,
+	"lon": -73.928596,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"665": {
+	"location_name": "Bronx - IS74",
+	"lat": 40.814701,
+	"lon": -73.886703,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"667": {
+	"location_name": "DYERSBURG",
+	"lat": 36.0528,
+	"lon": -89.3819,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"668": {
+	"location_name": "Pocatello Garrett an",
+	"lat": 42.876701,
+	"lon": -112.460297,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"673": {
+	"location_name": "Fresh Kills",
+	"lat": 40.5802,
+	"lon": -74.1994,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"688": {
+	"location_name": "Denton Airport South",
+	"lat": 33.1944,
+	"lon": -97.1933,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"691": {
+	"location_name": "DCNearRoad",
+	"lat": 38.894749,
+	"lon": -76.953427,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"693": {
+	"location_name": "Holbrook",
+	"lat": 39.82,
+	"lon": -80.2897,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"709": {
+	"location_name": "Neah Bay 2-Makah Tri",
+	"lat": 48.366058,
+	"lon": -124.610046,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"714": {
+	"location_name": "Huntsville Old Airpo",
+	"lat": 34.6917,
+	"lon": -86.591698,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"715": {
+	"location_name": "Mammoth Cave NP",
+	"lat": 37.1314,
+	"lon": -86.1481,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"722": {
+	"location_name": "Anacortes-202 Ave (S",
+	"lat": 48.52008,
+	"lon": -122.613213,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"723": {
+	"location_name": "PERKINSTOWN",
+	"lat": 45.2039,
+	"lon": -90.6,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"724": {
+	"location_name": "Ketchum",
+	"lat": 43.682556,
+	"lon": -114.371094,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"739": {
+	"location_name": "McMillan Reservoir",
+	"lat": 38.921848,
+	"lon": -77.013176,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"757": {
+	"location_name": "DECATUR",
+	"lat": 39.8669,
+	"lon": -88.9256,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"760": {
+	"location_name": "Rochester",
+	"lat": 43.9947,
+	"lon": -92.4497,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"769": {
+	"location_name": "Rangely, CO",
+	"lat": 40.086941,
+	"lon": -108.761002,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"772": {
+	"location_name": "AIR LAB",
+	"lat": 35.9803,
+	"lon": -83.9306,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"773": {
+	"location_name": "SPRINGHILL",
+	"lat": 36.0183,
+	"lon": -83.8761,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"781": {
+	"location_name": "P2",
+	"lat": 39.595798,
+	"lon": -110.769997,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"785": {
+	"location_name": "Merced - S. Coffee A",
+	"lat": 37.2817,
+	"lon": -120.433601,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"790": {
+	"location_name": "Clovis - N. Villa Av",
+	"lat": 36.819199,
+	"lon": -119.7164,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"791": {
+	"location_name": "Turlock - S. Minaret",
+	"lat": 37.4883,
+	"lon": -120.8358,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"793": {
+	"location_name": "TracyAP",
+	"lat": 37.6825,
+	"lon": -121.4406,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"801": {
+	"location_name": "STILWELL CASTNET & N",
+	"lat": 35.750599,
+	"lon": -94.669701,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"807": {
+	"location_name": "Parklane",
+	"lat": 34.093899,
+	"lon": -80.962196,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"813": {
+	"location_name": "Badlands",
+	"lat": 43.746944,
+	"lon": -101.941109,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"814": {
+	"location_name": "Credit Union",
+	"lat": 44.087397,
+	"lon": -103.273777,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"817": {
+	"location_name": "Beaver Falls",
+	"lat": 40.747799,
+	"lon": -80.316704,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"818": {
+	"location_name": "WIND CAVE",
+	"lat": 43.557613,
+	"lon": -103.483658,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"822": {
+	"location_name": "Watertown",
+	"lat": 44.89965,
+	"lon": -97.128802,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"823": {
+	"location_name": "Research Farm",
+	"lat": 44.348604,
+	"lon": -96.807299,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"825": {
+	"location_name": "Otay Mesa - Donovan",
+	"lat": 32.579361,
+	"lon": -116.929486,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"828": {
+	"location_name": "Brigantine",
+	"lat": 39.46487,
+	"lon": -74.448738,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"834": {
+	"location_name": "JENISON",
+	"lat": 42.894402,
+	"lon": -85.852798,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"843": {
+	"location_name": "HU-Beltsville",
+	"lat": 39.055302,
+	"lon": -76.878304,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"855": {
+	"location_name": "Portland - Deering O",
+	"lat": 43.660248,
+	"lon": -70.268967,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"857": {
+	"location_name": "Fort Lee Near Road",
+	"lat": 40.85355,
+	"lon": -73.9661,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"858": {
+	"location_name": "Lima",
+	"lat": 40.771,
+	"lon": -84.0539,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"868": {
+	"location_name": "ALLEN PARK",
+	"lat": 42.2283,
+	"lon": -83.2092,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"869": {
+	"location_name": "V_VIEW",
+	"lat": 26.0732,
+	"lon": -80.3386,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"870": {
+	"location_name": "McCall",
+	"lat": 44.890197,
+	"lon": -116.1065,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"878": {
+	"location_name": "Davis - UCD Campus",
+	"lat": 38.53455,
+	"lon": -121.7734,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"880": {
+	"location_name": "Rutland",
+	"lat": 43.608528,
+	"lon": -72.98246,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"881": {
+	"location_name": "Greenville-ESC",
+	"lat": 34.843899,
+	"lon": -82.414597,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"890": {
+	"location_name": "Chico -  East",
+	"lat": 39.76168,
+	"lon": -121.84047,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"892": {
+	"location_name": "Gridley",
+	"lat": 39.32756,
+	"lon": -121.66881,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"893": {
+	"location_name": "Willows-Colusa",
+	"lat": 39.53387,
+	"lon": -122.190834,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"895": {
+	"location_name": "Fresno - Garland",
+	"lat": 36.78538,
+	"lon": -119.77321,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"907": {
+	"location_name": "PORT HURON",
+	"lat": 42.9533,
+	"lon": -82.4564,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"908": {
+	"location_name": "Viking Lake State Pa",
+	"lat": 40.970001,
+	"lon": -95.044998,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"917": {
+	"location_name": "Bremerton-Spruce Ave",
+	"lat": 47.592675,
+	"lon": -122.627397,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"919": {
+	"location_name": "St. Lukes Meridian",
+	"lat": 43.600699,
+	"lon": -116.347853,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"920": {
+	"location_name": "POMPANO_BEACH",
+	"lat": 26.2906,
+	"lon": -80.0969,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"923": {
+	"location_name": "West Duluth",
+	"lat": 46.743889,
+	"lon": -92.166946,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"924": {
+	"location_name": "Rahway PM",
+	"lat": 40.603943,
+	"lon": -74.276176,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+
+"928": {
+	"location_name": "Jersey City FH",
+	"lat": 40.725452,
+	"lon": -74.052292,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"931": {
+	"location_name": "Seattle-10th & Welle",
+	"lat": 47.597222,
+	"lon": -122.319722,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"932": {
+	"location_name": "Lake Sugema",
+	"lat": 40.693298,
+	"lon": -92.006104,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"935": {
+	"location_name": "Athens",
+	"lat": 33.925,
+	"lon": -83.3575,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"949": {
+	"location_name": "ETOWN2",
+	"lat": 37.7064,
+	"lon": -85.8517,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"952": {
+	"location_name": "Burns - Washington S",
+	"lat": 43.58925,
+	"lon": -119.048302,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"954": {
+	"location_name": "Trenton",
+	"lat": 33.7397,
+	"lon": -81.8536,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"959": {
+	"location_name": "Pahala",
+	"lat": 19.2065,
+	"lon": -155.4689,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"962": {
+	"location_name": "Rider University",
+	"lat": 40.283092,
+	"lon": -74.742645,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"966": {
+	"location_name": "NKU",
+	"lat": 39.0217,
+	"lon": -84.4744,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"970": {
+	"location_name": "Camden Spruce St",
+	"lat": 39.934446,
+	"lon": -75.125291,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"971": {
+	"location_name": "Elizabeth Trailer",
+	"lat": 40.641441,
+	"lon": -74.208366,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"973": {
+	"location_name": "NEWTWN",
+	"lat": 38.065,
+	"lon": -84.5,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"976": {
+	"location_name": "Evansville-Buena Vis",
+	"lat": 38.01325,
+	"lon": -87.577923,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"978": {
+	"location_name": "Flemington",
+	"lat": 40.515251,
+	"lon": -74.806755,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"979": {
+	"location_name": "Columbia",
+	"lat": 40.924606,
+	"lon": -75.067825,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"981": {
+	"location_name": "Columbus Airport",
+	"lat": 32.5214,
+	"lon": -84.9436,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"987": {
+	"location_name": "Rutgers University",
+	"lat": 40.462181,
+	"lon": -74.429436,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"994": {
+	"location_name": "Millville",
+	"lat": 39.422272,
+	"lon": -75.0252,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"998": {
+	"location_name": "Prineville - Davidso",
+	"lat": 44.299787,
+	"lon": -120.844773,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1000": {
+	"location_name": "Presque Isle Riversi",
+	"lat": 46.682299,
+	"lon": -68.016195,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1003": {
+	"location_name": "Padonia",
+	"lat": 39.462002,
+	"lon": -76.631599,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1006": {
+	"location_name": "Painesville",
+	"lat": 41.726811,
+	"lon": -81.242156,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1010": {
+	"location_name": "Preble NCore",
+	"lat": 39.83562,
+	"lon": -84.72049,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1013": {
+	"location_name": "Palo Verde",
+	"lat": 36.173415,
+	"lon": -115.332728,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1017": {
+	"location_name": "Parkway East (Near R",
+	"lat": 40.437431,
+	"lon": -79.863572,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1022": {
+	"location_name": "Paul Meyer",
+	"lat": 36.106389,
+	"lon": -115.253333,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1029": {
+	"location_name": "Pendleton - McKay Cr",
+	"lat": 45.652231,
+	"lon": -118.823033,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1031": {
+	"location_name": "Pepsi Place",
+	"lat": 30.262808,
+	"lon": -81.606834,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1037": {
+	"location_name": "Pierre",
+	"lat": 44.373786,
+	"lon": -100.287269,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1047": {
+	"location_name": "Plummer",
+	"lat": 38.985556,
+	"lon": -86.99,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1048": {
+	"location_name": "Plummer CDA Tribe",
+	"lat": 47.3386,
+	"lon": -116.885902,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1053": {
+	"location_name": "Ponca City",
+	"lat": 36.697189,
+	"lon": -97.081278,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1055": {
+	"location_name": "Port Angeles-E 5th S",
+	"lat": 48.115,
+	"lon": -123.436434,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1062": {
+	"location_name": "Port Townsend-San Ju",
+	"lat": 48.129101,
+	"lon": -122.7789,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1064": {
+	"location_name": "Portland - SE Lafaye",
+	"lat": 45.496641,
+	"lon": -122.602877,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1067": {
+	"location_name": "Portland - Sauvie Is",
+	"lat": 45.768531,
+	"lon": -122.7721,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1068": {
+	"location_name": "Portland - Spangler",
+	"lat": 45.25928,
+	"lon": -122.588151,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1069": {
+	"location_name": "Portland Near Road",
+	"lat": 45.39916,
+	"lon": -122.7455,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1070": {
+	"location_name": "Potosi",
+	"lat": 42.692131,
+	"lon": -90.696373,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1079": {
+	"location_name": "2912 Coffey",
+	"lat": 41.133317,
+	"lon": -95.956078,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1081": {
+	"location_name": "Hagerstown",
+	"lat": 39.565601,
+	"lon": -77.721901,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1083": {
+	"location_name": "ODOT Ironton",
+	"lat": 38.508114,
+	"lon": -82.659301,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1086": {
+	"location_name": "Issaquah-Lake Sammam",
+	"lat": 47.552502,
+	"lon": -122.064697,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1096": {
+	"location_name": "Johnstown",
+	"lat": 40.3097,
+	"lon": -78.9158,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1100": {
+	"location_name": "Jackson Road",
+	"lat": 27.0892,
+	"lon": -82.3625,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1101": {
+	"location_name": "HOUSTON",
+	"lat": 38.1761,
+	"lon": -89.7883,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1102": {
+	"location_name": "HOUGHTON LAKE",
+	"lat": 44.3106,
+	"lon": -84.891899,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1106": {
+	"location_name": "HOLLAND",
+	"lat": 42.767799,
+	"lon": -86.148598,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1107": {
+	"location_name": "Jean",
+	"lat": 35.785665,
+	"lon": -115.357087,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1112": {
+	"location_name": "HAZ2",
+	"lat": 37.2831,
+	"lon": -83.2203,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1113": {
+	"location_name": "Hattie Avenue",
+	"lat": 36.1106,
+	"lon": -80.2267,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1114": {
+	"location_name": "HARRINGTON BCH",
+	"lat": 43.4981,
+	"lon": -87.81,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1116": {
+	"location_name": "Harrisburg",
+	"lat": 40.246992,
+	"lon": -76.846988,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1120": {
+	"location_name": "HAMPTON",
+	"lat": 37.10373,
+	"lon": -76.38702,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1121": {
+	"location_name": "Jerome Mack",
+	"lat": 36.141875,
+	"lon": -115.078742,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1124": {
+	"location_name": "Joe Neal",
+	"lat": 36.270592,
+	"lon": -115.238282,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1126": {
+	"location_name": "John A. Chesnut Sr.",
+	"lat": 28.0903,
+	"lon": -82.7008,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1128": {
+	"location_name": "John Day Dayton St",
+	"lat": 44.417999,
+	"lon": -118.951302,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1132": {
+	"location_name": "Gwinnett Tech",
+	"lat": 33.9636,
+	"lon": -84.0664,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1137": {
+	"location_name": "Houston East C1",
+	"lat": 29.7681,
+	"lon": -95.2206,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1140": {
+	"location_name": "Houston North Waysid",
+	"lat": 29.8281,
+	"lon": -95.2842,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1142": {
+	"location_name": "Howard County Near R",
+	"lat": 39.143197,
+	"lon": -76.846192,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1145": {
+	"location_name": "Allentown",
+	"lat": 40.6119,
+	"lon": -75.4325,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1146": {
+	"location_name": "KAHULUI",
+	"lat": 20.869444,
+	"lon": -156.492417,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1147": {
+	"location_name": "KALAMAZOO",
+	"lat": 42.2781,
+	"lon": -85.5419,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1149": {
+	"location_name": "KILLENS",
+	"lat": 38.986672,
+	"lon": -75.5568,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1151": {
+	"location_name": "Groton",
+	"lat": 41.3536,
+	"lon": -72.0789,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1152": {
+	"location_name": "Kittanning",
+	"lat": 40.8142,
+	"lon": -79.565,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1153": {
+	"location_name": "ALSIP",
+	"lat": 41.6708,
+	"lon": -87.7325,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1154": {
+	"location_name": "Altoona",
+	"lat": 40.515,
+	"lon": -78.3889,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1155": {
+	"location_name": "KNI-Topeka",
+	"lat": 39.0242,
+	"lon": -95.7114,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1157": {
+	"location_name": "KNIGHT_P",
+	"lat": 38.088902,
+	"lon": -88.625,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1161": {
+	"location_name": "GreenValley",
+	"lat": 36.048705,
+	"lon": -115.052942,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1162": {
+	"location_name": "APOLLO BEACH",
+	"lat": 27.779712,
+	"lon": -82.419835,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1163": {
+	"location_name": "APPLETON AAL",
+	"lat": 44.3069,
+	"lon": -88.3956,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1164": {
+	"location_name": "Green Valley",
+	"lat": 31.8794,
+	"lon": -110.9964,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1165": {
+	"location_name": "Greeley Hospital",
+	"lat": 40.4147,
+	"lon": -104.7061,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1168": {
+	"location_name": "Arendtsville",
+	"lat": 39.9233,
+	"lon": -77.3081,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1170": {
+	"location_name": "Horn Point",
+	"lat": 38.5876,
+	"lon": -76.1408,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1172": {
+	"location_name": "Grants Pass - Parksi",
+	"lat": 42.434149,
+	"lon": -123.348466,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1174": {
+	"location_name": "Grangeville",
+	"lat": 45.931301,
+	"lon": -116.115196,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1176": {
+	"location_name": "Grand Portage",
+	"lat": 47.9721,
+	"lon": -89.6908,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1177": {
+	"location_name": "Grand Junction - Pow",
+	"lat": 39.063599,
+	"lon": -108.561096,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1178": {
+	"location_name": "Kamiah",
+	"lat": 46.2094,
+	"lon": -116.0275,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1181": {
+	"location_name": "Kapolei",
+	"lat": 21.323601,
+	"lon": -158.088593,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1184": {
+	"location_name": "Karnack C85",
+	"lat": 32.6706,
+	"lon": -94.1681,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1186": {
+	"location_name": "Goleta",
+	"lat": 34.445301,
+	"lon": -119.827797,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1187": {
+	"location_name": "Kaufman C71",
+	"lat": 32.565,
+	"lon": -96.3175,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1189": {
+	"location_name": "Keeler",
+	"lat": 36.4878,
+	"lon": -117.871,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1196": {
+	"location_name": "Glenpool",
+	"lat": 35.9525,
+	"lon": -96.0033,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1199": {
+	"location_name": "Kennewick-Metaline",
+	"lat": 46.2183,
+	"lon": -119.2015,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1200": {
+	"location_name": "Glendora - Laurel",
+	"lat": 34.1439,
+	"lon": -117.8508,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1201": {
+	"location_name": "Kennewick-S Clodfelt",
+	"lat": 46.204582,
+	"lon": -119.243743,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1204": {
+	"location_name": "Kent-James & Central",
+	"lat": 47.386101,
+	"lon": -122.230202,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1208": {
+	"location_name": "Gilory - 9th Street",
+	"lat": 36.999571,
+	"lon": -121.574684,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1210": {
+	"location_name": "Geronimo",
+	"lat": 32.25,
+	"lon": -110.9667,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1218": {
+	"location_name": "Klamath Falls - Pete",
+	"lat": 42.190296,
+	"lon": -121.731369,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1219": {
+	"location_name": "Garden Valley",
+	"lat": 44.104498,
+	"lon": -115.972386,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1220": {
+	"location_name": "Galveston Airport C1",
+	"lat": 29.2631,
+	"lon": -94.8564,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1223": {
+	"location_name": "GREEN BAY E HIGH",
+	"lat": 44.5167,
+	"lon": -87.9939,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1224": {
+	"location_name": "Greensburg",
+	"lat": 40.3053,
+	"lon": -79.5061,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1225": {
+	"location_name": "GRAYSON",
+	"lat": 38.2383,
+	"lon": -82.9883,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1226": {
+	"location_name": "GRAND RAPIDS",
+	"lat": 42.984699,
+	"lon": -85.671097,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1227": {
+	"location_name": "Kona",
+	"lat": 19.5097,
+	"lon": -155.9133,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1229": {
+	"location_name": "GPORT YC",
+	"lat": 30.390123,
+	"lon": -89.049746,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1231": {
+	"location_name": "GC_MAD",
+	"lat": 38.7045,
+	"lon": -90.1397,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1235": {
+	"location_name": "Aberdeen-Division St",
+	"lat": 46.9772,
+	"lon": -123.8317,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1236": {
+	"location_name": "Acadia NP - McFarlan",
+	"lat": 44.377048,
+	"lon": -68.260902,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1239": {
+	"location_name": "LACROSSE DOT",
+	"lat": 43.7781,
+	"lon": -91.225,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1242": {
+	"location_name": "Lancaster DW",
+	"lat": 40.0439,
+	"lon": -76.1125,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1246": {
+	"location_name": "Albany - Calapooia S",
+	"lat": 44.61569,
+	"lon": -123.091457,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1248": {
+	"location_name": "LEEDS",
+	"lat": 33.5453,
+	"lon": -86.5492,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1256": {
+	"location_name": "Alpine",
+	"lat": 32.842297,
+	"lon": -116.768326,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1261": {
+	"location_name": "Anacortes-Bartholome",
+	"lat": 48.465401,
+	"lon": -122.559998,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1263": {
+	"location_name": "LUMS 2",
+	"lat": 39.5513,
+	"lon": -75.732,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1265": {
+	"location_name": "La Casa NCORE - 4545",
+	"lat": 39.7794,
+	"lon": -105.00523,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1269": {
+	"location_name": "Anderson",
+	"lat": 40.4531,
+	"lon": -122.2978,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1270": {
+	"location_name": "Anderson-Eastside El",
+	"lat": 40.12569,
+	"lon": -85.652127,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1275": {
+	"location_name": "Lacey-College St",
+	"lat": 47.029301,
+	"lon": -122.821503,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1277": {
+	"location_name": "Lacrosse-Hill St",
+	"lat": 46.8153,
+	"lon": -117.8739,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1281": {
+	"location_name": "Anthony",
+	"lat": 32.0036,
+	"lon": -106.5992,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1284": {
+	"location_name": "Apple Valley",
+	"lat": 44.7383,
+	"lon": -93.2372,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1285": {
+	"location_name": "Horicon Wildlife Are",
+	"lat": 43.46611,
+	"lon": -88.621109,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1287": {
+	"location_name": "Lake City",
+	"lat": 30.1783,
+	"lon": -82.6192,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1289": {
+	"location_name": "Arden Arcade - Del P",
+	"lat": 38.613804,
+	"lon": -121.368007,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1291": {
+	"location_name": "Winter Park",
+	"lat": 28.5997,
+	"lon": -81.3628,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1296": {
+	"location_name": "Ascarate Park Southe",
+	"lat": 31.7467,
+	"lon": -106.402802,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+},
+"1297": {
+	"location_name": "GARINGER",
+	"lat": 35.2411,
+	"lon": -80.7831,
+	"status": "active",
+	"observation_source": "openaq",
+	"precomputed_forecasts": {
+		"pm25": {
+			"forecasts": "N/A",
+			"historical": "N/A"
+		}
+	},
+	"obs_options": {
+		"pm25": {
+			"start": 90,
+			"end": 90,
+			"unit": "ugm-3"
+		}
+	}
+}
+}
