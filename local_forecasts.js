@@ -1455,7 +1455,22 @@ function generateAverageChangeElement(dataset, pollutant, userTimeZone, currentH
             <span>${isAboveAverage ? 'Above' : 'Below'} (${averageType} Average)</span>
         </div>`;
 }
-function readAirNow(location, param, unit, forecastsDiv, buttonOption = true, historical = 2, reinforceTraining = 2, hpTunning = 2, resample = false, update = 2) {
+function readAirNow(options = {}) {
+
+    const {
+        location = "",
+        param = "pm25",
+        unit = "μg/m³",
+        forecastsDiv = "main_plot_for_airnow",
+        buttonOption = true,
+        historical = 2,
+        reinforceTraining = 2,
+        hpTunning = 2,
+        resample = false,
+        update = 2,
+        timezone = "UTC"
+    } = options;
+
     const messages = [
         "Generating data",
         "Connecting to AirNow",
@@ -1465,9 +1480,8 @@ function readAirNow(location, param, unit, forecastsDiv, buttonOption = true, hi
         "Please wait...",
         "Connecting..."
     ];
-
     $('.loader').show();
-
+    const siteTimeZone = timezone || "UTC";
     const paramCode = pollutant_details(param).id;
     const fileUrl = `precomputed/merra2/${location}.json`;
 
@@ -1604,23 +1618,24 @@ function readAirNow(location, param, unit, forecastsDiv, buttonOption = true, hi
 
             plots.forEach(plot => {
                 const plotColumns = plot.id === "aqi_plot_for_airnow"
-                    ? [{ column: "master_aqi", name: "AQI", color: "blue", width: 2 }] // Use AQI for the new tab
+                    ? [{ column: "master_aqi", name: "AQI", color: "blue", width: 2 }]
                     : [{ column: "master_observation", name: "Forecasted Value", color: "green", width: 2 }];
-
+            
                 draw_plot(
-                    combined_dataset = plot.data,
-                    param = 'pm2.5',
-                    unit = plot.id === "aqi_plot_for_airnow" ? "AQI" : "μg/m³",
-                    forecasts_div = plot.id,
-                    plot_columns = plotColumns,
-                    dates_ranges = false,
-                    enableFading = false,
-                    text = plot.id === "aqi_plot_for_airnow"
+                    plot.data,
+                    'pm2.5',
+                    plot.id === "aqi_plot_for_airnow" ? "AQI" : "μg/m³",
+                    plot.id,
+                    plotColumns,
+                    false,
+                    false,
+                    plot.id === "aqi_plot_for_airnow"
                         ? "<b>PM 2.5 AQI</b> | Calculated from PM 2.5 concentrations"
                         : "<b>Sources:</b> NASA Modern-Era Retrospective analysis for Research and Applications (MERRA-2)| | SNWG Bias CNN Model.",
-                    plotType = "bar"
+                    "bar",
+                    siteTimeZone
                 );
-
+            
                 window.dispatchEvent(new Event('resize'));
             });
 
@@ -2078,8 +2093,6 @@ function draw_plot(
             }
         ],
         autosize: true,
-        width: 1000,
-        height: 500,
         plot_bgcolor: '#F4F4F4',
         paper_bgcolor: '#FFFFFF',
         legend: {
@@ -2178,7 +2191,7 @@ function draw_plot(
         ]
     };
 
-    Plotly.newPlot(forecasts_div, traces, layout);
+    Plotly.newPlot(forecasts_div, traces, layout, {responsive: true});
 }
 
 function get_plot(location_name, param, unit, forecasts_div, forecasts_resample_div,merge,precomputer_forecasts,historical){
@@ -2557,7 +2570,13 @@ function openForecastsWindow(options = {}) {
 
             if (param === 'pm25' || param === 'pm2.5') {
                 console.log("Calling readAirNow for PM2.5");
-                readAirNow(location_name, param, current_observation_unit, 'main_plot_for_airnow', true, 2, 2, 2, false, 2);
+                readAirNow({
+                    location: location_name,
+                    param: param,
+                    unit: current_observation_unit,
+                    forecastsDiv: 'main_plot_for_airnow',
+                    timezone: timezone
+                });
             } else if (param === 'no2') {
                 console.log("Calling readApiBaker for NO2");
                 readApiBaker({
