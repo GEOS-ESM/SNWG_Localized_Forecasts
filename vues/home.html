@@ -6,13 +6,24 @@
     </div>
 </section>
 
+
+
 <div class="forecasts_container"></div>
 
 <div class="locations-container">
-    <button id="toggle-locations-box" class="btn btn-soft-ash btn-sm rounded" style="position: relative;">
-        <i class="bi bi-chevron-down" id="toggle-locations-icon" style="margin-right: 6px;"></i>
-        <span>Hide Locations</span>
-    </button>
+    <div class="d-flex align-items-center justify-content-between" style="gap: 1rem; position: relative; margin-bottom: 0.5rem;">
+        <button id="toggle-locations-box" class="btn btn-soft-ash btn-sm rounded" style="position: relative;">
+            <i class="bi bi-chevron-down" id="toggle-locations-icon" style="margin-right: 6px;"></i>
+            <span>Hide Locations</span>
+        </button>
+        <div id="species-filter-container" style="color: white;">
+            <label for="species-filter" style="font-weight:600;margin-right:8px;">Species:</label>
+            <select id="species-filter" class="form-select form-select-sm" style="width:auto;display:inline-block;">
+                <option value="no2">NO₂</option>
+                <option value="pm25">PM2.5</option>
+            </select>
+        </div>
+    </div>
     <div class="locations-box" data-margin="0" data-dots="true"
         data-items-md="5" data-items-xs="1">
         <ul class="pollutant_param list-inline mb-0"></ul>
@@ -22,10 +33,6 @@
         </div>
     </div>
 </div>
-
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="local_forecasts.js?v=1.4.0"></script>
 <script src="local_forecasts_assets.js?v=1.4.0"></script>
@@ -51,4 +58,11 @@
         });
     });
 
+$(document).on('change', '#species-filter', function() {
+    const selectedSpecies = $(this).val();
+    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", selectedSpecies);
+});
+$(document).ready(function () {
+    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", $("#species-filter").val() || "no2");
+});
 </script>

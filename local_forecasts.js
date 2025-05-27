@@ -308,6 +308,12 @@ function get_open_aq_observations(site_id, param) {
 }
 
 function create_map(sites, param) {
+
+    if (window.currentMap && window.currentMap.remove) {
+        window.currentMap.remove();
+        window.currentMap = null;
+    }
+    $('#map').html('');
     var deltaDistance = 100;
     var center_point = [30.1272444, -1.9297706];
     var map = new mapboxgl.Map({
@@ -317,8 +323,21 @@ function create_map(sites, param) {
         pitch: 0,
         bearing: 0,
         container: 'map',
+        minZoom: 1,
+        maxZoom: 10
        
     });
+    map.setRenderWorldCopies(false);
+    const bounds = [
+    [-180, -85], 
+    [180, 85]    
+    ];
+
+    map.setMaxBounds(bounds);
+    map.dragRotate.disable();
+    map.touchZoomRotate.disableRotation();
+
+
 
     var mapVisible = true;
 
@@ -340,10 +359,11 @@ function create_map(sites, param) {
     
     mapVisible = !mapVisible;
     });
-    
+
+
     
     map.on('load', async () => {
-    
+        map.resize(); // 
         map.addSource('locations_dst', {
             type: 'geojson',
             data: sites, 
@@ -407,15 +427,7 @@ function create_map(sites, param) {
                 'text-halo-width': 1.5
             }
         });
-    
-    
 
-
-    
-    
-   
-   
-          
     
     map.addLayer({
             id: 'clustered-point',
@@ -575,11 +587,10 @@ function create_map(sites, param) {
     return map;
 }
 
-function sitesArrayToGeoJSON(sites) {
+function sitesArrayToGeoJSON(sites, param = "no2") {
     return {
         type: "FeatureCollection",
         features: sites.map(site => {
-     
             const now = new Date();
             const pad = n => n.toString().padStart(2, '0');
             const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
@@ -589,16 +600,31 @@ function sitesArrayToGeoJSON(sites) {
             const localHour = pad(siteLocalNow.getHours());
             const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${localHour}`;
 
-
             const currentForecast = (site.forecasts || []).find(forecast => {
                 if (!forecast.local_time) return false;
                 const forecastHourStr = forecast.local_time.slice(0, 13);
                 return forecastHourStr === currentLocalStr;
             }) || {};
 
-            const no2 = currentForecast.corrected ?? "N/A";
-            const aqi = (no2 !== "N/A" && !isNaN(no2)) ? calculateAqiForNo2(no2) : "N/A";
+            let value = "N/A";
+            let aqi = "N/A";
+            if (param === "no2") {
+                value = currentForecast.corrected ?? "N/A";
+                aqi = (value !== "N/A" && !isNaN(value)) ? calculateAqiForNo2(value) : "N/A";
+            } else if (param === "pm25") {
+                value = currentForecast.value ?? "N/A";
+                aqi = (value !== "N/A" && !isNaN(value)) ? calculateAqiForPm25(value) : "N/A";
+            } else if (param === "o3") {
+                value = currentForecast.value ?? "N/A";
+                aqi = (value !== "N/A" && !isNaN(value)) ? calculateAqiForO3(value) : "N/A";
+            }
             const aqiLevel = getAqiLevel(aqi);
+
+            // Swap lat/lon for pm25
+            let coordinates = [site.lon, site.lat];
+            if (param === "pm25") {
+                coordinates = [site.lat, site.lon];
+            }
 
             return {
                 type: "Feature",
@@ -606,21 +632,18 @@ function sitesArrayToGeoJSON(sites) {
                     location_id: site.location_id || site.location || "unknown_id",
                     location_name: site.location || "Unknown Location",
                     time_zone: site.timezone,
-                    forecasted_value: currentForecast.corrected ?? "N/A",
-                    pm25_value: no2,
+                    forecasted_value: value,
                     aqi_value: aqi,
                     aqi_color: aqiLevel.color,
                     status: "active",
                     observation_source: "NASA",
+                    parameter: param,
                     obs_options: [currentForecast || null],
                     precomputed_forecasts: [currentForecast || null]
                 },
                 geometry: {
                     type: "Point",
-                    coordinates: [
-                        site.lon,
-                        site.lat
-                    ]
+                    coordinates: coordinates
                 }
             };
         })
@@ -629,13 +652,26 @@ function sitesArrayToGeoJSON(sites) {
 
    
 function generateSmallAqiBox(aqiValue, pollutant) {
-    if (aqiValue === 'N/A') return '';
-    const aqiLevel = getAqiLevel(aqiValue);
+    if (aqiValue === 'N/A' || aqiValue === undefined || aqiValue === null || isNaN(aqiValue)) return '';
+
+    let aqi = 'N/A';
+    if (pollutant === 'no2') {
+        aqi = calculateAqiForNo2(aqiValue);
+    } else if (pollutant === 'pm25') {
+        aqi = calculateAqiForPm25(aqiValue);
+    } else if (pollutant === 'o3') {
+        aqi = calculateAqiForO3(aqiValue);
+    }
+
+    if (aqi === 'N/A' || isNaN(aqi)) return '';
+
+    const aqiLevel = getAqiLevel(aqi);
+
     return `
         <div style="padding:6px 10px; min-width:120px; background:#fff; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.12); font-size:13px;">
             <div style="display:flex;align-items:center;gap:8px;">
                 <div style="width:28px;height:28px;border-radius:50%;background:${aqiLevel.color};display:flex;align-items:center;justify-content:center;font-weight:bold;color:#222;">
-                    ${aqiValue}
+                    ${aqi}
                 </div>
                 <div>
                     <div style="font-size:12px;font-weight:600;">AQI (${pollutant.toUpperCase()})</div>
@@ -651,13 +687,14 @@ function generateSmallAqiBox(aqiValue, pollutant) {
                 <div style="flex:1;background:#7E0023;"></div>
             </div>
             <div style="position:relative;height:0;">
-                <div style="position:absolute;top:-8px;left:${Math.min(Math.max((aqiValue/500)*100,0),100)}%;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:7px solid #222;transform:translateX(-50%);"></div>
+                <div style="position:absolute;top:-8px;left:${Math.min(Math.max((aqi/500)*100,0),100)}%;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:7px solid #222;transform:translateX(-50%);"></div>
             </div>
         </div>
     `;
 }
-function readCompressedJsonAndAddBanners(fileUrl) {
-    showLoadingDiv()
+
+function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
+    showLoadingDiv();
 
     fetch(fileUrl)
         .then(response => {
@@ -665,14 +702,12 @@ function readCompressedJsonAndAddBanners(fileUrl) {
             return response.arrayBuffer();
         })
         .then(buffer => {
-
             const decompressedData = pako.inflate(new Uint8Array(buffer), { to: 'string' });
             const sanitizedData = decompressedData.replace(/NaN/g, "null");
-
             return JSON.parse(sanitizedData); 
         })
         .then(data => {
-
+            console.log("Decompressed and parsed data:", data);
             data.sort((a, b) => {
                 const nameA = (a.location_name || a.location || '').toLowerCase();
                 const nameB = (b.location_name || b.location || '').toLowerCase();
@@ -683,18 +718,22 @@ function readCompressedJsonAndAddBanners(fileUrl) {
 
             if (!Array.isArray(data)) {
                 console.error("Invalid JSON structure: Expected an array of sites.");
+                hideLoadingDiv();
                 return;
             }
-            data.forEach(site => {
 
+
+            $(".pollutant-banner-o").empty();
+
+            const now = new Date();
+            const pad = n => n.toString().padStart(2, '0');
+            const filteredSites = [];
+
+            data.forEach(site => {
                 if (!site.timezone || typeof site.timezone !== "string" || site.timezone === "null") {
-                    console.warn(`Skipping site due to invalid timezone:`, site);
                     return;
                 }
-            
 
-                const now = new Date();
-                const pad = n => n.toString().padStart(2, '0');
                 const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
                 const localYear = siteLocalNow.getFullYear();
                 const localMonth = pad(siteLocalNow.getMonth() + 1);
@@ -702,52 +741,64 @@ function readCompressedJsonAndAddBanners(fileUrl) {
                 const localHour = pad(siteLocalNow.getHours());
                 const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${localHour}`;
 
-
-            
-
                 const filteredForecasts = (site.forecasts || []).filter(forecast => {
                     if (!forecast.local_time) return false;
-
                     const forecastHourStr = forecast.local_time.slice(0, 13);
                     return forecastHourStr === currentLocalStr;
                 });
-            
-         
-                const matchingForecast = filteredForecasts[0] || {};
-            
-                const obsOptions = {};
-                Object.keys(matchingForecast).forEach(key => {
-                    if (key !== "time" && key !== "local_time") {
-                        obsOptions[key] = {
-                            unit: getUnitForParameter(key),
-                            value: matchingForecast[key] || "N/A"
-                        };
-                    }
-                });
-            
-                const siteData = {
-                    location_name: site.location,
-                    observation_source: "NASA",
-                    forecasted_value: matchingForecast.corrected || "N/A",
-                    status: "active",
-                    latitude: site.lat,
-                    longitude: site.lon,
-                    timezone: site.timezone,
-                    precomputed_forecasts: JSON.stringify(filteredForecasts),
-                    obs_options: JSON.stringify(obsOptions),
-                };
 
-                if (!isNaN(siteData.forecasted_value) && siteData.forecasted_value !== null && siteData.forecasted_value !== "N/A") {
-                    add_the_banner(siteData, "no2");
+                const matchingForecast = filteredForecasts[0] || {};
+
+
+                let forecasted_value = "N/A";
+                if (selectedSpecies === "no2" && matchingForecast.corrected !== undefined && !isNaN(matchingForecast.corrected)) {
+                    forecasted_value = matchingForecast.corrected;
+                } else if (selectedSpecies === "pm25" && matchingForecast.value !== undefined && !isNaN(matchingForecast.value)) {
+                    forecasted_value = matchingForecast.value;
                 }
-               
+
+                if (forecasted_value !== "N/A") {
+                    const obsOptions = {};
+                    Object.keys(matchingForecast).forEach(key => {
+                        if (key !== "time" && key !== "local_time") {
+                            obsOptions[key] = {
+                                unit: getUnitForParameter(key),
+                                value: matchingForecast[key] || "N/A"
+                            };
+                        }
+                    });
+
+                    
+
+                    const siteData = {
+                        location_name: site.location,
+                        observation_source: "NASA",
+                        forecasted_value: forecasted_value,
+                        status: "active",
+                        latitude: site.lat,
+                        longitude: site.lon,
+                        timezone: site.timezone,
+                        precomputed_forecasts: JSON.stringify(filteredForecasts),
+                        obs_options: JSON.stringify(obsOptions),
+                    };
+
+                    add_the_banner(siteData, selectedSpecies);
+                    filteredSites.push({
+                        ...site,
+                        forecasted_value: forecasted_value
+                    });
+                }
             });
-            const geojson = sitesArrayToGeoJSON(data);
-            create_map(geojson, "no2");
+
+            const geojson = sitesArrayToGeoJSON(filteredSites, selectedSpecies);
+
+            create_map(geojson, selectedSpecies);
+
             hideLoadingDiv();
         })
         .catch(error => {
             console.error("Error processing the compressed JSON file:", error);
+            hideLoadingDiv();
         });
 }
 
@@ -783,6 +834,7 @@ function getUnitForParameter(parameter) {
 
 
 function add_the_banner(site, param) {
+    console.log("Adding banner for site:", site);
     const precomputed_forecasts = $.parseJSON(site.precomputed_forecasts);
     const obs_options = $.parseJSON(site.obs_options);
 
@@ -793,7 +845,17 @@ function add_the_banner(site, param) {
         const local_time = precomputed_forecasts?.[0]?.local_time || "--";
 
 
-        const aqiValue = calculateAqiForNo2(precomputed_forecasts?.[0]?.corrected || "--");
+        let aqiValue = 'N/A';
+        if (param === "no2") {
+            aqiValue = calculateAqiForNo2(precomputed_forecasts?.[0]?.corrected || "--");
+            source = "NASA GEOS CF, NASA Pandora";
+        } else if (param === "pm25" || param === "pm2.5") {
+            aqiValue = calculateAqiForPm25(precomputed_forecasts?.[0]?.value || "--");
+            source = "NASA MERRA 2 CNN, AirNow";
+        } else if (param === "o3") {
+            aqiValue = calculateAqiForO3(precomputed_forecasts?.[0]?.value || "--");
+            source = "NASA GEOS CF, NASA Pandora";
+        }
         const aqiLevel = getAqiLevel(aqiValue);
 
         const html = `
@@ -807,7 +869,7 @@ function add_the_banner(site, param) {
                                     ? site.location_name.replace(/_/g, ' ').replace(/\./g, ' ').slice(0, 10) + '...'
                                     : site.location_name.replace(/_/g, ' ').replace(/\./g, ' ')
                                 }</h5>
-                                <p class="source">Source: ${site.observation_source}</p>
+                                <p class="source">Sources: ${source}</p>
                                 <p class="source">${local_time ? local_time.slice(11, 16) : "--"} </p>
                                 <p class="timezone_text">(${site.timezone})</p>
                             </div>
@@ -1411,6 +1473,7 @@ function readAirNow(location, param, unit, forecastsDiv, buttonOption = true, hi
 
     fetch(fileUrl)
         .then(response => {
+            console.log("Fetching data from:", fileUrl);
             if (!response.ok) throw new Error('Network response was not ok');
             return response.json();
         })
@@ -2470,42 +2533,49 @@ function openForecastsWindow(options = {}) {
         if (isModal) {
             $loadingScreen.show();
             $(this).fadeOut(10).fadeIn(10);
-
+    
             const intervalId = setInterval(() => {
                 const message = messages[Math.floor(Math.random() * messages.length)];
                 $(".messages").html(message);
             }, 100);
-
+    
             const cleanLocationName = cleanText(location_name);
             $('.current_location_name').html(location_name.replace(/[_\W]+/g, " "));
             $('.current_param').html(pollutant_details(param).name);
             $('.current_param_1').html(pollutant_details(param).name);
             $('.current_observation_value').html(observation_value);
             $('.current_observation_unit_span').html(current_observation_unit);
-
+    
             $forecastsContainer.addClass("noussair_animations zoom_in");
             $loadingDiv.fadeOut(10);
-
+    
             $("button").css({
                 "animation": "intro 2s cubic-bezier(0.03, 1.08, 0.56, 1)",
                 "animation-delay": "2s"
             });
+    
 
-            if (obsSrcFinal === 'AirNow'){
-                console.log("Calling readAirNow");
+            if (param === 'pm25' || param === 'pm2.5') {
+                console.log("Calling readAirNow for PM2.5");
                 readAirNow(location_name, param, current_observation_unit, 'main_plot_for_airnow', true, 2, 2, 2, false, 2);
+            } else if (param === 'no2') {
+                console.log("Calling readApiBaker for NO2");
+                readApiBaker({
+                    location: location_name,
+                    timezone: timezone
+                });
             } else {
-                console.log("Calling readApiBaker with obs_src:", obs_src);
+
+                console.log("Unknown param, defaulting to readApiBaker");
                 readApiBaker({
                     location: location_name,
                     timezone: timezone
                 });
             }
-
+    
             $loadingScreen.hide();
             clearInterval(intervalId);
         } else {
- 
             console.log("Loaded site.html for full-page mode.");
             $loadingDiv.fadeOut(10);
         }
@@ -2632,29 +2702,6 @@ $(document).on("click", '.retrain_model', function() {
 
 
 
-$(document).ready(function () {
-
-    function getQueryParams() {
-        const params = {};
-        const queryString = window.location.search;
-        if (queryString) {
-            const urlParams = new URLSearchParams(queryString);
-            for (const [key, value] of urlParams.entries()) {
-                params[key] = value;
-            }
-        }
-        return params;
-    }
-
-
-    const queryParams = getQueryParams();
-    const locationName = queryParams["location_name"];
-    const param = queryParams["param"] || "no2"; 
-
-
-    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz");
-    
-});
 
 
 
