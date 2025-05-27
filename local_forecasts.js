@@ -748,12 +748,12 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
                 });
 
                 const matchingForecast = filteredForecasts[0] || {};
-
+                console.log("Matching forecast for site:", site.location, "at", currentLocalStr, "is", matchingForecast);
 
                 let forecasted_value = "N/A";
-                if (selectedSpecies === "no2" && matchingForecast.corrected !== undefined && !isNaN(matchingForecast.corrected)) {
+                if (selectedSpecies === "no2" && matchingForecast.corrected !== undefined ) {
                     forecasted_value = matchingForecast.corrected;
-                } else if (selectedSpecies === "pm25" && matchingForecast.value !== undefined && !isNaN(matchingForecast.value)) {
+                } else if (selectedSpecies === "pm25") {
                     forecasted_value = matchingForecast.value;
                 }
 
@@ -1488,7 +1488,7 @@ function readAirNow(location, param, unit, forecastsDiv, buttonOption = true, hi
                             <div class="card shadow-sm">
                                 <div class="card-body">
                                     <h5 class="card-title">Total Estimates</h5>
-                                    <p class="card-text fs-3 fw-bold">${data.metrics.total_observation || 'N/A'}</p>
+                                    <p class="card-text fs-3 fw-bold">${data.timezonemetrics.total_observation || 'N/A'}</p>
                                 </div>
                             </div>
                         </div>
@@ -1496,7 +1496,7 @@ function readAirNow(location, param, unit, forecastsDiv, buttonOption = true, hi
                             <div class="card shadow-sm">
                                 <div class="card-body">
                                     <h5 class="card-title">Last Update</h5>
-                                    <p class="card-text fs-3 fw-bold">${data.metrics.latest_training || 'N/A'}</p>
+                                    <p class="card-text fs-3 fw-bold">${data.timezonemetrics.latest_training || 'N/A'}</p>
                                 </div>
                             </div>
                         </div>
@@ -1504,7 +1504,7 @@ function readAirNow(location, param, unit, forecastsDiv, buttonOption = true, hi
                             <div class="card shadow-sm">
                                 <div class="card-body">
                                     <h5 class="card-title">Start Date</h5>
-                                    <p class="card-text">${data.metrics.start_date || 'N/A'}</p>
+                                    <p class="card-text">${data.timezonemetrics.start_date || 'N/A'}</p>
                                 </div>
                             </div>
                         </div>
@@ -1512,20 +1512,20 @@ function readAirNow(location, param, unit, forecastsDiv, buttonOption = true, hi
                             <div class="card shadow-sm">
                                 <div class="card-body">
                                     <h5 class="card-title">End Date</h5>
-                                    <p class="card-text">${data.metrics.end_date || 'N/A'}</p>
+                                    <p class="card-text">${data.timezonemetrics.end_date || 'N/A'}</p>
                                 </div>
                             </div>
                         </div>
-                        ${data.metrics.validation_score ? `
+                        ${data.timezonemetrics.validation_score ? `
                         <div class="col">
                             <div class="card shadow-sm">
                                 <div class="card-body">
                                     <h5 class="card-title">Validation Score</h5>
-                                    <p class="card-text">${data.metrics.validation_score}</p>
+                                    <p class="card-text">${data.timezonemetrics.validation_score}</p>
                                 </div>
                             </div>
                         </div>` : ''}
-                        ${data.metrics.performance?.metrics?.length ? data.metrics.performance.metrics.map(metric => `
+                        ${data.timezonemetrics.performance?.timezonemetrics?.length ? data.timezonemetrics.performance.timezonemetrics.map(metric => `
                         <div class="col">
                             <div class="card shadow-sm">
                                 <div class="card-body">
@@ -1693,7 +1693,7 @@ function generateModelCards(metrics) {
         <div class="col"><div class="card shadow-sm"><div class="card-body"><h5 class="card-title">Total Observations</h5><p class="card-text fs-3 fw-bold">${metrics.total_observation}</p></div></div></div>
         <div class="col"><div class="card shadow-sm"><div class="card-body"><h5 class="card-title">Last Model Update</h5><p class="card-text fs-3 fw-bold">${metrics.latest_training.substring(0, 19)}</p></div></div></div>
         <div class="col"><div class="card shadow-sm"><div class="card-body"><h5 class="card-title">Mean Square Error</h5><p class="card-text">${metrics.rmse}</p></div></div></div>
-        <div class="col"><div class="card shadow-sm"><div class="card-body"><h5 class="card-title">Mean Absolute Error</h5><p class="card-text">${metrics.preformance.metrics["Test MAE"]}</p></div></div></div>
+        <div class="col"><div class="card shadow-sm"><div class="card-body"><h5 class="card-title">Mean Absolute Error</h5><p class="card-text">${metrics.preformance.timezonemetrics["Test MAE"]}</p></div></div></div>
     `;
 }
 
