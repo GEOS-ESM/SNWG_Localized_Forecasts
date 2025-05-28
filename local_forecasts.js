@@ -2767,21 +2767,19 @@ $(document).on('click', '.routing_pollutant_param', function(e) {
    });
 
     $(document).on('keyup', '#filter-input', function() {
-
-      var locationName = $('#filter-input').val().toLowerCase();
-  
-
-      $('.launch-local-forecasts').each(function() {
-        var item = $(this);
-        var item_parent = $(this).parent();
-        var itemName = item.attr('location_name').toLowerCase();
-  
-        if (itemName.includes(locationName)) {
-            item_parent.show();
-        } else {
-            item_parent.hide();
-        }
-      });
+        var locationName = $('#filter-input').val().toLowerCase();
+        $('.launch-local-forecasts').each(function() {
+            var item = $(this);
+           
+            var item_parent = $(this).parent();
+            var itemName = item.attr('location_name').toLowerCase();
+             console.log("Filtering item: ", itemName);
+                        if (itemName.includes(locationName)) {
+                item_parent.removeClass('hide-on-filter');
+            } else {
+                item_parent.addClass('hide-on-filter');
+            }
+        });
     });
 
 document.addEventListener("DOMContentLoaded", function () {
