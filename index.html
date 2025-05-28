@@ -56,9 +56,6 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    .nav-link {
-      color: white !important;
-    }
 
     .btn-subscribe {
       background-color: white;
@@ -127,45 +124,61 @@ header.p-3.bg-dark.text-white {
     transform: translateY(-100%);
     pointer-events: none;
 }
-ul.navbar-nav.me-auto.mb-2.mb-lg-0 {
+
+
+header .navbar {
+  background-color: #ffffff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+
+header .navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #5f6368;
+  margin-right: 2rem;
+  display: flex;
+  align-items: center;
+}
+
+header .navbar-brand img {
+    height: 40px;
+    margin-right: 0.5rem;
+    margin-left: 14px;
+}
+
+header .navbar-nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+/* Nav links style */
+header .nav-link {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #5f6368;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  padding: 0.25rem 0;
+
     font-size: 14px;
     font-weight: 500;
 }
 
-a.nav-link.nl_wave_routing {}
-
-a.nav-link {
-    font-size: medium;
-    font-weight: 600;
+/* On hover */
+header .nav-link:hover {
+  color: #202124;
 }
 
-nav.navbar.navbar-expand-lg {
-    background: #212529;
-    width: 100%;
-    margin: 0;
-    padding: 0;
+/* Active link style (optional underline or bolder color) */
+header .nav-link.active,
+.nav-link[aria-current="page"] {
+  color: #202124;
+  font-weight: 500;
 }
 
-header .nav-item {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    padding: 3px 12px;
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 21px;
-    font-weight: 500;
-}
-
-li.nav-item :hover {
-    background: #505050c7;
-}
-
-nav.navbar.navbar-expand-lg img {
-    max-width: 103px;
-    margin: 14px;
-}
 </style>
 </head>
 
@@ -175,7 +188,7 @@ nav.navbar.navbar-expand-lg img {
 <header>
     <nav class="navbar navbar-expand-lg">
         <a class="navbar-brand d-flex align-items-center" href="#">
-            <img src="https://geos-esm.github.io/SNWG_Localized_Forecasts/parametres/snwg_logo.svg" alt="SNWG Logo">
+            <img src="parametres/snwg_logo_blue.svg" alt="SNWG Logo">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

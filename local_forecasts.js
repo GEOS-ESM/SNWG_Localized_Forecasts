@@ -2093,7 +2093,7 @@ function draw_plot(
             }
         ],
         autosize: true,
-        plot_bgcolor: '#F4F4F4',
+        plot_bgcolor: '#FFFFFF',
         paper_bgcolor: '#FFFFFF',
         legend: {
             orientation: 'h',
@@ -2117,7 +2117,7 @@ function draw_plot(
                 new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
                 new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
             ],
-            showgrid: true,
+            showgrid: false,
             gridcolor: '#D3D3D3',
             title: {
                 text: 'Time',
