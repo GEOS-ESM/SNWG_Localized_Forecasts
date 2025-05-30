@@ -1279,43 +1279,6 @@ function readApiBaker(options = {}) {
                 }
             });
 
-            // AQI display logic unchanged
-            plots.forEach((plot, index) => {
-                const siteTimeZone = timezone || "UTC";
-                const now = new Date();
-                const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
-                const currentHour = siteLocalNow.getHours();
-                const nextHour = (currentHour + 1) % 24;
-            
-                let currentValue = 'N/A';
-                let nextValue = 'N/A';
-            
-                for (let i = 0; i < masterData.master_datetime.length; i++) {
-                    const dtStr = masterData.master_datetime[i];
-                    const hour = parseInt(dtStr.slice(11, 13), 10);
-                    if (hour === currentHour) {
-                        currentValue = masterData[plot.columns[0].column][i];
-                    }
-                    if (hour === nextHour) {
-                        nextValue = masterData[plot.columns[0].column][i];
-                    }
-                }
-            
-                // Only display AQI elements for AQI plots
-                if (plot.displayAQI) {
-                    // Use AQI values directly from the data, do not recalculate
-                    const currentAqi = currentValue;
-                    const nextAqi = nextValue;
-            
-                    const currentAqiElement = generateAqiElement(currentAqi, plot.param, siteTimeZone, currentHour);
-                    const nextAqiElement = generateAqiElement(nextAqi, plot.param, siteTimeZone, nextHour);
-            
-                    if ($(`#aqi-${plot.id}`).length > 0) {
-                        $(`#aqi-${plot.id}`).append(currentAqiElement);
-                        $(`#aqi-${plot.id}`).append(nextAqiElement);
-                    }
-                }
-            });
 
         })
         .catch(error => {
