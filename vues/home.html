@@ -59,6 +59,7 @@
     });
 
 $(document).on('change', '#species-filter', function() {
+    cleanupBanners();
     const selectedSpecies = $(this).val();
     readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", selectedSpecies);
 });

@@ -609,16 +609,13 @@ function sitesArrayToGeoJSON(sites, param = "no2") {
             let value = "N/A";
             let aqi = "N/A";
             if (param === "no2") {
-                value = currentForecast.corrected ?? "N/A";
-                aqi = (value !== "N/A" && !isNaN(value)) ? calculateAqiForNo2(value) : "N/A";
+                aqi = currentForecast.no2_aqi ?? "N/A";
             } else if (param === "pm25") {
-                value = currentForecast.value ?? "N/A";
-                aqi = (value !== "N/A" && !isNaN(value)) ? calculateAqiForPm25(value) : "N/A";
+                aqi = currentForecast.pm25_aqi ?? "N/A";
             } else if (param === "o3") {
-                value = currentForecast.value ?? "N/A";
-                aqi = (value !== "N/A" && !isNaN(value)) ? calculateAqiForO3(value) : "N/A";
+                aqi = currentForecast.o3_aqi ?? "N/A";
             }
-            const aqiLevel = getAqiLevel(aqi);
+            const aqiLevel = getAqiLevel(aqi, param);
 
             // Swap lat/lon for pm25
             let coordinates = [site.lon, site.lat];
@@ -694,6 +691,8 @@ function generateSmallAqiBox(aqiValue, pollutant) {
 }
 
 function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
+
+    if (window.currentForecastData) window.currentForecastData = null;
     showLoadingDiv();
 
     fetch(fileUrl)
@@ -748,7 +747,6 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
                 });
 
                 const matchingForecast = filteredForecasts[0] || {};
-                console.log("Matching forecast for site:", site.location, "at", currentLocalStr, "is", matchingForecast);
 
                 let forecasted_value = "N/A";
                 if (selectedSpecies === "no2" && matchingForecast.corrected !== undefined ) {
@@ -829,12 +827,7 @@ function getUnitForParameter(parameter) {
     return units[parameter] || "N/A";
 }
 
-
-
-
-
 function add_the_banner(site, param) {
-    console.log("Adding banner for site:", site);
     const precomputed_forecasts = $.parseJSON(site.precomputed_forecasts);
     const obs_options = $.parseJSON(site.obs_options);
 
@@ -843,20 +836,27 @@ function add_the_banner(site, param) {
         const humidity = precomputed_forecasts?.[0]?.rh ? (precomputed_forecasts[0].rh * 100).toFixed(0) : "N/A";
         const windSpeed = precomputed_forecasts?.[0]?.wind_speed || "--";
         const local_time = precomputed_forecasts?.[0]?.local_time || "--";
+        const no2 = precomputed_forecasts?.[0]?.no2 || "--";
+        const no2_aqi = precomputed_forecasts?.[0]?.no2_aqi || "--";
+        const o3 = precomputed_forecasts?.[0]?.o3 || "--";  
+        const o3_aqi = precomputed_forecasts?.[0]?.o3_aqi || "--";
+        const pm25 = precomputed_forecasts?.[0]?.pm25 || "--";
+        const pm25_aqi = precomputed_forecasts?.[0]?.pm25_aqi || "--";
 
 
         let aqiValue = 'N/A';
         if (param === "no2") {
-            aqiValue = calculateAqiForNo2(precomputed_forecasts?.[0]?.corrected || "--");
+            aqiValue = no2_aqi;
             source = "NASA GEOS CF, NASA Pandora";
         } else if (param === "pm25" || param === "pm2.5") {
-            aqiValue = calculateAqiForPm25(precomputed_forecasts?.[0]?.value || "--");
+            aqiValue = pm25_aqi;
             source = "NASA MERRA 2 CNN, AirNow";
         } else if (param === "o3") {
-            aqiValue = calculateAqiForO3(precomputed_forecasts?.[0]?.value || "--");
+            aqiValue = o3_aqi
             source = "NASA GEOS CF, NASA Pandora";
         }
-        const aqiLevel = getAqiLevel(aqiValue);
+
+        const aqiLevel = getAqiLevel(aqiValue, param);
 
         const html = `
             <div class="col-3 single-pollutant-card">
@@ -905,6 +905,15 @@ function add_the_banner(site, param) {
 
         $(".pollutant-banner-o").append(html);
     }
+}
+
+function cleanupBanners() {
+
+    $('.pollutant-banner-o').empty();
+    if (window.currentForecastData) {
+        window.currentForecastData = null;
+    }
+
 }
 
 
@@ -974,13 +983,12 @@ function csvToArray(str, delimiter = ",") {
 
     return arr;
 }
-
 function readApiBaker(options = {}) {
     const {
         location = "",
-        timezone = "UTC"
+        timezone = "UTC",
+        plotType = "aqi", // "aqi" or "concentration"
     } = options;
-
 
     const messages = [
         "Generating data", 
@@ -1001,20 +1009,23 @@ function readApiBaker(options = {}) {
             return response.text(); 
         })
         .then(text => {
-
             const sanitizedText = text.replace(/NaN/g, "null");
             return JSON.parse(sanitizedText); 
         })
         .then(data => {
+            console.log("Fetched data for the site:", data);
             if (!data || data.status !== "200") throw new Error("No valid data received");
-
 
             let masterData = {
                 master_datetime: [],
                 master_no2: [],
+                master_no2_aqi: [],
                 master_o3: [],
+                master_o3_aqi: [],
                 master_pm25: [],
+                master_pm25_aqi: [],
                 master_predicted: [],
+                master_predicted_aqi: [],
                 master_observation: []
             };
 
@@ -1023,233 +1034,288 @@ function readApiBaker(options = {}) {
                     if (forecast.time) {
                         masterData.master_datetime.push(forecast.local_time);
                     }
-                    if (forecast.no2 >= 0) {
+                    // Concentrations
+                    if (forecast.no2 !== undefined) {
                         masterData.master_no2.push(forecast.no2);
                     }
-                    if (forecast.o3 >= 0) {
+                    if (forecast.o3 !== undefined) {
                         masterData.master_o3.push(forecast.o3);
                     }
-                    if (forecast.pm25 >= 0) {
+                    if (forecast.pm25 !== undefined) {
                         masterData.master_pm25.push(forecast.pm25);
                     }
-                    if (forecast.corrected >= 0) {
+                    if (forecast.corrected !== undefined) {
                         masterData.master_predicted.push(forecast.corrected);
                     }
-                    if (forecast.pandora >= 0) {
+                    if (forecast.pandora !== undefined) {
                         masterData.master_observation.push(forecast.pandora);
+                    }
+                    // AQI values
+                    if (forecast.no2_aqi !== undefined) {
+                        masterData.master_no2_aqi.push(forecast.no2_aqi);
+                    }
+                    if (forecast.o3_aqi !== undefined) {
+                        masterData.master_o3_aqi.push(forecast.o3_aqi);
+                    }
+                    if (forecast.pm25_aqi !== undefined) {
+                        masterData.master_pm25_aqi.push(forecast.pm25_aqi);
+                    }
+                    // For corrected, calculate AQI if not present
+                    if (forecast.corrected !== undefined) {
+                        let aqi = forecast.no2_aqi;
+                        if (aqi === undefined && forecast.no2 !== undefined) {
+                            aqi = calculateAqiForNo2(forecast.no2);
+                        }
+                        masterData.master_predicted_aqi.push(aqi);
                     }
                 });
             }
 
             const tabsNav = $("#pills-tabContent").prev();
             const tabsContainer = $(".tab-content");
-                
             tabsNav.empty();
             tabsContainer.empty();
-            
             const tabsList = $('<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist"></ul>');
             tabsNav.append(tabsList);
-            
+
             const plots = [
-            {
-                id: "plot_corrected",
-                title: "SNWG NO<sub>2</sub> Forecasts",
-                unit: "ppbv",
-                data: masterData,
-                param: "no2",
-                tabName: "Nitrogen Dioxide (NO<sub>2</sub>)", 
-                tabId: "tab_no2", 
-                description: "Source: SNWG bias-corrected model",
-                columns: [
-                    { column: "master_predicted", name: "Corrected", color: "blue", width: 2 }
-                ],
-                displayAQI: true 
-            },
-            {
-                id: "plot_pm25",
-                title: "Particulate Matter (PM<sub>2.5</sub>)",
-                unit: "μg/m³",
-                data: masterData,
-                param: "pm25",
-                tabName: "Fine Particulate Matter (PM<sub>2.5</sub>)",
-                tabId: "tab_pm25",
-                description: "Source: GEOS-CF",
-                columns: [
-                    { column: "master_pm25", name: "PM2.5", color: "green", width: 2 }
-                ],
-                displayAQI: true
-            },
-            {
-                id: "plot_o3",
-                title: "Ozone (O<sub>3</sub>)",
-                unit: "ppbv",
-                data: masterData,
-                param: "o3",
-                tabName: "Ozone (O<sub>3</sub>)", 
-                tabId: "tab_o3", 
-                description: "Source: GEOS-CF",
-                columns: [
-                    { column: "master_o3", name: "O3", color: "orange", width: 2 }
-                ],
-                displayAQI: true 
-            },
-            {
-                id: "plot_pandora",
-                title: "Pandora NO<sub>2</sub> Observations",
-                unit: "ppbv",
-                data: masterData,
-                param: "no2",
-                tabName: "Nitrogen dioxide (NO<sub>2</sub>) ", 
-                tabId: "tab_no2",
-                description: "Source: NASA Pandora",
-                columns: [
-                    { column: "master_observation", name: "Pandora", color: "black", width: 2 }
-                ],
-                displayAQI: false 
-            },
-            {
-                id: "plot_no2",
-                title: "Supporting Data: model-based NO<sub>2</sub> forecast",
-                unit: "ppbv",
-                data: masterData,
-                param: "no2",
-                tabName: "Nitrogen dioxide (NO<sub>2</sub>)", 
-                tabId: "tab_no2", 
-                description: "Source: GEOS-CF",
-                columns: [
-                    { column: "master_no2", name: "NO2", color: "red", width: 2 }
-                ],
-                displayAQI: false 
-            }
-        ];
-        
-
-        const tabMap = {};
-        
-        plots.forEach((plot, index) => {
-            const tabId = plot.tabId; 
-        
-            if (!tabMap[tabId]) {
-                const isActive = Object.keys(tabMap).length === 0 ? "active" : ""; 
-        
-                tabsList.append(`
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link ${isActive}" id="tab-${tabId}" data-bs-toggle="pill" href="#${tabId}" role="tab" aria-controls="${tabId}" aria-selected="${isActive === 'active'}">
-                            ${plot.tabName}
-                        </a>
-                    </li>
-                `);
-        
-                tabsContainer.append(`
-                    <div class="tab-pane fade ${isActive} show" id="${plot.tabId}" role="tabpanel" aria-labelledby="tab-${plot.tabId}">
-                        <h5 class='plot_title'>${plot.title}</h5>
-                        <p class='plot_source'>${plot.description}</p>
-                        <div class="aqi-container" id="aqi-${plot.id}"></div> <!-- Ensure this exists -->
-                        <div class="plot-container" id="${plot.id}"></div>
-                    </div>
-                `);
-        
-                tabMap[tabId] = true;
-            }
-
-            else{
-            $(`#${tabId}`).append(` <h5 class='plot_title'>${plot.title}</h5><p class= 'plot_source'>${plot.description}</p>
-                <div class="plot-container" id="${plot.id}"> 
-                </div>
-            `);
-            } 
-        });
-        
-
-        $(".nav-link").on("click", function () {
-            const targetTabId = $(this).attr("href").replace("#", "");
-        
-            $(".tab-pane").removeClass("active show");
-            $(`#${targetTabId}`).addClass("active show");
-        });
-        
-        plots.forEach((plot, index) => {
-
-            const siteTimeZone = timezone || "UTC";
-            const now = new Date();
-            const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
-            const currentHour = siteLocalNow.getHours();
-            const nextHour = (currentHour + 1) % 24; // wrap around midnight if needed
-
-            let currentValue = 'N/A';
-            let nextValue = 'N/A';
-
-
-            for (let i = 0; i < masterData.master_datetime.length; i++) {
-
-                const dtStr = masterData.master_datetime[i];
-
-                const hour = parseInt(dtStr.slice(11, 13), 10);
-
-                if (hour === currentHour) {
-                    currentValue = masterData[plot.columns[0].column][i];
+                {
+                    id: "plot_corrected_aqi",
+                    title: `SNWG NO<sub>2</sub> Forecasts (AQI)`,
+                    unit: "AQI",
+                    data: masterData,
+                    param: "no2",
+                    tabName: "Nitrogen Dioxide (NO<sub>2</sub>)",
+                    tabId: "tab_no2",
+                    description: "Source: SNWG bias-corrected model",
+                    columns: [
+                        { column: "master_predicted_aqi", name: "Corrected AQI", color: "blue", width: 2 }
+                    ],
+                    displayAQI: true
+                },
+                {
+                    id: "plot_pm25_aqi",
+                    title: `Particulate Matter (PM<sub>2.5</sub>) (AQI)`,
+                    unit: "AQI",
+                    data: masterData,
+                    param: "pm25",
+                    tabName: "Fine Particulate Matter (PM<sub>2.5</sub>)",
+                    tabId: "tab_pm25",
+                    description: "Source: GEOS-CF",
+                    columns: [
+                        { column: "master_pm25_aqi", name: "PM2.5 AQI", color: "green", width: 2 }
+                    ],
+                    displayAQI: true
+                },
+                {
+                    id: "plot_o3_aqi",
+                    title: `Ozone (O<sub>3</sub>) (AQI)`,
+                    unit: "AQI",
+                    data: masterData,
+                    param: "o3",
+                    tabName: "Ozone (O<sub>3</sub>)",
+                    tabId: "tab_o3",
+                    description: "Source: GEOS-CF",
+                    columns: [
+                        { column: "master_o3_aqi", name: "O3 AQI", color: "orange", width: 2 }
+                    ],
+                    displayAQI: true
+                },
+                // Supporting concentration plots
+                {
+                    id: "plot_corrected_conc",
+                    title: `SNWG NO<sub>2</sub> Forecasts (ppbv)`,
+                    unit: "ppbv",
+                    data: masterData,
+                    param: "no2",
+                    tabName: "Nitrogen Dioxide (NO<sub>2</sub>)",
+                    tabId: "tab_no2",
+                    description: "Supporting: SNWG bias-corrected model (concentration)",
+                    columns: [
+                        { column: "master_predicted", name: "Corrected", color: "blue", width: 2 }
+                    ],
+                    displayAQI: false
+                },
+                {
+                    id: "plot_pm25_conc",
+                    title: `Particulate Matter (PM<sub>2.5</sub>) (μg/m³)`,
+                    unit: "μg/m³",
+                    data: masterData,
+                    param: "pm25",
+                    tabName: "Fine Particulate Matter (PM<sub>2.5</sub>)",
+                    tabId: "tab_pm25",
+                    description: "Supporting: GEOS-CF (concentration)",
+                    columns: [
+                        { column: "master_pm25", name: "PM2.5", color: "green", width: 2 }
+                    ],
+                    displayAQI: false
+                },
+                {
+                    id: "plot_o3_conc",
+                    title: `Ozone (O<sub>3</sub>) (ppbv)`,
+                    unit: "ppbv",
+                    data: masterData,
+                    param: "o3",
+                    tabName: "Ozone (O<sub>3</sub>)",
+                    tabId: "tab_o3",
+                    description: "Supporting: GEOS-CF (concentration)",
+                    columns: [
+                        { column: "master_o3", name: "O3", color: "orange", width: 2 }
+                    ],
+                    displayAQI: false
+                },
+                // Pandora obs plot (unchanged)
+                {
+                    id: "plot_pandora",
+                    title: "Pandora NO<sub>2</sub> Observations",
+                    unit: "ppbv",
+                    data: masterData,
+                    param: "no2",
+                    tabName: "Nitrogen dioxide (NO<sub>2</sub>)",
+                    tabId: "tab_no2",
+                    description: "Source: NASA Pandora",
+                    columns: [
+                        { column: "master_observation", name: "Pandora", color: "black", width: 2 }
+                    ],
+                    displayAQI: false
+                },
+                {
+                    id: "plot_no2_model",
+                    title: "Supporting Data: model-based NO<sub>2</sub> forecast",
+                    unit: "ppbv",
+                    data: masterData,
+                    param: "no2",
+                    tabName: "Nitrogen dioxide (NO<sub>2</sub>)",
+                    tabId: "tab_no2",
+                    description: "Source: GEOS-CF",
+                    columns: [
+                        { column: "master_no2", name: "NO2", color: "red", width: 2 }
+                    ],
+                    displayAQI: false
                 }
-                if (hour === nextHour) {
-                    nextValue = masterData[plot.columns[0].column][i];
-                }
-            }
+            ];
 
-        
-
-            if (plot.displayAQI) {
-                const currentAqi = plot.param === "no2"
-                    ? calculateAqiForNo2(currentValue)
-                    : plot.param === "pm25"
-                    ? calculateAqiForPm25(currentValue)
-                    : calculateAqiForO3(currentValue);
-        
-                const nextAqi = plot.param === "no2"
-                    ? calculateAqiForNo2(nextValue)
-                    : plot.param === "pm25"
-                    ? calculateAqiForPm25(nextValue)
-                    : calculateAqiForO3(nextValue);
-        
-                console.log("Current AQI:", currentAqi);
-                console.log("Next AQI:", nextAqi);
-        
-                const currentAqiElement = generateAqiElement(currentAqi, plot.param, siteTimeZone, currentHour);
-                const nextAqiElement = generateAqiElement(nextAqi, plot.param, siteTimeZone, nextHour);
-        
-                if ($(`#aqi-${plot.id}`).length > 0) {
-                    console.log("AQI container found for plot ID:", plot.id);
-                    $(`#aqi-${plot.id}`).append(currentAqiElement);
-                    $(`#aqi-${plot.id}`).append(nextAqiElement);
+            const tabMap = {};
+            plots.forEach((plot, index) => {
+                const tabId = plot.tabId;
+                if (!tabMap[tabId]) {
+                    const isActive = Object.keys(tabMap).length === 0 ? "active" : "";
+                    tabsList.append(`
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link ${isActive}" id="tab-${tabId}" data-bs-toggle="pill" href="#${tabId}" role="tab" aria-controls="${tabId}" aria-selected="${isActive === 'active'}">
+                                ${plot.tabName}
+                            </a>
+                        </li>
+                    `);
+                    tabsContainer.append(`
+                        <div class="tab-pane fade ${isActive} show" id="${tabId}" role="tabpanel" aria-labelledby="tab-${tabId}">
+                            <div class="plot-container" id="${plot.id}"></div>
+                            <div class="aqi-container" id="aqi-${plot.id}"></div>
+                        </div>
+                    `);
+                    tabMap[tabId] = true;
                 } else {
-                    console.error(`AQI container not found for plot ID: ${plot.id}`);
+                    // If the tab already exists, just append the plot container
+                    $(`#${tabId}`).append(`<div class="plot-container" id="${plot.id}"></div><div class="aqi-container" id="aqi-${plot.id}"></div>`);
                 }
-            } else {
-                console.log(`AQI display is disabled for plot ID: ${plot.id}`);
-            }
-        });
+            
+                const siteTimeZone = timezone || "UTC";
+                const now = new Date();
+                const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
+                const currentHour = siteLocalNow.getHours();
+                const nextHour = (currentHour + 1) % 24;
 
+                let currentValue = 'N/A';
+                let nextValue = 'N/A';
 
-        plots.forEach(plot => {
-            const plotContainer = $(`#${plot.id}`);
-            if (plotContainer.length > 0) {
-                draw_plot(
-                    plot.data,
-                    plot.param,
-                    plot.unit, 
-                    plot.id,
-                    plot.columns,
-                    false,   // dates_ranges
-                    false,   // enableFading
-                    "",      // text
-                    "bar",   // plotType
-                    timezone // timezone
-                );
-            } else {
-                console.error(`No DOM element with id '${plot.id}' exists on the page.`);
-            }
+                for (let i = 0; i < masterData.master_datetime.length; i++) {
+                    const dtStr = masterData.master_datetime[i];
+                    const hour = parseInt(dtStr.slice(11, 13), 10);
+                    if (hour === currentHour) {
+                        currentValue = masterData[plot.columns[0].column][i];
+                    }
+                    if (hour === nextHour) {
+                        nextValue = masterData[plot.columns[0].column][i];
+                    }
+                }
 
+                if (plot.displayAQI) {
+                    const currentAqi = currentValue;
+                    const nextAqi = nextValue;
+
+                    const currentAqiElement = generateAqiElement(currentAqi, plot.param, siteTimeZone, currentHour);
+                    const nextAqiElement = generateAqiElement(nextAqi, plot.param, siteTimeZone, nextHour);
+
+                    if ($(`#aqi-${plot.id}`).length > 0) {
+                        $(`#aqi-${plot.id}`).append(currentAqiElement);
+                        $(`#aqi-${plot.id}`).append(nextAqiElement);
+                    }
+                }
             });
 
+            $(".nav-link").on("click", function () {
+                const targetTabId = $(this).attr("href").replace("#", "");
+                $(".tab-pane").removeClass("active show");
+                $(`#${targetTabId}`).addClass("active show");
+            });
+
+            plots.forEach(plot => {
+                const plotContainer = $(`#${plot.id}`);
+                if (plotContainer.length > 0) {
+                    draw_plot(
+                        plot.data,
+                        plot.param,
+                        plot.unit, 
+                        plot.id,
+                        plot.columns,
+                        false,   // dates_ranges
+                        false,   // enableFading
+                        "",      // text
+                        "bar",   // plotType
+                        timezone // timezone
+                    );
+                } else {
+                    console.error(`No DOM element with id '${plot.id}' exists on the page.`);
+                }
+            });
+
+            // AQI display logic unchanged
+            plots.forEach((plot, index) => {
+                const siteTimeZone = timezone || "UTC";
+                const now = new Date();
+                const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
+                const currentHour = siteLocalNow.getHours();
+                const nextHour = (currentHour + 1) % 24;
             
+                let currentValue = 'N/A';
+                let nextValue = 'N/A';
+            
+                for (let i = 0; i < masterData.master_datetime.length; i++) {
+                    const dtStr = masterData.master_datetime[i];
+                    const hour = parseInt(dtStr.slice(11, 13), 10);
+                    if (hour === currentHour) {
+                        currentValue = masterData[plot.columns[0].column][i];
+                    }
+                    if (hour === nextHour) {
+                        nextValue = masterData[plot.columns[0].column][i];
+                    }
+                }
+            
+                // Only display AQI elements for AQI plots
+                if (plot.displayAQI) {
+                    // Use AQI values directly from the data, do not recalculate
+                    const currentAqi = currentValue;
+                    const nextAqi = nextValue;
+            
+                    const currentAqiElement = generateAqiElement(currentAqi, plot.param, siteTimeZone, currentHour);
+                    const nextAqiElement = generateAqiElement(nextAqi, plot.param, siteTimeZone, nextHour);
+            
+                    if ($(`#aqi-${plot.id}`).length > 0) {
+                        $(`#aqi-${plot.id}`).append(currentAqiElement);
+                        $(`#aqi-${plot.id}`).append(nextAqiElement);
+                    }
+                }
+            });
 
         })
         .catch(error => {
@@ -1259,7 +1325,6 @@ function readApiBaker(options = {}) {
                 <p style="text-align: justify;">The forecasts for this location have not been updated recently. Please check back soon, or feel free to contact us at noussair.lazrak@nyu.edu</p>
             `);
             $('.model_data').html(``);
-
             $('.loader').hide();
         });
 }
@@ -1344,23 +1409,33 @@ function calculateAqiForPm25(concentration) {
     return 'N/A';
 }
 
-function getAqiLevel(aqi) {
-    if (aqi <= 50) {
-        return { level: "Good", color: "#4CAF50", message: "Air quality is considered satisfactory." };
-    } else if (aqi <= 100) {
-        return { level: "Moderate", color: "#FFEB3B", message: "Air quality is acceptable." };
-    } else if (aqi <= 150) {
-        return { level: "Unhealthy for Sensitive Groups", color: "#FF9800", message: "Members of sensitive groups may experience health effects." };
-    } else if (aqi <= 200) {
-        return { level: "Unhealthy", color: "#F44336", message: "Everyone may begin to experience health effects." };
-    } else if (aqi <= 300) {
-        return { level: "Very Unhealthy", color: "#9C27B0", message: "Health alert: everyone may experience serious health effects." };
-    } else {
-        return { level: "Hazardous", color: "#7E0023", message: "Health warnings of emergency conditions." };
+function getAqiLevel(aqi, species = "no2") {
+    if (aqi === null || aqi === undefined || isNaN(aqi)) {
+        return { level: "N/A", color: "#808080", message: "No AQI data available." };
     }
+
+
+    const breakpoints = [
+        { max: 50,    level: "Good", color: "#4CAF50", message: "Air quality is considered satisfactory." },
+        { max: 100,   level: "Moderate", color: "#FFEB3B", message: "Air quality is acceptable." },
+        { max: 150,   level: "Unhealthy for Sensitive Groups", color: "#FF9800", message: "Members of sensitive groups may experience health effects." },
+        { max: 200,   level: "Unhealthy", color: "#F44336", message: "Everyone may begin to experience health effects." },
+        { max: 300,   level: "Very Unhealthy", color: "#9C27B0", message: "Health alert: everyone may experience serious health effects." },
+        { max: 500,   level: "Hazardous", color: "#7E0023", message: "Health warnings of emergency conditions." }
+    ];
+
+
+
+    for (const bp of breakpoints) {
+        if (aqi <= bp.max) {
+            return { level: bp.level, color: bp.color, message: bp.message };
+        }
+    }
+    return { level: "Beyond Index", color: "#000000", message: "AQI is beyond the standard index." };
 }
 
 function generateAqiElement(aqiValue, pollutant, userTimeZone, currentHour) {
+    console.log("Generating AQI element for pollutant:", pollutant, "with value:", aqiValue, "at hour:", currentHour);
     if (aqiValue === 'N/A') {
         return ''; 
     }
@@ -2713,18 +2788,7 @@ $(document).on("click", '.retrain_model', function() {
 
     });
     
-   
-
-
-
 // MAIN APP
-
-
-
-
-
-
-
 
 $('.modal-dialog').on('show.bs.modal', function () {
     $('#loading-screen').show();
