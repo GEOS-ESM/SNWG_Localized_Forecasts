@@ -64,6 +64,6 @@ $(document).on('change', '#species-filter', function() {
     readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", selectedSpecies);
 });
 $(document).ready(function () {
-    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", $("#species-filter").val() || "no2");
+    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", "no2");
 });
 </script>

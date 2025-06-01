@@ -1073,3 +1073,72 @@ div#species-filter-container {
   .single-pollutant-card.hide-on-filter {
     display: none !important;
   }
+
+  .plot_description {
+    text-align: left;
+    padding: 26px 0px 0px 0px;
+}
+
+.plot_description h4 {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.plot_description h6 {
+    font-size: 12px;
+}
+
+.xvg_aqi-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.xvg_aqi-subtitle {
+  font-size: 0.875rem;
+  color: #bbb;
+}
+.xvg_btn-custom {
+  background-color: #222;
+  border: 1px solid #444;
+  color: white;
+}
+.xvg_aqi {
+  font-size: 2rem;
+  font-weight: bold;
+}
+.xvg_aqi-change {
+  font-size: 1.2rem;
+}
+.green {
+  color: #00cc66;
+}
+.red {
+  color: #ff4d4d;
+}
+.xvg_timestamp {
+  font-size: 0.75rem;
+  color: #aaa;
+}
+.xvg_aqi-container {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-content: center;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.d-xvg {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 16px;
+    text-align: left !important;
+}
+
+.xvg_aqi-change {
+    font-size: smaller;
+    font-weight: 700;
+}

@@ -591,37 +591,51 @@ function sitesArrayToGeoJSON(sites, param = "no2") {
     return {
         type: "FeatureCollection",
         features: sites.map(site => {
+           
             const now = new Date();
             const pad = n => n.toString().padStart(2, '0');
             const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
             const localYear = siteLocalNow.getFullYear();
             const localMonth = pad(siteLocalNow.getMonth() + 1);
             const localDate = pad(siteLocalNow.getDate());
-            const localHour = pad(siteLocalNow.getHours());
-            const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${localHour}`;
-
-            const currentForecast = (site.forecasts || []).find(forecast => {
-                if (!forecast.local_time) return false;
-                const forecastHourStr = forecast.local_time.slice(0, 13);
-                return forecastHourStr === currentLocalStr;
-            }) || {};
+            const localHour = siteLocalNow.getHours();
+            const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(localHour)}`;
+ 
+            let currentForecast = {};
+            if (param === "pm25") {
+                // For PM2.5, match if current hour is within any 3-hour window
+                currentForecast = (site.forecasts || []).find(forecast => {
+                    if (!forecast.local_time) return false;
+                    const forecastDate = forecast.local_time.slice(0, 10);
+                    const forecastHour = parseInt(forecast.local_time.slice(11, 13), 10);
+                    return (
+                        forecastDate === `${localYear}-${localMonth}-${localDate}` &&
+                        localHour >= forecastHour &&
+                        localHour < forecastHour + 3
+                    );
+                }) || {};
+            } else {
+                // For NO2 and O3, match exact hour
+                currentForecast = (site.forecasts || []).find(forecast => {
+                    if (!forecast.local_time) return false;
+                    const forecastHourStr = forecast.local_time.slice(0, 13);
+                    return forecastHourStr === currentLocalStr;
+                }) || {};
+            }
+            
 
             let value = "N/A";
             let aqi = "N/A";
             if (param === "no2") {
                 aqi = currentForecast.no2_aqi ?? "N/A";
             } else if (param === "pm25") {
-                aqi = currentForecast.pm25_aqi ?? "N/A";
+                aqi = currentForecast.pm25_aqi ?? currentForecast.pm25_conc_cnn ?? "N/A";
             } else if (param === "o3") {
                 aqi = currentForecast.o3_aqi ?? "N/A";
             }
             const aqiLevel = getAqiLevel(aqi, param);
 
-            // Swap lat/lon for pm25
             let coordinates = [site.lon, site.lat];
-            if (param === "pm25") {
-                coordinates = [site.lat, site.lon];
-            }
 
             return {
                 type: "Feature",
@@ -729,32 +743,61 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
             const filteredSites = [];
 
             data.forEach(site => {
-                if (!site.timezone || typeof site.timezone !== "string" || site.timezone === "null") {
-                    return;
-                }
-
+                const siteSpecies = (site.species || "").toLowerCase();
+                const selected = (selectedSpecies || "").toLowerCase();
+                const pm25Aliases = ["pm25", "pm2.5", "pm 2.5", "pm_2.5", "pm-2.5", "pm 25", "pm_25", "pm-25"];
+                const isPm25 = pm25Aliases.includes(selected.replace(/\s|_|-/g, ""));
+                const isSpeciesMatch = isPm25
+                    ? pm25Aliases.includes(siteSpecies.replace(/\s|_|-/g, ""))
+                    : siteSpecies === selected;
+            
+                if (!isSpeciesMatch) return;
+                if (!site.timezone || typeof site.timezone !== "string" || site.timezone === "null") return;
+            
                 const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
                 const localYear = siteLocalNow.getFullYear();
                 const localMonth = pad(siteLocalNow.getMonth() + 1);
                 const localDate = pad(siteLocalNow.getDate());
-                const localHour = pad(siteLocalNow.getHours());
-                const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${localHour}`;
+                const localHour = siteLocalNow.getHours();
+            
+                let matchingForecast = null;
+            
+                if (isPm25) {
+                    // For PM2.5, always use 3-hour window match
+                    console.log("site data", site);
+                    console.log("site data", site);
+                    matchingForecast = (site.forecasts || []).find(forecast => {
+                        if (!forecast.local_time) return false;
+                        // Parse forecast start time as Date
+                        const forecastStart = new Date(forecast.local_time.replace(' ', 'T'));
+                        // Forecast end is 3 hours later
+                        const forecastEnd = new Date(forecastStart.getTime() + 3 * 60 * 60 * 1000);
+                        // Current site-local time
+                        const nowLocal = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
+                        // Check if nowLocal is within [forecastStart, forecastEnd)
+                        return nowLocal >= forecastStart && nowLocal < forecastEnd;
+                    });
 
-                const filteredForecasts = (site.forecasts || []).filter(forecast => {
-                    if (!forecast.local_time) return false;
-                    const forecastHourStr = forecast.local_time.slice(0, 13);
-                    return forecastHourStr === currentLocalStr;
-                });
-
-                const matchingForecast = filteredForecasts[0] || {};
-
-                let forecasted_value = "N/A";
-                if (selectedSpecies === "no2" && matchingForecast.corrected !== undefined ) {
-                    forecasted_value = matchingForecast.corrected;
-                } else if (selectedSpecies === "pm25") {
-                    forecasted_value = matchingForecast.value;
+                   
+                } else {
+                    // For other species, match exact hour
+                    const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(localHour)}`;
+                    matchingForecast = (site.forecasts || []).find(forecast => {
+                        if (!forecast.local_time) return false;
+                        const forecastHourStr = forecast.local_time.slice(0, 13);
+                        return forecastHourStr === currentLocalStr;
+                    });
                 }
-
+            
+                matchingForecast = matchingForecast || {};
+            
+                let forecasted_value = "N/A";
+                if (selected === "no2" && matchingForecast.corrected !== undefined ) {
+                    forecasted_value = matchingForecast.corrected;
+                } else if (isPm25) {
+                    forecasted_value = matchingForecast.pm25_aqi;
+                }
+            
                 if (forecasted_value !== "N/A") {
                     const obsOptions = {};
                     Object.keys(matchingForecast).forEach(key => {
@@ -765,9 +808,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
                             };
                         }
                     });
-
-                    
-
+            
                     const siteData = {
                         location_name: site.location,
                         observation_source: "NASA",
@@ -776,10 +817,11 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
                         latitude: site.lat,
                         longitude: site.lon,
                         timezone: site.timezone,
-                        precomputed_forecasts: JSON.stringify(filteredForecasts),
+                        precomputed_forecasts: JSON.stringify([matchingForecast]),
                         obs_options: JSON.stringify(obsOptions),
                     };
 
+            
                     add_the_banner(siteData, selectedSpecies);
                     filteredSites.push({
                         ...site,
@@ -1001,7 +1043,7 @@ function readApiBaker(options = {}) {
     ];
     $('.loader').show();
 
-    const fileUrl = `precomputed/no2/${location.replace(/_/g, "-")}.json`;
+    const fileUrl = `precomputed/all_dts/${location.replace(/_/g, "-")}.json`;
 
     fetch(fileUrl)
         .then(response => {
@@ -1013,7 +1055,6 @@ function readApiBaker(options = {}) {
             return JSON.parse(sanitizedText); 
         })
         .then(data => {
-            console.log("Fetched data for the site:", data);
             if (!data || data.status !== "200") throw new Error("No valid data received");
 
             let masterData = {
@@ -1091,7 +1132,8 @@ function readApiBaker(options = {}) {
                     columns: [
                         { column: "master_predicted_aqi", name: "Corrected AQI", color: "blue", width: 2 }
                     ],
-                    displayAQI: true
+                    displayAQI: true,
+                    displayMetrics: true
                 },
                 {
                     id: "plot_pm25_aqi",
@@ -1105,7 +1147,8 @@ function readApiBaker(options = {}) {
                     columns: [
                         { column: "master_pm25_aqi", name: "PM2.5 AQI", color: "green", width: 2 }
                     ],
-                    displayAQI: true
+                    displayAQI: true,
+                    displayMetrics: true
                 },
                 {
                     id: "plot_o3_aqi",
@@ -1119,7 +1162,8 @@ function readApiBaker(options = {}) {
                     columns: [
                         { column: "master_o3_aqi", name: "O3 AQI", color: "orange", width: 2 }
                     ],
-                    displayAQI: true
+                    displayAQI: true,
+                    displayMetrics: true
                 },
                 // Supporting concentration plots
                 {
@@ -1134,7 +1178,8 @@ function readApiBaker(options = {}) {
                     columns: [
                         { column: "master_predicted", name: "Corrected", color: "blue", width: 2 }
                     ],
-                    displayAQI: false
+                    displayAQI: false,
+                    displayMetrics: false
                 },
                 {
                     id: "plot_pm25_conc",
@@ -1148,7 +1193,8 @@ function readApiBaker(options = {}) {
                     columns: [
                         { column: "master_pm25", name: "PM2.5", color: "green", width: 2 }
                     ],
-                    displayAQI: false
+                    displayAQI: false,
+                    displayMetrics: false
                 },
                 {
                     id: "plot_o3_conc",
@@ -1162,7 +1208,8 @@ function readApiBaker(options = {}) {
                     columns: [
                         { column: "master_o3", name: "O3", color: "orange", width: 2 }
                     ],
-                    displayAQI: false
+                    displayAQI: false,
+                    displayMetrics: false
                 },
                 // Pandora obs plot (unchanged)
                 {
@@ -1177,7 +1224,8 @@ function readApiBaker(options = {}) {
                     columns: [
                         { column: "master_observation", name: "Pandora", color: "black", width: 2 }
                     ],
-                    displayAQI: false
+                    displayAQI: false,
+                    displayMetrics: false
                 },
                 {
                     id: "plot_no2_model",
@@ -1191,7 +1239,8 @@ function readApiBaker(options = {}) {
                     columns: [
                         { column: "master_no2", name: "NO2", color: "red", width: 2 }
                     ],
-                    displayAQI: false
+                    displayAQI: false,
+                    displayMetrics: false
                 }
             ];
 
@@ -1242,13 +1291,74 @@ function readApiBaker(options = {}) {
                 if (plot.displayAQI) {
                     const currentAqi = currentValue;
                     const nextAqi = nextValue;
-
+                
                     const currentAqiElement = generateAqiElement(currentAqi, plot.param, siteTimeZone, currentHour);
                     const nextAqiElement = generateAqiElement(nextAqi, plot.param, siteTimeZone, nextHour);
+                
+                    const $plotContainer = $(`#${plot.id}`);
+                    if ($plotContainer.length > 0) {
+                        $plotContainer.before(currentAqiElement);
+                        $plotContainer.before(nextAqiElement);
+                    }
+                }
+                if (plot.displayMetrics) {
+                    const columnKey = plot.columns[0].column;
+                    const values = masterData[columnKey] || [];
+                    const datetimes = masterData.master_datetime || [];
+                
 
-                    if ($(`#aqi-${plot.id}`).length > 0) {
-                        $(`#aqi-${plot.id}`).append(currentAqiElement);
-                        $(`#aqi-${plot.id}`).append(nextAqiElement);
+                    let currentIdx = -1, prevIdx = -1, nextIdx = -1;
+                    for (let i = 0; i < datetimes.length; i++) {
+                        const hour = parseInt(datetimes[i].slice(11, 13), 10);
+                        if (hour === currentHour) currentIdx = i;
+                        if (hour === (currentHour - 1 + 24) % 24) prevIdx = i;
+                        if (hour === (currentHour + 1) % 24) nextIdx = i;
+                    }
+                
+
+                    const today = siteLocalNow.toISOString().slice(0, 10);
+                    const todayVals = datetimes
+                        .map((dt, i) => ({ dt, val: values[i] }))
+                        .filter(({ dt }) => dt && dt.startsWith(today))
+                        .map(({ val }) => typeof val === "number" ? val : NaN)
+                        .filter(val => !isNaN(val));
+                    const dailyAvg = todayVals.length ? (todayVals.reduce((a, b) => a + b, 0) / todayVals.length) : 'N/A';
+                
+  
+                    const currentVal = currentIdx !== -1 ? values[currentIdx] : 'N/A';
+                    const prevVal = prevIdx !== -1 ? values[prevIdx] : 'N/A';
+                    const nextVal = nextIdx !== -1 ? values[nextIdx] : 'N/A';
+                
+                
+                    const change = getChange(currentVal, dailyAvg);
+                    const prevChange = getChange(prevVal, dailyAvg);
+                    const nextChange = getChange(nextVal, dailyAvg);
+                
+                    function formatTime(dtIdx) {
+                        if (dtIdx === -1) return "--";
+                        const dt = new Date(datetimes[dtIdx]);
+                        return dt.toLocaleString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, month: "short", day: "2-digit" });
+                    }
+                
+                    const metricsHtml = generateMetricsHtml({
+                        title: plot.title,
+                        unit: plot.unit,
+                        currentVal,
+                        prevVal,
+                        nextVal,
+                        dailyAvg,
+                        change,
+                        prevChange,
+                        nextChange,
+                        currentIdx,
+                        prevIdx,
+                        nextIdx,
+                        datetimes
+                    });
+                    
+                    const $plotContainer = $(`#${plot.id}`);
+                    if ($plotContainer.length > 0) {
+                        $plotContainer.before(metricsHtml);
                     }
                 }
             });
@@ -1260,7 +1370,12 @@ function readApiBaker(options = {}) {
             });
 
             plots.forEach(plot => {
+
+                if (!plot.data || (Array.isArray(plot.data) && plot.data.length === 0) || (typeof plot.data === 'object' && Object.keys(plot.data).length === 0)) {
+                    return;
+                }
                 const plotContainer = $(`#${plot.id}`);
+                plotContainer.before(`<div class="plot_description"><h4>${plot.title}</h4><h6>${plot.description || ""}</h6></div>`);
                 if (plotContainer.length > 0) {
                     draw_plot(
                         plot.data,
@@ -1274,11 +1389,12 @@ function readApiBaker(options = {}) {
                         "bar",   // plotType
                         timezone // timezone
                     );
+
+
                 } else {
                     console.error(`No DOM element with id '${plot.id}' exists on the page.`);
                 }
             });
-
 
         })
         .catch(error => {
@@ -1398,7 +1514,6 @@ function getAqiLevel(aqi, species = "no2") {
 }
 
 function generateAqiElement(aqiValue, pollutant, userTimeZone, currentHour) {
-    console.log("Generating AQI element for pollutant:", pollutant, "with value:", aqiValue, "at hour:", currentHour);
     if (aqiValue === 'N/A') {
         return ''; 
     }
@@ -1493,6 +1608,73 @@ function generateAverageChangeElement(dataset, pollutant, userTimeZone, currentH
             <span>${isAboveAverage ? 'Above' : 'Below'} (${averageType} Average)</span>
         </div>`;
 }
+
+function getChange(val, avg) {
+    if (typeof val === "number" && typeof avg === "number" && avg !== 0) {
+        const diff = val - avg;
+        const pct = ((val - avg) / avg) * 100;
+        return {
+            diff: diff.toFixed(2),
+            pct: pct.toFixed(2),
+            sign: pct > 0 ? "+" : "",
+            class: pct > 0 ? "red" : pct < 0 ? "green" : "",
+            arrow: pct > 0 ? "▲" : pct < 0 ? "▼" : ""
+        };
+    }
+    return { diff: "N/A", pct: "N/A", sign: "", class: "", arrow: "" };
+}
+
+function generateMetricsHtml({
+    title = "",
+    unit = "",
+    currentVal = "N/A",
+    prevVal = "N/A",
+    nextVal = "N/A",
+    dailyAvg = "N/A",
+    change = {},
+    prevChange = {},
+    nextChange = {},
+    currentIdx = -1,
+    prevIdx = -1,
+    nextIdx = -1,
+    datetimes = []
+} = {}) {
+    function formatTime(dtIdx) {
+        if (dtIdx === -1 || !datetimes[dtIdx]) return "--";
+        const dt = new Date(datetimes[dtIdx]);
+        return dt.toLocaleString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, month: "short", day: "2-digit" });
+    }
+
+    return `
+    <div class="xvg_aqi-container">
+
+        <div>
+            <div class="d-xvg">
+                <div class="xvg_aqi me-3">${currentVal !== 'N/A' ? currentVal : '--'}</div>
+                <div class="xvg_aqi-change ${change.class}">${change.arrow} ${change.sign}${change.diff} (${change.sign}${change.pct !== "N/A" ? change.pct + "%" : "--"})</div>
+                <div class="xvg_timestamp">Current AQI (US Scale): ${formatTime(currentIdx)}</div>
+            </div>
+            
+        </div>
+
+        <div class="d-xvg">
+            <div class="xvg_aqi me-3">${nextVal !== 'N/A' ? nextVal : '--'}</div>
+            <div class="xvg_aqi-change ${nextChange.class}">${nextChange.arrow} ${nextChange.sign}${nextChange.diff} (${nextChange.sign}${nextChange.pct !== "N/A" ? nextChange.pct + "%" : "--"})</div>
+            <div class="xvg_timestamp">Next hour: ${formatTime(nextIdx)}</div>
+        </div>
+        
+        <div class="d-xvg">
+            <div class="xvg_aqi me-3">${prevVal !== 'N/A' ? prevVal : '--'}</div>
+            <div class="xvg_aqi-change ${prevChange.class}">${prevChange.arrow} ${prevChange.sign}${prevChange.diff} (${prevChange.sign}${prevChange.pct !== "N/A" ? prevChange.pct + "%" : "--"})</div>
+            <div class="xvg_timestamp">Previous hour: ${formatTime(prevIdx)}</div>
+        </div>
+        <div class="d-xvg">
+            <div class="xvg_aqi me-3">${dailyAvg !== 'N/A' ? dailyAvg.toFixed(2) : '--'}</div>
+            <div class="xvg_aqi-change">Daily Avg</div>
+        </div>
+    </div>
+    `;
+}
 function readAirNow(options = {}) {
 
     const {
@@ -1521,7 +1703,7 @@ function readAirNow(options = {}) {
     $('.loader').show();
     const siteTimeZone = timezone || "UTC";
     const paramCode = pollutant_details(param).id;
-    const fileUrl = `precomputed/merra2/${location}.json`;
+    const fileUrl = `precomputed/all_dts/${location}.json`;
 
     fetch(fileUrl)
         .then(response => {
@@ -2115,6 +2297,13 @@ function draw_plot(
     }
 
     const layout = {
+        margin: {
+            l: 0, // left
+            r: 0, // right
+            t: 0, // top
+            b: 20, // bottom
+            pad: 0
+        },
         annotations: [
             {
                 x: 0,
@@ -2158,7 +2347,7 @@ function draw_plot(
             showgrid: false,
             gridcolor: '#D3D3D3',
             title: {
-                text: 'Time',
+                text: '', 
                 font: {
                     size: 16,
                     color: '#000000'
@@ -2608,11 +2797,8 @@ function openForecastsWindow(options = {}) {
 
             if (param === 'pm25' || param === 'pm2.5') {
                 console.log("Calling readAirNow for PM2.5");
-                readAirNow({
+                readApiBaker({
                     location: location_name,
-                    param: param,
-                    unit: current_observation_unit,
-                    forecastsDiv: 'main_plot_for_airnow',
                     timezone: timezone
                 });
             } else if (param === 'no2') {
