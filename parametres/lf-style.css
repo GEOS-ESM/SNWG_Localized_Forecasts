@@ -864,7 +864,7 @@ a#global-view {
 }
 
 button#toggle-locations-box {
-    bottom: 25px;
+    bottom: 13px;
     background: none;
     color: #ffffff;
     display: flex;
@@ -874,6 +874,8 @@ button#toggle-locations-box {
     border-radius: 0px !important;
     padding-left: 1%;
     width: 100%;
+    font-size: large;
+    font-weight: 600;
 }
 
 input#filter-input {
@@ -1005,7 +1007,7 @@ h5.plot_title {
 }
 
 section.wrapper.image-wrapper.bg-image.bg-overlay.bg-overlay-300 {
-    min-height: 100vh;
+    min-height: 90vh;
 }
 
 div#species-filter-container {

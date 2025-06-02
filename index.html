@@ -73,22 +73,22 @@
 
 
 
-    .locations-container {
+.locations-container {
     width: 100%;
-    position: fixed;
+    position: absolute;
     margin-bottom: 0;
-    bottom: 0;
+    bottom: 2px;
     background: #02020252;
+    z-index: 10;
 }
 a.launch-local-forecasts {
     text-decoration: none;
 }
 
 div#map {
-    position: absolute;
+    min-height: 90vh !important;
+    height: 90vh !important;
     width: 100%;
-    height: 100%;
-    z-index: 0 !important;
 }
 
 header.p-3.bg-dark.text-white {
@@ -220,19 +220,30 @@ header .nav-link.active,
  </div>
         
     
-    <footer class="bg-dark text-inverse">
-        
+
+    <footer class="bg-white text-inverse pt-3">
+        <div class="container pb-2">
+            <div class="row align-items-center">
+                <div class="col-12 d-flex justify-content-start">
+                    <a href="https://gmao.gsfc.nasa.gov/" target="_blank" rel="noopener">
+                        <img src="parametres/ESD-logo.png" alt="NASA Logo" style="height:40px; margin-left:18px;">
+                    </a>
+                    <a href="https://marroninstitute.nyu.edu/" target="_blank" rel="noopener">
+                        <img src="parametres/Marron_logo.png" alt="NYU Marron Logo" style="height:40px; margin-left:18px;">
+                    </a>
+                </div>
+            </div>
+        </div>
         <div class="container">
             <div class="d-md-flex align-items-center justify-content-between">
-                <div class="footer-left text-white">
+                <div class="footer-left">
                     <p class="mb-0">© 2025 SNWG Localized Forecasts.</p>
                 </div>
-                <div class="footer-right text-white">
+                <div class="footer-right">
                     <p class="mb-0">Version: 1.1</p>
                 </div>
             </div>
         </div>
-        
     </footer>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

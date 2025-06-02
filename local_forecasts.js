@@ -1046,7 +1046,6 @@ function readApiBaker(options = {}) {
     fetch(fileUrl)
         .then(response => {
             if (!response.ok) {
-                // Try again with underscores if hyphens fail
                 const fallbackUrl = `precomputed/all_dts/${location.replace(/[-\s]/g, "_")}.json`;
                 return fetch(fallbackUrl).then(fallbackResponse => {
                     if (!fallbackResponse.ok) throw new Error('Network response was not ok');
@@ -1284,24 +1283,31 @@ function readApiBaker(options = {}) {
                 let currentValue = 'N/A';
                 let nextValue = 'N/A';
                 
+                               // ...inside readApiBaker, after defining currentValue and nextValue for each plot...
+                
                 if (plot.param === "pm25") {
-
+                    // For PM2.5, use 3-hour window logic for current and next values
+                    currentValue = 'N/A';
+                    nextValue = 'N/A';
                     for (let i = 0; i < masterData.master_datetime.length; i++) {
                         const dtStr = masterData.master_datetime[i];
                         if (!dtStr) continue;
                         const forecastStart = new Date(dtStr.replace(' ', 'T'));
                         const forecastEnd = new Date(forecastStart.getTime() + 3 * 60 * 60 * 1000);
+                        // Current: is now within this 3-hour window?
                         if (siteLocalNow >= forecastStart && siteLocalNow < forecastEnd) {
                             currentValue = masterData[plot.columns[0].column][i];
                         }
-
+                        // Next: is 1 hour from now within this 3-hour window?
                         const nextLocalDate = new Date(siteLocalNow.getTime() + 1 * 60 * 60 * 1000);
                         if (nextLocalDate >= forecastStart && nextLocalDate < forecastEnd) {
                             nextValue = masterData[plot.columns[0].column][i];
                         }
                     }
                 } else {
-
+                    // For other species, match by hour
+                    currentValue = 'N/A';
+                    nextValue = 'N/A';
                     for (let i = 0; i < masterData.master_datetime.length; i++) {
                         const dtStr = masterData.master_datetime[i];
                         if (!dtStr) continue;
@@ -1314,17 +1320,8 @@ function readApiBaker(options = {}) {
                         }
                     }
                 }
-
-                for (let i = 0; i < masterData.master_datetime.length; i++) {
-                    const dtStr = masterData.master_datetime[i];
-                    const hour = parseInt(dtStr.slice(11, 13), 10);
-                    if (hour === currentHour) {
-                        currentValue = masterData[plot.columns[0].column][i];
-                    }
-                    if (hour === nextHour) {
-                        nextValue = masterData[plot.columns[0].column][i];
-                    }
-                }
+                
+                // Remove the extra for-loop that matches by hour for all species (it would overwrite the correct 3-hour logic for PM2.5)
 
                 if (plot.displayAQI) {
                     const currentAqi = currentValue;
@@ -1712,7 +1709,7 @@ function generateMetricsHtml({
             <div class="d-xvg">
                 <div class="xvg_aqi me-3">${currentVal !== 'N/A' ? currentVal : '--'}</div>
                 <div class="xvg_aqi-change ${change.class}">${change.arrow} ${change.sign}${change.diff} (${change.sign}${change.pct !== "N/A" ? change.pct + "%" : "--"})</div>
-                <div class="xvg_timestamp">Current AQI (US Scale): ${formatTime(currentIdx)}</div>
+                <div class="xvg_timestamp">Current AQI (US Scale)}</div>
             </div>
             
         </div>
@@ -1720,13 +1717,13 @@ function generateMetricsHtml({
         <div class="d-xvg">
             <div class="xvg_aqi me-3">${nextVal !== 'N/A' ? nextVal : '--'}</div>
             <div class="xvg_aqi-change ${nextChange.class}">${nextChange.arrow} ${nextChange.sign}${nextChange.diff} (${nextChange.sign}${nextChange.pct !== "N/A" ? nextChange.pct + "%" : "--"})</div>
-            <div class="xvg_timestamp">Next hour: ${formatTime(nextIdx)}</div>
+            <div class="xvg_timestamp">Next hour</div>
         </div>
         
         <div class="d-xvg">
             <div class="xvg_aqi me-3">${prevVal !== 'N/A' ? prevVal : '--'}</div>
             <div class="xvg_aqi-change ${prevChange.class}">${prevChange.arrow} ${prevChange.sign}${prevChange.diff} (${prevChange.sign}${prevChange.pct !== "N/A" ? prevChange.pct + "%" : "--"})</div>
-            <div class="xvg_timestamp">Previous hour: ${formatTime(prevIdx)}</div>
+            <div class="xvg_timestamp">Previous hour</div>
         </div>
         <div class="d-xvg">
             <div class="xvg_aqi me-3">${dailyAvg !== 'N/A' ? dailyAvg.toFixed(2) : '--'}</div>
