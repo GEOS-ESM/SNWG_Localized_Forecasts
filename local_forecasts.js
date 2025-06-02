@@ -1148,7 +1148,9 @@ function readApiBaker(options = {}) {
                     param: "pm25",
                     tabName: "Fine Particulate Matter (PM<sub>2.5</sub>)",
                     tabId: "tab_pm25",
-                    description: "Source: GEOS-CF",
+                    description: (typeof options.param === "string" && options.param.toLowerCase().includes("pm25"))
+                    ? "Source: NASA GEOS-FP+ML PM2.5 Forecast"
+                    : "Source: NASA GEOS-CF PM2.5 Forecast",
                     columns: [
                         { column: "master_pm25_aqi", name: "PM2.5 AQI", color: "green", width: 2 }
                     ],
@@ -2855,13 +2857,15 @@ function openForecastsWindow(options = {}) {
                 console.log("Calling readAirNow for PM2.5");
                 readApiBaker({
                     location: location_name,
-                    timezone: timezone
+                    timezone: timezone,
+                    param: param,
                 });
             } else if (param === 'no2') {
                 console.log("Calling readApiBaker for NO2");
                 readApiBaker({
                     location: location_name,
-                    timezone: timezone
+                    timezone: timezone,
+                    param: param,
                 });
             } else {
 
