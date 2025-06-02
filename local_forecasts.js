@@ -890,7 +890,7 @@ function add_the_banner(site, param) {
             source = "NASA GEOS CF, NASA Pandora";
         } else if (param === "pm25" || param === "pm2.5") {
             aqiValue = pm25_aqi;
-            source = "NASA MERRA 2 CNN, AirNow";
+            source = "NASA GEOS-FP, AirNow";
         } else if (param === "o3") {
             aqiValue = o3_aqi
             source = "NASA GEOS CF, NASA Pandora";
@@ -1060,6 +1060,7 @@ function readApiBaker(options = {}) {
             return JSON.parse(sanitizedText); 
         })
         .then(data => {
+            console.log("Data from API Baker:", data);
             if (!data || data.status !== "200" || !Array.isArray(data.forecasts) || data.forecasts.length === 0) {
                 throw new Error("No valid data received");
             }
@@ -1133,7 +1134,7 @@ function readApiBaker(options = {}) {
                     param: "no2",
                     tabName: "Nitrogen Dioxide (NO<sub>2</sub>)",
                     tabId: "tab_no2",
-                    description: "Source: SNWG bias-corrected model",
+                    description: "Source: NASA SNWG bias-corrected model",
                     columns: [
                         { column: "master_predicted_aqi", name: "Corrected AQI", color: "blue", width: 2 }
                     ],
@@ -1166,7 +1167,7 @@ function readApiBaker(options = {}) {
                     param: "no2",
                     tabName: "Nitrogen Dioxide (NO<sub>2</sub>)",
                     tabId: "tab_no2",
-                    description: "Supporting: SNWG bias-corrected model (concentration)",
+                    description: "Supporting: NASA SNWG bias-corrected model (concentration)",
                     columns: [
                         { column: "master_predicted", name: "Corrected", color: "blue", width: 2 }
                     ],
@@ -1181,7 +1182,7 @@ function readApiBaker(options = {}) {
                     param: "pm25",
                     tabName: "Fine Particulate Matter (PM<sub>2.5</sub>)",
                     tabId: "tab_pm25",
-                    description: "Supporting: GEOS-CF (concentration)",
+                    description: "Supporting: NASA GEOS-CF (concentration)",
                     columns: [
                         { column: "master_pm25", name: "PM2.5", color: "green", width: 2 }
                     ],
@@ -1196,7 +1197,7 @@ function readApiBaker(options = {}) {
                     param: "o3",
                     tabName: "Ozone (O<sub>3</sub>)",
                     tabId: "tab_o3",
-                    description: "Supporting: GEOS-CF (concentration)",
+                    description: "Supporting: NASA GEOS-CF (concentration)",
                     columns: [
                         { column: "master_o3", name: "O3", color: "orange", width: 2 }
                     ],
@@ -1227,7 +1228,7 @@ function readApiBaker(options = {}) {
                     param: "no2",
                     tabName: "Nitrogen dioxide (NO<sub>2</sub>)",
                     tabId: "tab_no2",
-                    description: "Source: GEOS-CF",
+                    description: "Source: NASA GEOS-CF",
                     columns: [
                         { column: "master_no2", name: "NO2", color: "red", width: 2 }
                     ],
