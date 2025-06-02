@@ -20,7 +20,7 @@
             <label for="species-filter" style="font-weight:600;margin-right:8px;">Species:</label>
             <select id="species-filter" class="form-select form-select-sm" style="width:auto;display:inline-block;">
                 <option value="no2">NO₂</option>
-                <option value="pm25">PM2.5</option>
+                <option value="pm25" selected>PM2.5</option>
             </select>
         </div>
     </div>
@@ -64,6 +64,6 @@ $(document).on('change', '#species-filter', function() {
     readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", selectedSpecies);
 });
 $(document).ready(function () {
-    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", "no2");
+    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz",  "pm25");
 });
 </script>
