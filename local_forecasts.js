@@ -667,11 +667,11 @@ function generateSmallAqiBox(aqiValue, pollutant) {
 
     let aqi = 'N/A';
     if (pollutant === 'no2') {
-        aqi = calculateAqiForNo2(aqiValue);
+        aqi = aqiValue;
     } else if (pollutant === 'pm25') {
-        aqi = calculateAqiForPm25(aqiValue);
+        aqi = aqiValue;
     } else if (pollutant === 'o3') {
-        aqi = calculateAqiForO3(aqiValue);
+        aqi = aqiValue;
     }
 
     if (aqi === 'N/A' || isNaN(aqi)) return '';
