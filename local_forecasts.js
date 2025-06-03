@@ -772,13 +772,11 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
                         const forecastEnd = new Date(forecastStart.getTime() + 3 * 60 * 60 * 1000);
                         // Current site-local time
                         const nowLocal = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
-                        // Check if nowLocal is within [forecastStart, forecastEnd)
                         return nowLocal >= forecastStart && nowLocal < forecastEnd;
                     });
 
                    
                 } else {
-                    // For other species, match exact hour
                     const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(localHour)}`;
                     matchingForecast = (site.forecasts || []).find(forecast => {
                         if (!forecast.local_time) return false;
@@ -1138,7 +1136,8 @@ function readApiBaker(options = {}) {
                         { column: "master_predicted_aqi", name: "Corrected AQI", color: "blue", width: 2 }
                     ],
                     displayAQI: true,
-                    displayMetrics: true
+                    displayMetrics: true,
+                    enableAqiColors: true 
                 },
                 {
                     id: "plot_pm25_aqi",
@@ -1155,7 +1154,8 @@ function readApiBaker(options = {}) {
                         { column: "master_pm25_aqi", name: "PM2.5 AQI", color: "green", width: 2 }
                     ],
                     displayAQI: true,
-                    displayMetrics: true
+                    displayMetrics: true,
+                    enableAqiColors: true 
                 },
                 // Supporting concentration plots
                 {
@@ -1171,7 +1171,8 @@ function readApiBaker(options = {}) {
                         { column: "master_predicted", name: "Corrected", color: "blue", width: 2 }
                     ],
                     displayAQI: false,
-                    displayMetrics: false
+                    displayMetrics: false,
+                    enableAqiColors: false 
                 },
                 {
                     id: "plot_pm25_conc",
@@ -1186,7 +1187,8 @@ function readApiBaker(options = {}) {
                         { column: "master_pm25", name: "PM2.5", color: "green", width: 2 }
                     ],
                     displayAQI: false,
-                    displayMetrics: false
+                    displayMetrics: false,
+                    enableAqiColors: false 
                 },
                 {
                     id: "plot_o3_conc",
@@ -1201,9 +1203,10 @@ function readApiBaker(options = {}) {
                         { column: "master_o3", name: "O3", color: "orange", width: 2 }
                     ],
                     displayAQI: false,
-                    displayMetrics: false
+                    displayMetrics: false,
+                    enableAqiColors: false 
                 },
-                // Pandora obs plot (unchanged)
+                // Pandora obs plot 
                 {
                     id: "plot_pandora",
                     title: "Pandora NO<sub>2</sub> Observations",
@@ -1217,7 +1220,8 @@ function readApiBaker(options = {}) {
                         { column: "master_observation", name: "Pandora", color: "black", width: 2 }
                     ],
                     displayAQI: false,
-                    displayMetrics: false
+                    displayMetrics: false,
+                    enableAqiColors: false 
                 },
                 {
                     id: "plot_no2_model",
@@ -1232,17 +1236,16 @@ function readApiBaker(options = {}) {
                         { column: "master_no2", name: "NO2", color: "red", width: 2 }
                     ],
                     displayAQI: false,
-                    displayMetrics: false
+                    displayMetrics: false,
+                    enableAqiColors: false 
                 }
             ];
 
             const tabMap = {};
             plots.forEach((plot, index) => {
-                // Check if data for this plot is valid and not empty
                 const colKey = plot.columns[0]?.column;
                 const dataArr = plot.data && colKey && Array.isArray(plot.data[colKey]) ? plot.data[colKey] : [];
                 if (!dataArr.length) {
-                    // Skip this plot if no data
                     return;
                 }
 
@@ -1283,10 +1286,9 @@ function readApiBaker(options = {}) {
                 let currentValue = 'N/A';
                 let nextValue = 'N/A';
                 
-                               // ...inside readApiBaker, after defining currentValue and nextValue for each plot...
                 
                 if (plot.param === "pm25") {
-                    // For PM2.5, use 3-hour window logic for current and next values
+
                     currentValue = 'N/A';
                     nextValue = 'N/A';
                     for (let i = 0; i < masterData.master_datetime.length; i++) {
@@ -1294,18 +1296,18 @@ function readApiBaker(options = {}) {
                         if (!dtStr) continue;
                         const forecastStart = new Date(dtStr.replace(' ', 'T'));
                         const forecastEnd = new Date(forecastStart.getTime() + 3 * 60 * 60 * 1000);
-                        // Current: is now within this 3-hour window?
+
                         if (siteLocalNow >= forecastStart && siteLocalNow < forecastEnd) {
                             currentValue = masterData[plot.columns[0].column][i];
                         }
-                        // Next: is 1 hour from now within this 3-hour window?
+
                         const nextLocalDate = new Date(siteLocalNow.getTime() + 1 * 60 * 60 * 1000);
                         if (nextLocalDate >= forecastStart && nextLocalDate < forecastEnd) {
                             nextValue = masterData[plot.columns[0].column][i];
                         }
                     }
                 } else {
-                    // For other species, match by hour
+
                     currentValue = 'N/A';
                     nextValue = 'N/A';
                     for (let i = 0; i < masterData.master_datetime.length; i++) {
@@ -1321,7 +1323,6 @@ function readApiBaker(options = {}) {
                     }
                 }
                 
-                // Remove the extra for-loop that matches by hour for all species (it would overwrite the correct 3-hour logic for PM2.5)
 
                 if (plot.displayAQI) {
                     const currentAqi = currentValue;
@@ -1446,7 +1447,8 @@ function readApiBaker(options = {}) {
                         false,   // enableFading
                         "",      // text
                         "bar",   // plotType
-                        timezone // timezone
+                        timezone,
+                        plot.enableAqiColors 
                     );
                 } else {
                     console.error(`No DOM element with id '${plot.id}' exists on the page.`);
@@ -2257,7 +2259,16 @@ function cleanAndSortData(datetime_data, combined_dataset) {
 
     return cleanedData;
 }
-
+function getAqiBarColor(aqiValue, pollutant, alpha = 1) {
+        const aqiLevel = getAqiLevel(aqiValue, pollutant);
+        if (!aqiLevel.color) return `rgba(128,128,128,${alpha})`;
+        const hex = aqiLevel.color.replace('#', '');
+        const bigint = parseInt(hex, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return `rgba(${r},${g},${b},${alpha})`;
+    }
 
 function validateData(data, requiredKeys = [], minLength = 1) {
 
@@ -2286,7 +2297,8 @@ function draw_plot(
     enableFading = false,
     text = "Forecasts",
     plotType = "scatter",
-    timezone = "UTC" 
+    timezone = "UTC",
+    enableAqiColors = false  
 ) {
 
     const datetime_data = combined_dataset["master_datetime"];
@@ -2305,40 +2317,52 @@ function draw_plot(
     const lastIndex = cleanedData.master_datetime.length - 1;
     let currentX = null;
     let currentY = null;
-
-
-    const traces = plot_columns
-        .filter(column => column && column.name && column.column)
-        .map(({ column, name, color, width, dash }, index) => {
-            const lineColor = color || 'rgba(7, 23, 16, 0.65)';
-            const rgbaMatch = lineColor.match(/\d+/g);
-            const fadingColor = rgbaMatch
-                ? `rgba(${rgbaMatch[0]}, ${rgbaMatch[1]}, ${rgbaMatch[2]}, 0.6)`
-                : 'rgba(0, 0, 0, 0.6)';
-
-            const barColors = cleanedData.master_datetime.map((datetime) => {
+    
+   const traces = plot_columns
+    .filter(column => column && column.name && column.column)
+    .map(({ column, name, color, width, dash }, index) => {
+        let barColors;
+        if (plotType === "bar" && enableAqiColors) {
+            barColors = cleanedData.master_datetime.map((datetime, i) => {
+                const value = cleanedData[column][i];
+                const dataTime = new Date(datetime);
+                const alpha = dataTime <= localNow ? 1 : 0.5;
+                return getAqiBarColor(value, param, alpha);
+            });
+        } else {
+            barColors = cleanedData.master_datetime.map((datetime) => {
                 const dataTime = new Date(datetime);
                 return dataTime < localNow ? '#2196f3' : '#2196f3c2';
             });
+        }
 
-            return {
-                type: plotType === "bar" ? "bar" : "scatter",
-                mode: plotType === "bar" ? undefined : "lines",
-                connectgaps: plotType === "bar" ? undefined : false,
-                x: cleanedData.master_datetime,
-                y: cleanedData[column],
-                line: plotType === "bar" ? undefined : {
-                    color: lineColor,
-                    width: width || 1,
-                    dash: dash || 'solid'
-                },
-                marker: plotType === "bar" ? { color: barColors } : undefined,
-                fill: plotType === "bar" ? undefined : enableFading && index === 0 ? 'tozeroy' : 'none',
-                fillcolor: plotType === "bar" ? undefined : enableFading && index === 0 ? fadingColor : 'none',
-                hoverinfo: 'x+y',
-                name: name
-            };
-        });
+        const lineColor = color || 'rgba(7, 23, 16, 0.65)';
+        const rgbaMatch = lineColor.match(/\d+/g);
+        const fadingColor = rgbaMatch
+            ? `rgba(${rgbaMatch[0]}, ${rgbaMatch[1]}, ${rgbaMatch[2]}, 0.6)`
+            : 'rgba(0, 0, 0, 0.6)';
+
+        return {
+            type: plotType === "bar" ? "bar" : "scatter",
+            mode: plotType === "bar" ? undefined : "lines",
+            connectgaps: plotType === "bar" ? undefined : false,
+            x: cleanedData.master_datetime,
+            y: cleanedData[column],
+            line: plotType === "bar" ? undefined : {
+                color: enableAqiColors ? barColors[0] : lineColor,
+                width: width || 1,
+                dash: dash || 'solid'
+            },
+            marker: plotType === "bar"
+                ? { color: barColors }
+                : undefined,
+            fill: plotType === "bar" ? undefined : enableFading && index === 0 ? 'tozeroy' : 'none',
+            fillcolor: plotType === "bar" ? undefined : enableFading && index === 0 ? fadingColor : 'none',
+            hoverinfo: 'x+y',
+            name: name
+        };
+    });
+
 
     for (let i = 0; i < cleanedData.master_datetime.length; i++) {
         const datetime = new Date(cleanedData.master_datetime[i]);
@@ -2354,10 +2378,10 @@ function draw_plot(
 
     const layout = {
         margin: {
-            l: 0, // left
-            r: 0, // right
-            t: 0, // top
-            b: 20, // bottom
+            l: 0,
+            r: 0, 
+            t: 0, 
+            b: 20, 
             pad: 0
         },
         annotations: [
