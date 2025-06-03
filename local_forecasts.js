@@ -2844,7 +2844,7 @@ function openForecastsWindow(options = {}) {
         obsSrcFinal = 's3';
     }
 
-    $loadingDiv.fadeIn(10);
+
 
 
     const fileToLoad = isModal ? `vues/location.html` : `vues/site.html`;
