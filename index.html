@@ -99,7 +99,7 @@ header.p-3.bg-dark.text-white {
 }
 
 .w_loader {
-	    position: fixed;
+	    position: absolute;
 		width: 100%;
 		margin: auto;
 		background: #1d4ecce3;
@@ -230,18 +230,37 @@ header .nav-link {
     font-weight: 500;
 }
 
-/* On hover */
+
 header .nav-link:hover {
   color: #202124;
 }
 
-/* Active link style (optional underline or bolder color) */
+
 header .nav-link.active,
 .nav-link[aria-current="page"] {
   color: #202124;
   font-weight: 500;
 }
 
+.footer-logos {
+    gap: 18px;
+}
+.footer-logo-img {
+    height: 40px;
+    margin-left: 0;
+}
+@media (max-width: 767.98px) {
+    .footer-logos {
+        flex-direction: column !important;
+        align-items: flex-end !important;
+        gap: 10px;
+    }
+    .footer-logo-img {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        height: 36px;
+    }
+}
 </style>
 </head>
 
@@ -285,14 +304,14 @@ header .nav-link.active,
     
 
     <footer class="bg-white text-inverse pt-3">
-        <div class="container pb-2">
+        <div class="container">
             <div class="row align-items-center">
-                <div class="col-12 d-flex justify-content-start">
-                    <a href="https://gmao.gsfc.nasa.gov/" target="_blank" rel="noopener">
-                        <img src="parametres/ESD-logo.png" alt="NASA Logo" style="height:40px; margin-left:18px;">
+                <div class="col-12 d-flex justify-content-start flex-row flex-md-row flex-column-reverse flex-sm-column-reverse flex-lg-row footer-logos">
+                    <a href="https://gmao.gsfc.nasa.gov/" target="_blank" rel="noopener" class="footer-logo-link">
+                        <img src="parametres/ESD-logo.png" alt="NASA Logo" class="footer-logo-img">
                     </a>
-                    <a href="https://marroninstitute.nyu.edu/" target="_blank" rel="noopener">
-                        <img src="parametres/Marron_logo.png" alt="NYU Marron Logo" style="height:40px; margin-left:18px;">
+                    <a href="https://marroninstitute.nyu.edu/" target="_blank" rel="noopener" class="footer-logo-link">
+                        <img src="parametres/Marron_logo.png" alt="NYU Marron Logo" class="footer-logo-img">
                     </a>
                 </div>
             </div>

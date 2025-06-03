@@ -312,18 +312,6 @@ header.wrapper.bg-soft-primary {
 }
 
 
-.loading_div {
-    position: absolute;
-    background: #000000;
-    left: 0;
-    right: 0;
-    width: 105%;
-    height: 100%;
-    padding-top: 18%;
-    text-align: center;
-    z-index: 12000;
-    color: white;
-}
 
 .ball {
     width: 10px;
@@ -1154,7 +1142,5 @@ div#species-filter-container {
     top: 0;
     left: 0;
     right: 0;
-    background: #fff;
-    z-index: 9999;
   }
 }
