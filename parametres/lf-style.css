@@ -1144,3 +1144,17 @@ div#species-filter-container {
     font-size: smaller;
     font-weight: 700;
 }
+
+@media (max-width: 768px) {
+  .forecasts_container {
+    max-height: 80vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    z-index: 9999;
+  }
+}
