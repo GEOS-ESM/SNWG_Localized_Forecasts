@@ -98,34 +98,95 @@ header.p-3.bg-dark.text-white {
     font-family: sans-serif;
 }
 
-.loading_div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    z-index: 9999;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(15,32,39,0.95);
-    transition: transform 0.7s cubic-bezier(.77,0,.18,1), opacity 0.5s;
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: all;
-    display: none;
-    opacity: 1;
-    font-size: large;
-    font-weight: 600;
-}
-.loading_div.slide-up-in {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: all;
-}
-.loading_div.slide-up-out {
-    opacity: 0;
-    transform: translateY(-100%);
-    pointer-events: none;
-}
+.w_loader {
+	    position: fixed;
+		width: 100%;
+		margin: auto;
+		background: #1d4ecce3;
+		z-index: 100;
+		height: 100vh;
+		text-align: center;
+		margin: 0 auto;
+		display:none;
+		margin: 0 auto;
+		padding-left: 50%;
+		padding-top: 17%;
+		text-align : center;
+		color: white;
+	}
+	.w_loader .circle {
+	  position: absolute;
+	  width: 38px;
+	  height: 38px;
+	  opacity: 0;
+	  transform: rotate(225deg);
+	  animation-iteration-count: infinite;
+	  animation-name: orbit;
+	  animation-duration: 5.5s;
+	}
+	.w_loader .circle:after {
+	  content: '';
+	  position: absolute;
+	  width: 5px;
+	  height: 5px;
+	  border-radius: 5px;
+	  background: #fff;
+	  /* Pick a color */
+	}
+	.w_loader .circle:nth-child(2) {
+	  animation-delay: 240ms;
+	}
+	.w_loader .circle:nth-child(3) {
+	  animation-delay: 480ms;
+	}
+	.w_loader .circle:nth-child(4) {
+	  animation-delay: 720ms;
+	}
+	.w_loader .circle:nth-child(5) {
+	  animation-delay: 960ms;
+	}
+	.w_loader p {
+    text-align: center;
+    margin-left: -97%;
+    margin-top: 60px;
+	}
+	@keyframes orbit {
+	  0% {
+		transform: rotate(225deg);
+		opacity: 1;
+		animation-timing-function: ease-out;
+	  }
+	  7% {
+		transform: rotate(345deg);
+		animation-timing-function: linear;
+	  }
+	  30% {
+		transform: rotate(455deg);
+		animation-timing-function: ease-in-out;
+	  }
+	  39% {
+		transform: rotate(690deg);
+		animation-timing-function: linear;
+	  }
+	  70% {
+		transform: rotate(815deg);
+		opacity: 1;
+		animation-timing-function: ease-out;
+	  }
+	  75% {
+		transform: rotate(945deg);
+		animation-timing-function: ease-out;
+	  }
+	  76% {
+		transform: rotate(945deg);
+		opacity: 0;
+	  }
+	  100% {
+		transform: rotate(945deg);
+		opacity: 0;
+	  }
+	}
+
 
 
 header .navbar {
@@ -206,15 +267,15 @@ header .nav-link.active,
         </div>
     </nav>
 </header>
-<div class="loading_div">
-        <div class="ball"></div>
-        <div class="ball"></div>
-        <div class="ball"></div>
-        <div class="ball"></div>
-        <div class="ball"></div>
-        <div class="ball"></div>
-        <div class="ball"></div>
-        <div class="messages"> Loading</div>
+
+<div class='loading_div w_loader'>
+		  <div class='circle'></div>
+		  <div class='circle'></div>
+		  <div class='circle'></div>
+		  <div class='circle'></div>
+		  <div class='circle'></div>
+		  <p>Loading</p>
+		</div>
 </div>
 <div class="main_wave_js wavejs">
            
