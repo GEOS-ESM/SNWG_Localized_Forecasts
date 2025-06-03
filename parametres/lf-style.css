@@ -107,6 +107,7 @@ div#modal-02 {
 .modal-dialog.modal-dialog-centered.modal-md {
     max-width: 100%;
     min-width: 200px;
+    overflow: scroll;
     padding: 41px;
     width: 1000px;
     background: white;
@@ -207,6 +208,7 @@ h5.location_name {
 
 .modal-dialog.modal-dialog-centered.modal-md {
     max-height: 86vh;
+    overflow: overlay;
     display: block;
 }
 
@@ -308,6 +310,7 @@ span.source {
 header.wrapper.bg-soft-primary {
     z-index: 1;
 }
+
 
 
 
