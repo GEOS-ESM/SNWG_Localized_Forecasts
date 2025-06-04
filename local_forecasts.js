@@ -1711,7 +1711,7 @@ function generateMetricsHtml({
             <div class="d-xvg">
                 <div class="xvg_aqi me-3">${currentVal !== 'N/A' ? currentVal : '--'}</div>
                 <div class="xvg_aqi-change ${change.class}">${change.arrow} ${change.sign}${change.diff} (${change.sign}${change.pct !== "N/A" ? change.pct + "%" : "--"})</div>
-                <div class="xvg_timestamp">Current AQI (US Scale)}</div>
+                <div class="xvg_timestamp">Current AQI (US Scale)</div>
             </div>
             
         </div>
