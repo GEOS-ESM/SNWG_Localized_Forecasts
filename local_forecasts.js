@@ -932,7 +932,7 @@ function add_the_banner(site, param) {
                                     <span class="info-icon">
                                         <i class="bi bi-droplet-half"></i>
                                     </span>
-                                    <span class="info-value">--</span>
+                                    <span class="info-value">${humidity}%</span>
                                 </div>
                             </div>
                         </div>
