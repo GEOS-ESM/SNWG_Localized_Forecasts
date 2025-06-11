@@ -884,13 +884,13 @@ function add_the_banner(site, param) {
 
         let aqiValue = 'N/A';
         if (param === "no2") {
-            aqiValue = no2_aqi;
+            aqiValue = parseInt(no2_aqi);
             source = "NASA GEOS CF, NASA Pandora";
         } else if (param === "pm25" || param === "pm2.5") {
-            aqiValue = pm25_aqi;
+            aqiValue = parseInt(pm25_aqi);
             source = "NASA GEOS-FP, AirNow";
         } else if (param === "o3") {
-            aqiValue = o3_aqi
+            aqiValue = parseInt(o3_aqi)
             source = "NASA GEOS CF, NASA Pandora";
         }
 
