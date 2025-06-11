@@ -644,7 +644,7 @@ function sitesArrayToGeoJSON(sites, param = "no2") {
                     location_name: site.location || "Unknown Location",
                     time_zone: site.timezone,
                     forecasted_value: value,
-                    aqi_value: aqi,
+                    aqi_value: parseInt(aqi),
                     aqi_color: aqiLevel.color,
                     status: "active",
                     observation_source: "NASA",
@@ -808,7 +808,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
                     const siteData = {
                         location_name: site.location,
                         observation_source: "NASA",
-                        forecasted_value: forecasted_value,
+                        forecasted_value: parseInt(forecasted_value),
                         status: "active",
                         latitude: site.lat,
                         longitude: site.lon,
@@ -1325,8 +1325,8 @@ function readApiBaker(options = {}) {
                 
 
                 if (plot.displayAQI) {
-                    const currentAqi = currentValue;
-                    const nextAqi = nextValue;
+                    const currentAqi =  parseInt(currentValue);
+                    const nextAqi = parseInt(nextValue);
                 
 
                     let nextLabel = "Next hour";
@@ -1394,10 +1394,10 @@ function readApiBaker(options = {}) {
                         .filter(({ dt }) => dt && dt.startsWith(today))
                         .map(({ val }) => typeof val === "number" ? val : NaN)
                         .filter(val => !isNaN(val));
-                    const dailyAvg = todayVals.length ? (todayVals.reduce((a, b) => a + b, 0) / todayVals.length) : 'N/A';
-                    const currentVal = currentIdx !== -1 ? values[currentIdx] : 'N/A';
-                    const prevVal = prevIdx !== -1 ? values[prevIdx] : 'N/A';
-                    const nextVal = nextIdx !== -1 ? values[nextIdx] : 'N/A';
+                    const dailyAvg = todayVals.length ? parseInt((todayVals.reduce((a, b) => a + b, 0) / todayVals.length)) : 'N/A';
+                    const currentVal = parseInt(currentIdx) !== -1 ? values[currentIdx] : 'N/A';
+                    const prevVal = parseInt(prevIdx) !== -1 ? values[prevIdx] : 'N/A';
+                    const nextVal = parseInt(nextIdx) !== -1 ? values[nextIdx] : 'N/A';
                     const change = getChange(currentVal, dailyAvg);
                     const prevChange = getChange(prevVal, dailyAvg);
                     const nextChange = getChange(nextVal, dailyAvg);
