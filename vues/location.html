@@ -1111,6 +1111,30 @@ button.filter-btn.active {
         text-align: left;
         color: #555;
     }
+
+
+    .aqi-container {
+    z-index: 1;
+    height: fit-content !important;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .local_forecats_window .nav-item {
+      width: 100%;
+  }
+
+  .prediction-box {
+      position: relative;
+      height: fit-content;
+      width: 100%;
+  }
+
+
 }
 
 .aqi-scale-container {
@@ -1190,22 +1214,30 @@ h5.plot_title {
     margin-top: 24px;
     text-transform: capitalize;
 }
-
 .aqi-container {
-    position: relative;
-    z-index: 1;
-    height: 129px !important;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
+
 </style>
 <div class="forecasts-box">
+ 
       <div class="modal-dialog modal-dialog-centered modal-md">
+         
           <div class="modal-content text-center">
-              <div class="modal-body">
-                  <button class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="actions_xgj">
 
-                  <button class="btn btn-outline-primary toggle-fullscreen" style="position: absolute; top: 10px; right: 50px; z-index: 1000;">
-                      <i class="bi bi-arrows-fullscreen"></i> 
-                  </button>
+              <button class="btn-close" data-bs-dismiss="modal"></button>
+
+              <button class="btn btn-outline-primary toggle-fullscreen">
+                  <i class="bi bi-arrows-fullscreen"></i> 
+              </button>
+            </div>
+
+
+        
+              <div class="modal-body">
                   <div class="forecasts-view row text-center">
                       <h3 class="module_title location_parameter_name"></h3>
                       <h1 class="sub-title site-name"><span class="current_location_name"></span></h1>
