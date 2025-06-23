@@ -627,8 +627,13 @@ function sitesArrayToGeoJSON(sites, param = "no2") {
             let value = "N/A";
             let aqi = "N/A";
             if (param === "no2") {
-                aqi = currentForecast.no2_aqi ?? "N/A";
-            } else if (param === "pm25") {
+                let no2_ppm = currentForecast.no2 !== undefined ? currentForecast.no2 / 1000 : undefined;
+                aqi = currentForecast.no2_aqi !== undefined
+                    ? currentForecast.no2_aqi
+                    : (no2_ppm !== undefined ? calculateAqiForNo2(no2_ppm) : "N/A");
+            }
+            
+            else if (param === "pm25") {
                 aqi = currentForecast.pm25_aqi ?? currentForecast.pm25_conc_cnn ?? "N/A";
             } else if (param === "o3") {
                 aqi = currentForecast.o3_aqi ?? "N/A";
@@ -789,7 +794,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
             
                 let forecasted_value = "N/A";
                 if (selected === "no2" && matchingForecast.corrected !== undefined ) {
-                    forecasted_value = matchingForecast.corrected;
+                    forecasted_value = (matchingForecast.corrected / 1000).toFixed(3);
                 } else if (isPm25) {
                     forecasted_value = matchingForecast.pm25_aqi;
                 }
@@ -898,46 +903,60 @@ function add_the_banner(site, param) {
 
         const html = `
             <div class="col-3 single-pollutant-card">
-                <a class="launch-local-forecasts" obs_src="${site.observation_source}" parameter="${param}" station_id="${site.location_id}" location_name="${site.location_name.replace(/ /g, "-")}" observation_value="${site.forecasted_value}" status="${site.status}" current_observation_unit="${obs_options?.[param]?.unit || 'N/A'}" latitude="${site.latitude}" longitude="${site.longitude}" lastUpdated="--" precomputed_forecasts='${JSON.stringify(precomputed_forecasts)}', timezone="${site.timezone}" >
-                    <div class="pollutant-banner">
-                        <div class="banner-header">
-                            <div class="location-info">
-                                <h5 class="location-name">${
-                                  site.location_name.length > 10
-                                    ? site.location_name.replace(/_/g, ' ').replace(/\./g, ' ').slice(0, 10) + '...'
-                                    : site.location_name.replace(/_/g, ' ').replace(/\./g, ' ')
-                                }</h5>
-                                <p class="source">Sources: ${source}</p>
-                                <p class="source">${local_time ? local_time.slice(11, 16) : "--"} </p>
-                                <p class="timezone_text">(${site.timezone})</p>
-                            </div>
-                            <div class="aqi-info">
-                                <div class="aqi-circle" style="background-color: ${aqiLevel.color};">
-                                    <span class="aqi-value">${aqiValue}</span>
-                                </div>
-                                <span class="aqi-level">${aqiLevel.level}</span>
-                            </div>
+                <div class="pollutant-banner launch-local-forecasts"
+                    style="cursor: pointer;"
+                    obs_src="${site.observation_source}"
+                    parameter="${param}"
+                    station_id="${site.location_id}"
+                    location_name="${site.location_name.replace(/ /g, "-")}"
+                    observation_value="${site.forecasted_value}"
+                    status="${site.status}"
+                    current_observation_unit="${obs_options?.[param]?.unit || 'N/A'}"
+                    latitude="${site.latitude}"
+                    longitude="${site.longitude}"
+                    lastUpdated="--"
+                    precomputed_forecasts='${JSON.stringify(precomputed_forecasts)}'
+                    timezone="${site.timezone}"
+                    tabindex="0"
+                    role="button"
+                >
+                    <div class="banner-header">
+                        <div class="location-info">
+                            <h5 class="location-name">${
+                              site.location_name.length > 10
+                                ? site.location_name.replace(/_/g, ' ').replace(/\./g, ' ').slice(0, 10) + '...'
+                                : site.location_name.replace(/_/g, ' ').replace(/\./g, ' ')
+                            }</h5>
+                            <p class="source">Sources: ${source}</p>
+                            <p class="source">${local_time ? local_time.slice(11, 16) : "--"} </p>
+                            <p class="timezone_text">(${site.timezone})</p>
                         </div>
-                        <div class="banner-body compact">
-                            <div class="weather-info">
-                                <div class="info-item">
-                                    <!-- Temperature Icon -->
-                                    <span class="info-icon">
-                                        <i class="bi bi-thermometer-half"></i>
-                                    </span>
-                                    <span class="info-value">${temperature}°C</span>
-                                </div>
-                                <div class="info-item">
-                                    <!-- Humidity Icon -->
-                                    <span class="info-icon">
-                                        <i class="bi bi-droplet-half"></i>
-                                    </span>
-                                    <span class="info-value">${humidity}%</span>
-                                </div>
+                        <div class="aqi-info">
+                            <div class="aqi-circle" style="background-color: ${aqiLevel.color};">
+                                <span class="aqi-value">${aqiValue}</span>
+                            </div>
+                            <span class="aqi-level">${aqiLevel.level}</span>
+                        </div>
+                    </div>
+                    <div class="banner-body compact">
+                        <div class="weather-info">
+                            <div class="info-item">
+                                <!-- Temperature Icon -->
+                                <span class="info-icon">
+                                    <i class="bi bi-thermometer-half"></i>
+                                </span>
+                                <span class="info-value">${temperature}°C</span>
+                            </div>
+                            <div class="info-item">
+                                <!-- Humidity Icon -->
+                                <span class="info-icon">
+                                    <i class="bi bi-droplet-half"></i>
+                                </span>
+                                <span class="info-value">${humidity}%</span>
                             </div>
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
         `;
 
@@ -1166,7 +1185,7 @@ function readApiBaker(options = {}) {
                     param: "no2",
                     tabName: "Nitrogen Dioxide (NO<sub>2</sub>)",
                     tabId: "tab_no2",
-                    description: "Supporting: NASA SNWG bias-corrected model (concentration)",
+                    description: "Supporting: NASA SNWG bias-corrected forecasts",
                     columns: [
                         { column: "master_predicted", name: "Corrected", color: "blue", width: 2 }
                     ],
@@ -1182,7 +1201,7 @@ function readApiBaker(options = {}) {
                     param: "pm25",
                     tabName: "Fine Particulate Matter (PM<sub>2.5</sub>)",
                     tabId: "tab_pm25",
-                    description: "Supporting: NASA GEOS-CF (concentration)",
+                    description: "Supporting: NASA GEOS-CF forecasts",
                     columns: [
                         { column: "master_pm25", name: "PM2.5", color: "green", width: 2 }
                     ],
@@ -1198,7 +1217,7 @@ function readApiBaker(options = {}) {
                     param: "o3",
                     tabName: "Ozone (O<sub>3</sub>)",
                     tabId: "tab_o3",
-                    description: "Supporting: NASA GEOS-CF (concentration)",
+                    description: "Supporting: NASA GEOS-CF forecasts",
                     columns: [
                         { column: "master_o3", name: "O3", color: "orange", width: 2 }
                     ],
@@ -2464,9 +2483,14 @@ function draw_plot(
                     color: '#000000'
                 }
             },
+            
             color: '#000000',
             showgrid: true,
-            gridcolor: '#D3D3D3'
+            gridcolor: '#D3D3D3',
+            side: 'left',
+            automargin: true, 
+            ticklabelposition: "outside", 
+            tickson: "boundaries",
         },
         hovermode: 'x unified',
         shapes: [
@@ -2834,7 +2858,6 @@ function openForecastsWindow(options = {}) {
         timezone = "UTC"
     } = options;
 
-
     const $loadingDiv = $(".loading_div");
     const $forecastsContainer = $(".forecasts_container");
     const $loadingScreen = $('#loading-screen');
@@ -2844,67 +2867,57 @@ function openForecastsWindow(options = {}) {
         obsSrcFinal = 's3';
     }
 
-
-
-
-    const fileToLoad = isModal ? `vues/location.html` : `vues/site.html`;
-
-    $forecastsContainer.load(`${fileToLoad}?st=${st_id}&param=${param}&location_name=${location_name}&obs_src=${obsSrcFinal}`, function () {
-        if (isModal) {
+    if (isModal) {
+        const fileToLoad = `vues/location.html`;
+        $forecastsContainer.load(`${fileToLoad}?st=${st_id}&param=${param}&location_name=${location_name}&obs_src=${obsSrcFinal}`, function () {
             $loadingScreen.show();
             $(this).fadeOut(10).fadeIn(10);
-    
+
             const intervalId = setInterval(() => {
                 const message = messages[Math.floor(Math.random() * messages.length)];
                 $(".messages").html(message);
             }, 100);
-    
-            const cleanLocationName = cleanText(location_name);
+
             $('.current_location_name').html(location_name.replace(/[_\W]+/g, " "));
             $('.current_param').html(pollutant_details(param).name);
             $('.current_param_1').html(pollutant_details(param).name);
             $('.current_observation_value').html(observation_value);
             $('.current_observation_unit_span').html(current_observation_unit);
-    
+
             $forecastsContainer.addClass("noussair_animations zoom_in");
             $loadingDiv.fadeOut(10);
-    
+
             $("button").css({
                 "animation": "intro 2s cubic-bezier(0.03, 1.08, 0.56, 1)",
                 "animation-delay": "2s"
             });
-    
 
             if (param === 'pm25' || param === 'pm2.5') {
-                console.log("Calling readAirNow for PM2.5");
                 readApiBaker({
                     location: location_name,
                     timezone: timezone,
                     param: param,
                 });
             } else if (param === 'no2') {
-                console.log("Calling readApiBaker for NO2");
                 readApiBaker({
                     location: location_name,
                     timezone: timezone,
                     param: param,
                 });
             } else {
-
-                console.log("Unknown param, defaulting to readApiBaker");
                 readApiBaker({
                     location: location_name,
                     timezone: timezone
                 });
             }
-    
+
             $loadingScreen.hide();
             clearInterval(intervalId);
-        } else {
-            console.log("Loaded site.html for full-page mode.");
-            $loadingDiv.fadeOut(10);
-        }
-    });
+        });
+    } else {
+        const url = `vues/site.html?location=${encodeURIComponent(location_name)}&param=${encodeURIComponent(param)}&timezone=${encodeURIComponent(timezone)}`;
+        window.location.href = url;
+    }
 }
 $(document).on("click", ".launch-local-forecasts", function() {
     const messages = [

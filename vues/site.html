@@ -1264,11 +1264,38 @@ fullscreenButton.addEventListener("click", function () {
 
     if (forecastsBox.classList.contains("fullscreen")) {
         fullscreenIcon.classList.remove("bi-arrows-fullscreen");
-        fullscreenIcon.classList.add("bi-arrows-collapse"); // Exit Full Screen Icon
+        fullscreenIcon.classList.add("bi-arrows-collapse"); 
     } else {
         fullscreenIcon.classList.remove("bi-arrows-collapse");
-        fullscreenIcon.classList.add("bi-arrows-fullscreen"); // Full Screen Icon
+        fullscreenIcon.classList.add("bi-arrows-fullscreen"); 
     }
 });
 
+function getQueryParams() {
+    const params = {};
+    window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(str,key,value) {
+        params[key] = decodeURIComponent(value);
+    });
+    return params;
+}
+
+const queryParams = getQueryParams();
+const locationName = queryParams.location || "";
+const param = queryParams.param || "no2";
+const timezone = queryParams.timezone || "UTC";
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    if (typeof openForecastsWindow === "function") {
+        openForecastsWindow({
+            location_name: locationName,
+            param: param,
+            timezone: timezone,
+            isModal: false
+        });
+    } else {
+        document.querySelector('.current_location_name').textContent = locationName.replace(/_/g, " ");
+        document.querySelector('.module_title.location_parameter_name').textContent = param.toUpperCase();
+    }
+});
 </script>
