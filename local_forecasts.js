@@ -622,8 +622,6 @@ function sitesArrayToGeoJSON(sites, param = "no2") {
                     return forecastHourStr === currentLocalStr;
                 }) || {};
             }
-            
-
             let value = "N/A";
             let aqi = "N/A";
             if (param === "no2") {
@@ -1044,7 +1042,8 @@ function readApiBaker(options = {}) {
     const {
         location = "",
         timezone = "UTC",
-        plotType = "aqi", // "aqi" or "concentration"
+        plotType = "aqi",
+        isModal = false,
     } = options;
 
     const messages = [
@@ -1089,6 +1088,7 @@ function readApiBaker(options = {}) {
                 master_o3_aqi: [],
                 master_pm25: [],
                 master_pm25_aqi: [],
+                master_pm25_conc_cnn: [],
                 master_predicted: [],
                 master_predicted_aqi: [],
                 master_observation: []
@@ -1107,6 +1107,9 @@ function readApiBaker(options = {}) {
                 }
                 if (forecast.pm25 !== undefined) {
                     masterData.master_pm25.push(forecast.pm25);
+                }
+                if (forecast.pm25_conc_cnn !== undefined) {
+                    masterData.master_pm25_conc_cnn.push(forecast.pm25_conc_cnn);
                 }
                 if (forecast.corrected !== undefined) {
                     masterData.master_predicted.push(forecast.corrected);
@@ -1133,7 +1136,7 @@ function readApiBaker(options = {}) {
                     masterData.master_predicted_aqi.push(aqi);
                 }
             });
-
+            
             const tabsNav = $("#pills-tabContent").prev();
             const tabsContainer = $(".tab-content");
             tabsNav.empty();
@@ -1201,9 +1204,9 @@ function readApiBaker(options = {}) {
                     param: "pm25",
                     tabName: "Fine Particulate Matter (PM<sub>2.5</sub>)",
                     tabId: "tab_pm25",
-                    description: "Supporting: NASA GEOS-CF forecasts",
+                    description: "PM2.5 Forecast",
                     columns: [
-                        { column: "master_pm25", name: "PM2.5", color: "green", width: 2 }
+                        { column: "master_pm25_conc_cnn", name: "PM2.5", color: "green", width: 2 }
                     ],
                     displayAQI: false,
                     displayMetrics: false,
@@ -1344,103 +1347,173 @@ function readApiBaker(options = {}) {
                 
 
                 if (plot.displayAQI) {
-                    const currentAqi =  parseInt(currentValue);
-                    const nextAqi = parseInt(nextValue);
-                
-
-                    let nextLabel = "Next hour";
-                    if (plot.param === "pm25") {
-                        nextLabel = "Next 3 hours";
-                    }
-                
-                    const currentAqiElement = generateAqiElement(currentAqi, plot.param, siteTimeZone, currentHour);
-                    let nextAqiElement = generateAqiElement(nextAqi, plot.param, siteTimeZone, nextHour);
-                
-                    if (plot.param === "pm25" && typeof nextAqiElement === "string") {
-                        nextAqiElement = nextAqiElement.replace(
-                            /AQI \([A-Z0-9.]+\) at \d{1,2}:00/,
-                            `AQI (${plot.param.toUpperCase()}) ${nextLabel} (${nextHour}:00)`
-                        );
-                    }
-                
-                    const $plotContainer = $(`#${plot.id}`);
-                    if ($plotContainer.length > 0) {
-                        $plotContainer.before(currentAqiElement);
-                        $plotContainer.before(nextAqiElement);
-                    }
-                }
-                if (plot.displayMetrics) {
                     const columnKey = plot.columns[0].column;
                     const values = masterData[columnKey] || [];
                     const datetimes = masterData.master_datetime || [];
-                    let currentIdx = -1, prevIdx = -1, nextIdx = -1;
+                    const siteTimeZone = timezone || "UTC";
+                    const now = new Date();
+                    const pad = n => n.toString().padStart(2, '0');
+                    const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
+                    const localYear = siteLocalNow.getFullYear();
+                    const localMonth = pad(siteLocalNow.getMonth() + 1);
+                    const localDate = pad(siteLocalNow.getDate());
+                    const currentHour = siteLocalNow.getHours();
                 
-                    if (plot.param === "pm25") {
-                        for (let i = 0; i < datetimes.length; i++) {
-                            const dtStr = datetimes[i];
-                            if (!dtStr) continue;
-                            const forecastStart = new Date(dtStr.replace(' ', 'T'));
-                            const forecastEnd = new Date(forecastStart.getTime() + 3 * 60 * 60 * 1000);
-                
-                
-                            if (siteLocalNow >= forecastStart && siteLocalNow < forecastEnd) {
-                                currentIdx = i;
-                            }
-    
-                            const prevLocalDate = new Date(siteLocalNow.getTime() - 1 * 60 * 60 * 1000);
-                            if (prevLocalDate >= forecastStart && prevLocalDate < forecastEnd) {
-                                prevIdx = i;
-                            }
 
-                            const nextLocalDate = new Date(siteLocalNow.getTime() + 1 * 60 * 60 * 1000);
-                            if (nextLocalDate >= forecastStart && nextLocalDate < forecastEnd) {
-                                nextIdx = i;
+                    function getAqiForHourOffset(offset) {
+                        let targetIdx = -1;
+                        if (plot.param === "pm25") {
+                            const targetDate = new Date(siteLocalNow.getTime() + offset * 60 * 60 * 1000);
+                            for (let i = 0; i < datetimes.length; i++) {
+                                const dtStr = datetimes[i];
+                                if (!dtStr) continue;
+                                const forecastStart = new Date(dtStr.replace(' ', 'T'));
+                                const forecastEnd = new Date(forecastStart.getTime() + 3 * 60 * 60 * 1000);
+                                if (targetDate >= forecastStart && targetDate < forecastEnd) {
+                                    targetIdx = i;
+                                    break;
+                                }
+                            }
+                        } else {
+                            const targetHour = (currentHour + offset) % 24;
+                            for (let i = 0; i < datetimes.length; i++) {
+                                const hour = parseInt(datetimes[i].slice(11, 13), 10);
+                                if (hour === targetHour) {
+                                    targetIdx = i;
+                                    break;
+                                }
                             }
                         }
-                    } else {
-  
-                        for (let i = 0; i < datetimes.length; i++) {
-                            const hour = parseInt(datetimes[i].slice(11, 13), 10);
-                            if (hour === currentHour) currentIdx = i;
-                            if (hour === (currentHour - 1 + 24) % 24) prevIdx = i;
-                            if (hour === (currentHour + 1) % 24) nextIdx = i;
-                        }
+                        return targetIdx !== -1 ? values[targetIdx] : 'N/A';
                     }
                 
-                    const today = siteLocalNow.toISOString().slice(0, 10);
+                    const currentAqi = getAqiForHourOffset(0);
+                    const nextAqi1 = getAqiForHourOffset(3);
+                    const nextAqi2 = getAqiForHourOffset(6);
+                    const nextAqi3 = getAqiForHourOffset(9);
+                
+                    const todayStr = siteLocalNow.toISOString().slice(0, 10);
+                    const tomorrowDate = new Date(siteLocalNow.getTime() + 24 * 60 * 60 * 1000);
+                    const tomorrowStr = tomorrowDate.toISOString().slice(0, 10);
+                
                     const todayVals = datetimes
                         .map((dt, i) => ({ dt, val: values[i] }))
-                        .filter(({ dt }) => dt && dt.startsWith(today))
-                        .map(({ val }) => typeof val === "number" ? val : NaN)
+                        .filter(({ dt }) => dt && dt.startsWith(todayStr))
+                        .map(({ val }) => typeof val === "number" ? val : parseInt(val))
                         .filter(val => !isNaN(val));
-                    const dailyAvg = todayVals.length ? parseInt((todayVals.reduce((a, b) => a + b, 0) / todayVals.length)) : 'N/A';
-                    const currentVal = parseInt(currentIdx) !== -1 ? values[currentIdx] : 'N/A';
-                    const prevVal = parseInt(prevIdx) !== -1 ? values[prevIdx] : 'N/A';
-                    const nextVal = parseInt(nextIdx) !== -1 ? values[nextIdx] : 'N/A';
-                    const change = getChange(currentVal, dailyAvg);
-                    const prevChange = getChange(prevVal, dailyAvg);
-                    const nextChange = getChange(nextVal, dailyAvg);
+                    const tomorrowVals = datetimes
+                        .map((dt, i) => ({ dt, val: values[i] }))
+                        .filter(({ dt }) => dt && dt.startsWith(tomorrowStr))
+                        .map(({ val }) => typeof val === "number" ? val : parseInt(val))
+                        .filter(val => !isNaN(val));
                 
-                    const metricsHtml = generateMetricsHtml({
-                        title: plot.title,
-                        unit: plot.unit,
-                        currentVal,
-                        prevVal,
-                        nextVal,
-                        dailyAvg,
-                        change,
-                        prevChange,
-                        nextChange,
-                        currentIdx,
-                        prevIdx,
-                        nextIdx,
-                        datetimes
-                    });
+                    const todayAvg = todayVals.length ? parseInt(todayVals.reduce((a, b) => a + b, 0) / todayVals.length) : 'N/A';
+                    const tomorrowAvg = tomorrowVals.length ? parseInt(tomorrowVals.reduce((a, b) => a + b, 0) / tomorrowVals.length) : 'N/A';
+                
+
+                    let aqiHtml = `
+                        <div class="aqi-multi-hour-box">
+                            <div class="aqi-multi-row">
+                            <h6>Forecasted Air Quality Indices today</h6>
+                                <div>${generateAqiElement(currentAqi, plot.param, siteTimeZone, currentHour)}<div style="text-align:center;font-size:12px;"></div></div>
+                                <div>${generateAqiElement(nextAqi1, plot.param, siteTimeZone, (currentHour + 3) % 24)}<div style="text-align:center;font-size:12px;"></div></div>
+                                <div>${generateAqiElement(nextAqi2, plot.param, siteTimeZone, (currentHour + 6) % 24)}<div style="text-align:center;font-size:12px;"></div></div>
+                                <div>${generateAqiElement(nextAqi3, plot.param, siteTimeZone, (currentHour + 9) % 24)}<div style="text-align:center;font-size:12px;"></div></div>
+                            </div>
+                            <div class="aqi-multi-row">
+                            <h6>Forecasted daily averages</h6>
+                                <div>${generateAqiElement(todayAvg, plot.param, siteTimeZone, "Today")}</div>
+                                <div>${generateAqiElement(tomorrowAvg, plot.param, siteTimeZone, "Tomorrow")}</div>
+                            </div>
+                        </div>
+                    `;
+                
                     const $plotContainer = $(`#${plot.id}`);
                     if ($plotContainer.length > 0) {
-                        $plotContainer.before(metricsHtml);
+                        $plotContainer.before(aqiHtml);
                     }
                 }
+            if (plot.displayMetrics) {
+            const columnKey = plot.columns[0].column;
+            const values = masterData[columnKey] || [];
+            const datetimes = masterData.master_datetime || [];
+            const siteTimeZone = timezone || "UTC";
+            const now = new Date();
+            const pad = n => n.toString().padStart(2, '0');
+            const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
+
+            const todayStr = siteLocalNow.toISOString().slice(0, 10);
+            const tomorrowDate = new Date(siteLocalNow.getTime() + 24 * 60 * 60 * 1000);
+            const tomorrowStr = tomorrowDate.toISOString().slice(0, 10);
+            const prevDate = new Date(siteLocalNow.getTime() - 24 * 60 * 60 * 1000);
+            const prevStr = prevDate.toISOString().slice(0, 10);
+
+            const prevVals = datetimes
+            .map((dt, i) => ({ dt, val: values[i] }))
+            .filter(({ dt }) => dt && dt.startsWith(prevStr))
+            .map(({ val }) => typeof val === "number" ? val : parseFloat(val))
+            .filter(val => !isNaN(val));
+            const todayVals = datetimes
+            .map((dt, i) => ({ dt, val: values[i] }))
+            .filter(({ dt }) => dt && dt.startsWith(todayStr))
+            .map(({ val }) => typeof val === "number" ? val : parseFloat(val))
+            .filter(val => !isNaN(val));
+            const tomorrowVals = datetimes
+            .map((dt, i) => ({ dt, val: values[i] }))
+            .filter(({ dt }) => dt && dt.startsWith(tomorrowStr))
+            .map(({ val }) => typeof val === "number" ? val : parseFloat(val))
+            .filter(val => !isNaN(val));
+
+            const prevAvg = prevVals.length ? prevVals.reduce((a, b) => a + b, 0) / prevVals.length : 'N/A';
+            const todayAvg = todayVals.length ? todayVals.reduce((a, b) => a + b, 0) / todayVals.length : 'N/A';
+            const tomorrowAvg = tomorrowVals.length ? tomorrowVals.reduce((a, b) => a + b, 0) / tomorrowVals.length : 'N/A';
+
+            // Calculate change rates
+            function getChangeRate(newVal, oldVal) {
+            if (typeof newVal === "number" && typeof oldVal === "number" && oldVal !== 0) {
+            const diff = newVal - oldVal;
+            const pct = ((newVal - oldVal) / oldVal) * 100;
+            return {
+            diff: diff.toFixed(2),
+            pct: pct.toFixed(2),
+            sign: pct > 0 ? "+" : "",
+            class: pct > 0 ? "red" : pct < 0 ? "green" : "",
+            arrow: pct > 0 ? "▲" : pct < 0 ? "▼" : ""
+            };
+            }
+            return { diff: "N/A", pct: "N/A", sign: "", class: "", arrow: "" };
+            }
+
+            const changeTodayVsPrev = getChangeRate(todayAvg, prevAvg);
+            const changeTomorrowVsToday = getChangeRate(tomorrowAvg, todayAvg);
+
+            // Generate metrics HTML: 2 boxes, each with average and change rate below
+            const metricsHtml = `
+            <div class="xvg_aqi-container" style="display:flex;gap:20px;">
+            <div class="d-xvg" style="flex:1;">
+            <div class="xvg_aqi me-3" style="font-size:2em;">${todayAvg !== 'N/A' ? todayAvg.toFixed(2) : '--'}</div>
+            <div class="xvg_aqi-change">Today Avg</div>
+            <div class="xvg_aqi-change ${changeTodayVsPrev.class}" style="margin-top:8px;">
+            ${changeTodayVsPrev.arrow} ${changeTodayVsPrev.sign}${changeTodayVsPrev.diff} (${changeTodayVsPrev.sign}${changeTodayVsPrev.pct !== "N/A" ? changeTodayVsPrev.pct + "%" : "--"})
+            </div>
+            <div class="xvg_timestamp" style="font-size:12px;">vs Previous Day</div>
+            </div>
+            <div class="d-xvg" style="flex:1;">
+            <div class="xvg_aqi me-3" style="font-size:2em;">${tomorrowAvg !== 'N/A' ? tomorrowAvg.toFixed(2) : '--'}</div>
+            <div class="xvg_aqi-change">Tomorrow Avg</div>
+            <div class="xvg_aqi-change ${changeTomorrowVsToday.class}" style="margin-top:8px;">
+            ${changeTomorrowVsToday.arrow} ${changeTomorrowVsToday.sign}${changeTomorrowVsToday.diff} (${changeTomorrowVsToday.sign}${changeTomorrowVsToday.pct !== "N/A" ? changeTomorrowVsToday.pct + "%" : "--"})
+            </div>
+            <div class="xvg_timestamp" style="font-size:12px;">vs Today</div>
+            </div>
+            </div>
+            `;
+
+            const $plotContainer = $(`#${plot.id}`);
+            if ($plotContainer.length > 0) {
+            $plotContainer.before(metricsHtml);
+            }
+            }
             });
 
             $(".nav-link").on("click", function () {
@@ -1592,10 +1665,16 @@ function getAqiLevel(aqi, species = "no2") {
 }
 
 function generateAqiElement(aqiValue, pollutant, userTimeZone, currentHour) {
-    if (aqiValue === 'N/A') {
-        return ''; 
+    const hourStr = typeof currentHour === "number"
+        ? currentHour.toString().padStart(2, '0')+":00"
+        : currentHour;
+    if (aqiValue === 'N/A' || aqiValue === null) {
+        return `<div class="prediction-box" style="background: #80808017;">
+            <h5>${hourStr}</h5>
+            <span class="time"> US AQI (${pollutant.toUpperCase()})</span>
+            <h2>--</h2>
+        </div>`;
     }
-
 
     const aqiLevels = [
         { level: "Good", color: "#4CAF50", range: [0, 50], position: 0 },
@@ -1606,17 +1685,13 @@ function generateAqiElement(aqiValue, pollutant, userTimeZone, currentHour) {
         { level: "Hazardous", color: "#7E0023", range: [301, 500], position: 100 }
     ];
 
-
     const matchingLevel = aqiLevels.find(level => aqiValue >= level.range[0] && aqiValue <= level.range[1]);
-
     const indicatorPosition = matchingLevel ? matchingLevel.position : 0;
 
     return `
         <div class="prediction-box" style="background: #80808017;">
-            <h5>AQI (${pollutant.toUpperCase()}) at ${currentHour}:00</h5>
-            <span class="time">${userTimeZone}</span>
-            <h2>${aqiValue}</h2> 
-            <span>${matchingLevel.level}</span>
+            <h5>${hourStr}</h5>
+            <h2>${aqiValue !== null ? aqiValue : '--'}</h2>
             <div class="aqi-scale-container">
                 <div class="aqi-scale">
                     <div class="aqi-scale-step" style="background-color: #4CAF50;" title="Good (0-50)"></div>
@@ -1889,7 +1964,7 @@ function readAirNow(options = {}) {
 
             const plots = [
                 { id: "main_plot_for_airnow", title: "PM 2.5 Forecasts", data: masterData },
-                { id: "aqi_plot_for_airnow", title: "PM 2.5 AQI", data: masterData } // Add a new tab for AQI
+                { id: "aqi_plot_for_airnow", title: "PM 2.5 AQI", data: masterData } 
             ];
 
             plots.forEach((plot, index) => {
@@ -2915,10 +2990,49 @@ function openForecastsWindow(options = {}) {
             clearInterval(intervalId);
         });
     } else {
-        const url = `vues/site.html?location=${encodeURIComponent(location_name)}&param=${encodeURIComponent(param)}&timezone=${encodeURIComponent(timezone)}`;
-        window.location.href = url;
+            $loadingScreen.show();
+            $(this).fadeOut(10).fadeIn(10);
+
+            const intervalId = setInterval(() => {
+                const message = messages[Math.floor(Math.random() * messages.length)];
+                $(".messages").html(message);
+            }, 100);
+
+            $('.current_location_name').html(location_name.replace(/[_\W]+/g, " "));
+            $('.current_param').html(pollutant_details(param).name);
+            $('.current_param_1').html(pollutant_details(param).name);
+            $('.current_observation_value').html(observation_value);
+            $('.current_observation_unit_span').html(current_observation_unit);
+
+            $forecastsContainer.addClass("noussair_animations zoom_in");
+            $loadingDiv.fadeOut(10);
+
+            $("button").css({
+                "animation": "intro 2s cubic-bezier(0.03, 1.08, 0.56, 1)",
+                "animation-delay": "2s"
+            });
+       if (param === 'pm25' || param === 'pm2.5') {
+                readApiBaker({
+                    location: location_name,
+                    timezone: timezone,
+                    param: param,
+                });
+            } else if (param === 'no2') {
+                readApiBaker({
+                    location: location_name,
+                    timezone: timezone,
+                    param: param,
+                });
+            } else {
+                readApiBaker({
+                    location: location_name,
+                    timezone: timezone
+                });
+            }
     }
 }
+
+
 $(document).on("click", ".launch-local-forecasts", function() {
     const messages = [
         "Connecting to OpenAQ", 
