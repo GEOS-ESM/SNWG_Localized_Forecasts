@@ -29,10 +29,12 @@ $(document).ready(function() {
         loadHashContent();
     };
 
-    $(document).on('click', '.nl_wave_routing', function(e) {
+        $(document).on('click', '.nl_wave_routing', function(e) {
         var page = $(this).attr('href');
         if (page && page !== "#") {
             window.location.hash = page;
+            var cleanUrl = window.location.origin + window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, cleanUrl);
             $(window).scrollTop(0);
         }
         return false;
@@ -67,7 +69,7 @@ $(document).ready(function() {
 
 function loadHashContent() {
     var hash = window.location.hash.substr(1);
-    // Check for URL parameters
+
     var hasParams = window.location.search.length > 1;
     var pageToLoad;
     if (hasParams && (window.location.search.includes("site=") || window.location.search.includes("location="))) {
