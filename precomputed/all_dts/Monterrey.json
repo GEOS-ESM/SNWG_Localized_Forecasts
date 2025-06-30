@@ -6,14 +6,14 @@
     "timezone": "America/Monterrey",
     "message": "200",
     "status": "200",
-    "latest_update": "2025-06-29 16:00:00",
+    "latest_update": "2025-06-30 10:00:00",
     "sources": [
         "merra2",
         "geoscf"
     ],
     "metrics": {
         "validation_score": "N/A",
-        "total_observation": 110,
+        "total_observation": 108,
         "performance": {
             "metrics": [
                 {
@@ -30,118 +30,13 @@
                 }
             ]
         },
-        "start_date": "2025-06-19 00:00:00",
-        "end_date": "2025-07-02 15:00:00"
+        "start_date": "2025-06-20 00:00:00",
+        "end_date": "2025-07-03 09:00:00"
     },
     "forecasts": [
         {
-            "time": "2025-06-19 00:00:00",
-            "local_time": "2025-06-18 18:00:00",
-            "no2": null,
-            "no2_aqi": null,
-            "o3": null,
-            "o3_aqi": null,
-            "pm25": null,
-            "pm25_aqi": 29.0,
-            "rh": null,
-            "t10m": null,
-            "tprec": null,
-            "hcho": null,
-            "pm25_conc_cnn": 5.22
-        },
-        {
-            "time": "2025-06-19 03:00:00",
-            "local_time": "2025-06-18 21:00:00",
-            "no2": null,
-            "no2_aqi": null,
-            "o3": null,
-            "o3_aqi": null,
-            "pm25": null,
-            "pm25_aqi": 30.0,
-            "rh": null,
-            "t10m": null,
-            "tprec": null,
-            "hcho": null,
-            "pm25_conc_cnn": 5.35
-        },
-        {
-            "time": "2025-06-19 06:00:00",
-            "local_time": "2025-06-19 00:00:00",
-            "no2": null,
-            "no2_aqi": null,
-            "o3": null,
-            "o3_aqi": null,
-            "pm25": null,
-            "pm25_aqi": 29.0,
-            "rh": null,
-            "t10m": null,
-            "tprec": null,
-            "hcho": null,
-            "pm25_conc_cnn": 5.31
-        },
-        {
-            "time": "2025-06-19 09:00:00",
-            "local_time": "2025-06-19 03:00:00",
-            "no2": null,
-            "no2_aqi": null,
-            "o3": null,
-            "o3_aqi": null,
-            "pm25": null,
-            "pm25_aqi": 29.0,
-            "rh": null,
-            "t10m": null,
-            "tprec": null,
-            "hcho": null,
-            "pm25_conc_cnn": 5.28
-        },
-        {
-            "time": "2025-06-19 12:00:00",
-            "local_time": "2025-06-19 06:00:00",
-            "no2": null,
-            "no2_aqi": null,
-            "o3": null,
-            "o3_aqi": null,
-            "pm25": null,
-            "pm25_aqi": 30.0,
-            "rh": null,
-            "t10m": null,
-            "tprec": null,
-            "hcho": null,
-            "pm25_conc_cnn": 5.41
-        },
-        {
-            "time": "2025-06-19 15:00:00",
-            "local_time": "2025-06-19 09:00:00",
-            "no2": null,
-            "no2_aqi": null,
-            "o3": null,
-            "o3_aqi": null,
-            "pm25": null,
-            "pm25_aqi": 28.0,
-            "rh": null,
-            "t10m": null,
-            "tprec": null,
-            "hcho": null,
-            "pm25_conc_cnn": 5.12
-        },
-        {
-            "time": "2025-06-19 18:00:00",
-            "local_time": "2025-06-19 12:00:00",
-            "no2": null,
-            "no2_aqi": null,
-            "o3": null,
-            "o3_aqi": null,
-            "pm25": null,
-            "pm25_aqi": 26.0,
-            "rh": null,
-            "t10m": null,
-            "tprec": null,
-            "hcho": null,
-            "pm25_conc_cnn": 4.76
-        },
-        {
-            "time": "2025-06-19 21:00:00",
-            "local_time": "2025-06-19 15:00:00",
+            "time": "2025-06-20 00:00:00",
+            "local_time": "2025-06-19 18:00:00",
             "no2": null,
             "no2_aqi": null,
             "o3": null,
@@ -152,22 +47,7 @@
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 4.81
-        },
-        {
-            "time": "2025-06-20 00:00:00",
-            "local_time": "2025-06-19 18:00:00",
-            "no2": null,
-            "no2_aqi": null,
-            "o3": null,
-            "o3_aqi": null,
-            "pm25": null,
-            "pm25_aqi": 28.0,
-            "rh": null,
-            "t10m": null,
-            "tprec": null,
-            "hcho": null,
-            "pm25_conc_cnn": 5.02
+            "pm25_conc_cnn": 4.87
         },
         {
             "time": "2025-06-20 03:00:00",
@@ -177,12 +57,12 @@
             "o3": null,
             "o3_aqi": null,
             "pm25": null,
-            "pm25_aqi": 28.0,
+            "pm25_aqi": 27.0,
             "rh": null,
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 5.01
+            "pm25_conc_cnn": 4.79
         },
         {
             "time": "2025-06-20 06:00:00",
@@ -192,12 +72,12 @@
             "o3": null,
             "o3_aqi": null,
             "pm25": null,
-            "pm25_aqi": 27.5,
+            "pm25_aqi": 27.0,
             "rh": null,
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 4.96
+            "pm25_conc_cnn": 4.84
         },
         {
             "time": "2025-06-20 09:00:00",
@@ -212,7 +92,7 @@
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 4.88
+            "pm25_conc_cnn": 4.85
         },
         {
             "time": "2025-06-20 12:00:00",
@@ -227,7 +107,7 @@
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 4.87
+            "pm25_conc_cnn": 4.85
         },
         {
             "time": "2025-06-20 15:00:00",
@@ -237,12 +117,12 @@
             "o3": null,
             "o3_aqi": null,
             "pm25": null,
-            "pm25_aqi": 25.5,
+            "pm25_aqi": 26.0,
             "rh": null,
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 4.55
+            "pm25_conc_cnn": 4.63
         },
         {
             "time": "2025-06-20 18:00:00",
@@ -252,12 +132,12 @@
             "o3": null,
             "o3_aqi": null,
             "pm25": null,
-            "pm25_aqi": 23.5,
+            "pm25_aqi": 25.0,
             "rh": null,
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 4.27
+            "pm25_conc_cnn": 4.5
         },
         {
             "time": "2025-06-20 21:00:00",
@@ -267,12 +147,12 @@
             "o3": null,
             "o3_aqi": null,
             "pm25": null,
-            "pm25_aqi": 23.5,
+            "pm25_aqi": 25.0,
             "rh": null,
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 4.29
+            "pm25_conc_cnn": 4.56
         },
         {
             "time": "2025-06-21 00:00:00",
@@ -282,61 +162,16 @@
             "o3": null,
             "o3_aqi": null,
             "pm25": null,
-            "pm25_aqi": 27.67,
+            "pm25_aqi": 29.5,
             "rh": null,
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 4.96
+            "pm25_conc_cnn": 5.28
         },
         {
             "time": "2025-06-21 03:00:00",
             "local_time": "2025-06-20 21:00:00",
-            "no2": null,
-            "no2_aqi": null,
-            "o3": null,
-            "o3_aqi": null,
-            "pm25": null,
-            "pm25_aqi": 27.67,
-            "rh": null,
-            "t10m": null,
-            "tprec": null,
-            "hcho": null,
-            "pm25_conc_cnn": 4.98
-        },
-        {
-            "time": "2025-06-21 06:00:00",
-            "local_time": "2025-06-21 00:00:00",
-            "no2": null,
-            "no2_aqi": null,
-            "o3": null,
-            "o3_aqi": null,
-            "pm25": null,
-            "pm25_aqi": 28.33,
-            "rh": null,
-            "t10m": null,
-            "tprec": null,
-            "hcho": null,
-            "pm25_conc_cnn": 5.07
-        },
-        {
-            "time": "2025-06-21 09:00:00",
-            "local_time": "2025-06-21 03:00:00",
-            "no2": null,
-            "no2_aqi": null,
-            "o3": null,
-            "o3_aqi": null,
-            "pm25": null,
-            "pm25_aqi": 28.67,
-            "rh": null,
-            "t10m": null,
-            "tprec": null,
-            "hcho": null,
-            "pm25_conc_cnn": 5.1
-        },
-        {
-            "time": "2025-06-21 12:00:00",
-            "local_time": "2025-06-21 06:00:00",
             "no2": null,
             "no2_aqi": null,
             "o3": null,
@@ -347,7 +182,52 @@
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 5.14
+            "pm25_conc_cnn": 5.22
+        },
+        {
+            "time": "2025-06-21 06:00:00",
+            "local_time": "2025-06-21 00:00:00",
+            "no2": null,
+            "no2_aqi": null,
+            "o3": null,
+            "o3_aqi": null,
+            "pm25": null,
+            "pm25_aqi": 30.0,
+            "rh": null,
+            "t10m": null,
+            "tprec": null,
+            "hcho": null,
+            "pm25_conc_cnn": 5.33
+        },
+        {
+            "time": "2025-06-21 09:00:00",
+            "local_time": "2025-06-21 03:00:00",
+            "no2": null,
+            "no2_aqi": null,
+            "o3": null,
+            "o3_aqi": null,
+            "pm25": null,
+            "pm25_aqi": 30.0,
+            "rh": null,
+            "t10m": null,
+            "tprec": null,
+            "hcho": null,
+            "pm25_conc_cnn": 5.35
+        },
+        {
+            "time": "2025-06-21 12:00:00",
+            "local_time": "2025-06-21 06:00:00",
+            "no2": null,
+            "no2_aqi": null,
+            "o3": null,
+            "o3_aqi": null,
+            "pm25": null,
+            "pm25_aqi": 30.0,
+            "rh": null,
+            "t10m": null,
+            "tprec": null,
+            "hcho": null,
+            "pm25_conc_cnn": 5.32
         },
         {
             "time": "2025-06-21 15:00:00",
@@ -357,12 +237,12 @@
             "o3": null,
             "o3_aqi": null,
             "pm25": null,
-            "pm25_aqi": 27.33,
+            "pm25_aqi": 28.5,
             "rh": null,
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 4.96
+            "pm25_conc_cnn": 5.15
         },
         {
             "time": "2025-06-21 18:00:00",
@@ -372,12 +252,12 @@
             "o3": null,
             "o3_aqi": null,
             "pm25": null,
-            "pm25_aqi": 27.0,
+            "pm25_aqi": 28.5,
             "rh": null,
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 4.83
+            "pm25_conc_cnn": 5.09
         },
         {
             "time": "2025-06-21 21:00:00",
@@ -387,12 +267,12 @@
             "o3": null,
             "o3_aqi": null,
             "pm25": null,
-            "pm25_aqi": 27.33,
+            "pm25_aqi": 28.5,
             "rh": null,
             "t10m": null,
             "tprec": null,
             "hcho": null,
-            "pm25_conc_cnn": 4.91
+            "pm25_conc_cnn": 5.14
         },
         {
             "time": "2025-06-22 00:00:00",
@@ -1672,16 +1552,106 @@
         {
             "time": "2025-07-02 15:00:00",
             "local_time": "2025-07-02 09:00:00",
-            "no2": 3.95,
-            "no2_aqi": 10.0,
-            "o3": 23.92,
-            "o3_aqi": 22.0,
-            "pm25": 10.72,
+            "no2": 3.08,
+            "no2_aqi": 9.0,
+            "o3": 28.4,
+            "o3_aqi": 26.0,
+            "pm25": 9.48,
             "pm25_aqi": null,
-            "rh": 0.83,
-            "t10m": 295.99,
+            "rh": 0.78,
+            "t10m": 296.78,
             "tprec": 0.0,
-            "hcho": 1.65,
+            "hcho": 1.97,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-07-02 18:00:00",
+            "local_time": "2025-07-02 12:00:00",
+            "no2": 1.76,
+            "no2_aqi": 5.0,
+            "o3": 37.54,
+            "o3_aqi": 35.0,
+            "pm25": 8.22,
+            "pm25_aqi": null,
+            "rh": 0.66,
+            "t10m": 299.03,
+            "tprec": 0.0,
+            "hcho": 2.37,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-07-02 21:00:00",
+            "local_time": "2025-07-02 15:00:00",
+            "no2": 2.42,
+            "no2_aqi": 2.0,
+            "o3": 34.05,
+            "o3_aqi": 32.0,
+            "pm25": 8.47,
+            "pm25_aqi": null,
+            "rh": 0.61,
+            "t10m": 299.98,
+            "tprec": 0.0,
+            "hcho": 2.38,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-07-03 00:00:00",
+            "local_time": "2025-07-02 18:00:00",
+            "no2": 9.03,
+            "no2_aqi": 4.0,
+            "o3": 20.31,
+            "o3_aqi": 19.0,
+            "pm25": 10.92,
+            "pm25_aqi": null,
+            "rh": 0.73,
+            "t10m": 297.63,
+            "tprec": 0.0,
+            "hcho": 2.09,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-07-03 03:00:00",
+            "local_time": "2025-07-02 21:00:00",
+            "no2": 8.54,
+            "no2_aqi": 6.0,
+            "o3": 19.2,
+            "o3_aqi": 18.0,
+            "pm25": 13.01,
+            "pm25_aqi": null,
+            "rh": 0.75,
+            "t10m": 296.21,
+            "tprec": 0.0,
+            "hcho": 2.01,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-07-03 06:00:00",
+            "local_time": "2025-07-03 00:00:00",
+            "no2": 17.35,
+            "no2_aqi": 11.0,
+            "o3": 9.34,
+            "o3_aqi": 9.0,
+            "pm25": 22.88,
+            "pm25_aqi": null,
+            "rh": 0.81,
+            "t10m": 295.04,
+            "tprec": 0.0,
+            "hcho": 2.5,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-07-03 09:00:00",
+            "local_time": "2025-07-03 03:00:00",
+            "no2": 19.12,
+            "no2_aqi": 14.0,
+            "o3": 7.69,
+            "o3_aqi": 7.0,
+            "pm25": 28.76,
+            "pm25_aqi": null,
+            "rh": 0.85,
+            "t10m": 294.33,
+            "tprec": 0.0,
+            "hcho": 2.71,
             "pm25_conc_cnn": null
         }
     ]
