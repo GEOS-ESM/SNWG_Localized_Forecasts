@@ -1094,6 +1094,8 @@ function readApiBaker(options = {}) {
                 master_observation: []
             };
 
+            let timezone = data.timezone;
+
             data.forecasts.forEach(forecast => {
                 if (forecast.time) {
                     masterData.master_datetime.push(forecast.local_time);
@@ -1292,7 +1294,7 @@ function readApiBaker(options = {}) {
                     $(`#${tabId}`).append(`<div class="plot-container" id="${plot.id}"></div><div class="aqi-container" id="aqi-${plot.id}"></div>`);
                 }
 
-                const siteTimeZone = timezone || "UTC";
+                const siteTimeZone = timezone;
                 const now = new Date();
                 const pad = n => n.toString().padStart(2, '0');
                 const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
@@ -1350,7 +1352,7 @@ function readApiBaker(options = {}) {
                     const columnKey = plot.columns[0].column;
                     const values = masterData[columnKey] || [];
                     const datetimes = masterData.master_datetime || [];
-                    const siteTimeZone = timezone || "UTC";
+                    const siteTimeZone = timezone;
                     const now = new Date();
                     const pad = n => n.toString().padStart(2, '0');
                     const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
@@ -1414,14 +1416,14 @@ function readApiBaker(options = {}) {
                     let aqiHtml = `
                         <div class="aqi-multi-hour-box">
                             <div class="aqi-multi-row">
-                            <h6>Forecasted Air Quality Indices today</h6>
+                            <h6>Forecasted Air Quality Indices today (US Scale)</h6>
                                 <div>${generateAqiElement(currentAqi, plot.param, siteTimeZone, currentHour)}<div style="text-align:center;font-size:12px;"></div></div>
                                 <div>${generateAqiElement(nextAqi1, plot.param, siteTimeZone, (currentHour + 3) % 24)}<div style="text-align:center;font-size:12px;"></div></div>
                                 <div>${generateAqiElement(nextAqi2, plot.param, siteTimeZone, (currentHour + 6) % 24)}<div style="text-align:center;font-size:12px;"></div></div>
                                 <div>${generateAqiElement(nextAqi3, plot.param, siteTimeZone, (currentHour + 9) % 24)}<div style="text-align:center;font-size:12px;"></div></div>
                             </div>
                             <div class="aqi-multi-row">
-                            <h6>Forecasted daily averages</h6>
+                            <h6>Forecasted daily averages (US Scale)</h6>
                                 <div>${generateAqiElement(todayAvg, plot.param, siteTimeZone, "Today")}</div>
                                 <div>${generateAqiElement(tomorrowAvg, plot.param, siteTimeZone, "Tomorrow")}</div>
                             </div>
@@ -1666,7 +1668,7 @@ function getAqiLevel(aqi, species = "no2") {
 
 function generateAqiElement(aqiValue, pollutant, userTimeZone, currentHour) {
     const hourStr = typeof currentHour === "number"
-        ? currentHour.toString().padStart(2, '0')+":00"
+        ? currentHour.toString().padStart(2, '0')+":00 ("+userTimeZone+")" 
         : currentHour;
     if (aqiValue === 'N/A' || aqiValue === null) {
         return `<div class="prediction-box" style="background: #80808017;">
