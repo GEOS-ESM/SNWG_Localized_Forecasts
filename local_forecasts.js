@@ -1562,7 +1562,7 @@ tabsContainer.append(`
                 <li><b>O₃:</b> NASA GEOS-CF</li>
             </ul>
             <h4 style="margin-top:1em;">AQI Scale (US EPA)</h4>
-            <table class="table table-sm table-bordered" style="max-width:500px;">
+            <table class="table table-sm table-bordered">
                 <thead>
                     <tr>
                         <th>AQI</th>
