@@ -2385,3 +2385,9 @@ h5.plot_title {
     margin: 8px 0;
     position: relative;
 }
+
+li.nav-item.model_infos a {
+    background: rgb(3, 54, 146) !important;
+    color: white;
+    font-weight: 100;
+}

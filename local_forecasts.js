@@ -1289,48 +1289,6 @@ function readApiBaker(options = {}) {
                     $(`#${tabId}`).append(`<div class="plot-container" id="${plot.id}"></div><div class="aqi-container" id="aqi-${plot.id}"></div>`);
                 }
 
-                tabsList.append(`
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" id="tab-info" data-bs-toggle="pill" href="#info_tab" role="tab" aria-controls="info_tab" aria-selected="false">
-            Info
-        </a>
-    </li>
-`);
-tabsContainer.append(`
-    <div class="tab-pane fade" id="info_tab" role="tabpanel" aria-labelledby="tab-info">
-        <div class="info-tab-content" style="padding: 1.5em;">
-            <h4>Model Sources</h4>
-            <ul>
-                <li><b>NO₂:</b> NASA GEOS-CF, NASA Pandora</li>
-                <li><b>PM₂.₅:</b> NASA GEOS-FP+ML, AirNow</li>
-                <li><b>O₃:</b> NASA GEOS-CF</li>
-            </ul>
-            <h4 style="margin-top:1em;">AQI Scale (US EPA)</h4>
-            <table class="table table-sm table-bordered" style="max-width:500px;">
-                <thead>
-                    <tr>
-                        <th>AQI</th>
-                        <th>Level</th>
-                        <th>Color</th>
-                        <th>Health Message</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>0-50</td><td>Good</td><td style="background:#4CAF50;"></td><td>Air quality is satisfactory.</td></tr>
-                    <tr><td>51-100</td><td>Moderate</td><td style="background:#FFEB3B;"></td><td>Acceptable; some pollutants may be a concern for a small number of sensitive people.</td></tr>
-                    <tr><td>101-150</td><td>Unhealthy for Sensitive Groups</td><td style="background:#FF9800;"></td><td>Sensitive groups may experience health effects.</td></tr>
-                    <tr><td>151-200</td><td>Unhealthy</td><td style="background:#F44336;"></td><td>Everyone may begin to experience health effects.</td></tr>
-                    <tr><td>201-300</td><td>Very Unhealthy</td><td style="background:#9C27B0;"></td><td>Health alert: everyone may experience more serious health effects.</td></tr>
-                    <tr><td>301-500</td><td>Hazardous</td><td style="background:#7E0023;"></td><td>Health warnings of emergency conditions.</td></tr>
-                </tbody>
-            </table>
-            <p style="font-size:13px;margin-top:1em;">
-                <b>Note:</b> AQI is calculated per US EPA standards. For more details, see <a href="https://www.airnow.gov/aqi/aqi-basics/" target="_blank">AirNow AQI Basics</a>.
-            </p>
-        </div>
-    </div>
-`);
-
 
                 const siteTimeZone = timezone;
                 const now = new Date();
@@ -1586,6 +1544,49 @@ tabsContainer.append(`
                     console.error(`No DOM element with id '${plot.id}' exists on the page.`);
                 }
             });
+
+            tabsList.append(`
+    <li class="nav-item model_infos" role="presentation">
+        <a class="nav-link" id="tab-info" data-bs-toggle="pill" href="#info_tab" role="tab" aria-controls="info_tab" aria-selected="false">
+            Air Quality Information
+        </a>
+    </li>
+`);
+tabsContainer.append(`
+    <div class="tab-pane fade" id="info_tab" role="tabpanel" aria-labelledby="tab-info">
+        <div class="info-tab-content" style="padding: 1.5em;">
+            <h4>Model Sources</h4>
+            <ul>
+                <li><b>NO₂:</b> NASA GEOS-CF, NASA Pandora</li>
+                <li><b>PM₂.₅:</b> NASA GEOS-FP+ML, AirNow</li>
+                <li><b>O₃:</b> NASA GEOS-CF</li>
+            </ul>
+            <h4 style="margin-top:1em;">AQI Scale (US EPA)</h4>
+            <table class="table table-sm table-bordered" style="max-width:500px;">
+                <thead>
+                    <tr>
+                        <th>AQI</th>
+                        <th>Level</th>
+                        <th>Color</th>
+                        <th>Health Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>0-50</td><td>Good</td><td style="background:#4CAF50;"></td><td>Air quality is satisfactory.</td></tr>
+                    <tr><td>51-100</td><td>Moderate</td><td style="background:#FFEB3B;"></td><td>Acceptable; some pollutants may be a concern for a small number of sensitive people.</td></tr>
+                    <tr><td>101-150</td><td>Unhealthy for Sensitive Groups</td><td style="background:#FF9800;"></td><td>Sensitive groups may experience health effects.</td></tr>
+                    <tr><td>151-200</td><td>Unhealthy</td><td style="background:#F44336;"></td><td>Everyone may begin to experience health effects.</td></tr>
+                    <tr><td>201-300</td><td>Very Unhealthy</td><td style="background:#9C27B0;"></td><td>Health alert: everyone may experience more serious health effects.</td></tr>
+                    <tr><td>301-500</td><td>Hazardous</td><td style="background:#7E0023;"></td><td>Health warnings of emergency conditions.</td></tr>
+                </tbody>
+            </table>
+            <p style="font-size:13px;margin-top:1em;">
+                <b>Note:</b> AQI is calculated per US EPA standards. For more details, see <a href="https://www.airnow.gov/aqi/aqi-basics/" target="_blank">AirNow AQI Basics</a>.
+            </p>
+        </div>
+    </div>
+`);
+            
 
             $('.loader').hide();
         })
