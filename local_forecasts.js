@@ -37,28 +37,23 @@ function easing(t) {
 }
 
 
-function pollutant_details(code) {
-    var pollutant_details = [];
-    if (code == "no2" || code == "1") {
-        pollutant_details.name = "<b>Nitrogen Dioxide</b> (NO<sub>2</sub>)";
-        pollutant_details.id= 1;
-    }
-
-    if (code == "so2" || code == "2") {
-        pollutant_details.name = "<b>Sulfur Dioxide</b> (SO<sub>2</sub>)";
-        pollutant_details.id= 2;
-    }
-    if (code == "pm25" || code == "3") {
-        pollutant_details.name = "<b>Particulate Matter</b> (PM<sub>2.5</sub>)";
-        pollutant_details.id= 3;
-    }
-
-    if (code == "o3" || code == "4") {
-        pollutant_details.name = "<b>Ozone</b> (O<sub>3</sub>)";
-        pollutant_details.id= 4;
-    }
-
-    return pollutant_details;
+function pollutant_details(code, format = "full") {
+    const pollutants = {
+        no2:  { name: "Nitrogen Dioxide", abbr: "NO₂", id: 1 },
+        "1":  { name: "Nitrogen Dioxide", abbr: "NO₂", id: 1 },
+        so2:  { name: "Sulfur Dioxide",   abbr: "SO₂", id: 2 },
+        "2":  { name: "Sulfur Dioxide",   abbr: "SO₂", id: 2 },
+        pm25: { name: "Particulate Matter", abbr: "PM₂.₅", id: 3 },
+        "3":  { name: "Particulate Matter", abbr: "PM₂.₅", id: 3 },
+        o3:   { name: "Ozone",            abbr: "O₃", id: 4 },
+        "4":  { name: "Ozone",            abbr: "O₃", id: 4 }
+    };
+    const p = pollutants[code?.toString().toLowerCase()];
+    if (!p) return format === "both" ? { name: "Unknown", abbr: "N/A" } : "N/A";
+    if (format === "abbr") return p.abbr;
+    if (format === "full") return `${p.name} (${p.abbr})`;
+    if (format === "both") return { name: p.name, abbr: p.abbr, id: p.id };
+    return "N/A";
 }
 
 function rewritePercentage(percentage) {
@@ -1294,6 +1289,49 @@ function readApiBaker(options = {}) {
                     $(`#${tabId}`).append(`<div class="plot-container" id="${plot.id}"></div><div class="aqi-container" id="aqi-${plot.id}"></div>`);
                 }
 
+                tabsList.append(`
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" id="tab-info" data-bs-toggle="pill" href="#info_tab" role="tab" aria-controls="info_tab" aria-selected="false">
+            Info
+        </a>
+    </li>
+`);
+tabsContainer.append(`
+    <div class="tab-pane fade" id="info_tab" role="tabpanel" aria-labelledby="tab-info">
+        <div class="info-tab-content" style="padding: 1.5em;">
+            <h4>Model Sources</h4>
+            <ul>
+                <li><b>NO₂:</b> NASA GEOS-CF, NASA Pandora</li>
+                <li><b>PM₂.₅:</b> NASA GEOS-FP+ML, AirNow</li>
+                <li><b>O₃:</b> NASA GEOS-CF</li>
+            </ul>
+            <h4 style="margin-top:1em;">AQI Scale (US EPA)</h4>
+            <table class="table table-sm table-bordered" style="max-width:500px;">
+                <thead>
+                    <tr>
+                        <th>AQI</th>
+                        <th>Level</th>
+                        <th>Color</th>
+                        <th>Health Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>0-50</td><td>Good</td><td style="background:#4CAF50;"></td><td>Air quality is satisfactory.</td></tr>
+                    <tr><td>51-100</td><td>Moderate</td><td style="background:#FFEB3B;"></td><td>Acceptable; some pollutants may be a concern for a small number of sensitive people.</td></tr>
+                    <tr><td>101-150</td><td>Unhealthy for Sensitive Groups</td><td style="background:#FF9800;"></td><td>Sensitive groups may experience health effects.</td></tr>
+                    <tr><td>151-200</td><td>Unhealthy</td><td style="background:#F44336;"></td><td>Everyone may begin to experience health effects.</td></tr>
+                    <tr><td>201-300</td><td>Very Unhealthy</td><td style="background:#9C27B0;"></td><td>Health alert: everyone may experience more serious health effects.</td></tr>
+                    <tr><td>301-500</td><td>Hazardous</td><td style="background:#7E0023;"></td><td>Health warnings of emergency conditions.</td></tr>
+                </tbody>
+            </table>
+            <p style="font-size:13px;margin-top:1em;">
+                <b>Note:</b> AQI is calculated per US EPA standards. For more details, see <a href="https://www.airnow.gov/aqi/aqi-basics/" target="_blank">AirNow AQI Basics</a>.
+            </p>
+        </div>
+    </div>
+`);
+
+
                 const siteTimeZone = timezone;
                 const now = new Date();
                 const pad = n => n.toString().padStart(2, '0');
@@ -1693,15 +1731,10 @@ function generateAqiElement(aqiValue, pollutant, userTimeZone, currentHour) {
     return `
         <div class="prediction-box" style="background: #80808017;">
             <h5>${hourStr}</h5>
+            <span class="time"> US AQI (Primary Pollutant: ${pollutant_details("pm25", format="abbr")})</span>
             <h2>${aqiValue !== null ? aqiValue : '--'}</h2>
             <div class="aqi-scale-container">
                 <div class="aqi-scale">
-                    <div class="aqi-scale-step" style="background-color: #4CAF50;" title="Good (0-50)"></div>
-                    <div class="aqi-scale-step" style="background-color: #FFEB3B;" title="Moderate (51-100)"></div>
-                    <div class="aqi-scale-step" style="background-color: #FF9800;" title="Unhealthy for Sensitive Groups (101-150)"></div>
-                    <div class="aqi-scale-step" style="background-color: #F44336;" title="Unhealthy (151-200)"></div>
-                    <div class="aqi-scale-step" style="background-color: #9C27B0;" title="Very Unhealthy (201-300)"></div>
-                    <div class="aqi-scale-step" style="background-color: #7E0023;" title="Hazardous (301-500)"></div>
                 </div>
                 <div class="aqi-indicator" style="left: ${indicatorPosition}%;"></div>
             </div>
@@ -1963,6 +1996,7 @@ function readAirNow(options = {}) {
 
             const tabsList = $('<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist"></ul>');
             tabsNav.append(tabsList);
+            
 
             const plots = [
                 { id: "main_plot_for_airnow", title: "PM 2.5 Forecasts", data: masterData },
@@ -1986,6 +2020,9 @@ function readAirNow(options = {}) {
                 `);
             });
 
+            
+
+            
             $(".nav-link").on("click", function () {
                 $(".tab-pane").removeClass("active show");
                 $($(this).attr("href")).addClass("active show");
@@ -2013,7 +2050,8 @@ function readAirNow(options = {}) {
             
                 window.dispatchEvent(new Event('resize'));
             });
-
+            
+            
             const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
             const currentDate = new Date();
             const currentDateString = currentDate.toISOString().split('T')[0];
