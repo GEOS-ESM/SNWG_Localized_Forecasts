@@ -1534,7 +1534,7 @@ function readApiBaker(options = {}) {
 
             // Generate metrics HTML: 2 boxes, each with average and change rate below
             const metricsHtml = `
-            <div class="xvg_aqi-container" style="display:flex;gap:20px;">
+            <div class="xvg_aqi-container">
             <div class="d-xvg" style="flex:1;">
             <div class="xvg_aqi me-3" style="font-size:2em;">${todayAvg !== 'N/A' ? todayAvg.toFixed(2) : '--'}</div>
             <div class="xvg_aqi-change">Today Avg</div>
@@ -1780,8 +1780,8 @@ function generateAqiElement(aqiValue, pollutant, userTimeZone, currentHour) {
         <div class="prediction-box" style="background: #80808017;">
             <h5>${hourStr}</h5>
             <span class="time"> US AQI (Primary Pollutant: ${pollutant_details(pollutant, format="abbr")})</span>
-            <h2>${aqiValue !== null ? aqiValue : '--'}</h2>
-            <h4>${matchingLevel.level !== null ? matchingLevel.level : '--'} </h4>
+                        <h2>${aqiValue !== null ? aqiValue : '--'}</h2>
+            <h4>${matchingLevel && matchingLevel.level ? matchingLevel.level : '--'}</h4>
             
             <div class="aqi-scale-container">
                 <div class="aqi-scale">
