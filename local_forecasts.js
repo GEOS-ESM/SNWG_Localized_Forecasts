@@ -39,20 +39,65 @@ function easing(t) {
 
 function pollutant_details(code, format = "full") {
     const pollutants = {
-        no2:  { name: "Nitrogen Dioxide", abbr: "NO₂", id: 1 },
-        "1":  { name: "Nitrogen Dioxide", abbr: "NO₂", id: 1 },
-        so2:  { name: "Sulfur Dioxide",   abbr: "SO₂", id: 2 },
-        "2":  { name: "Sulfur Dioxide",   abbr: "SO₂", id: 2 },
-        pm25: { name: "Particulate Matter", abbr: "PM₂.₅", id: 3 },
-        "3":  { name: "Particulate Matter", abbr: "PM₂.₅", id: 3 },
-        o3:   { name: "Ozone",            abbr: "O₃", id: 4 },
-        "4":  { name: "Ozone",            abbr: "O₃", id: 4 }
+        no2:  { 
+            name: "Nitrogen Dioxide", 
+            abbr: "NO<sub>2</sub>", 
+            id: 1,
+            desc: `NO<sub>2</sub> is a gas emitted from burning fossil fuels, e.g., by vehicles or power plants (<a href="https://www.epa.gov/no2-pollution/basic-information-about-no2" target="_blank">click to learn more</a>).`
+        },
+        "1":  { 
+            name: "Nitrogen Dioxide", 
+            abbr: "NO<sub>2</sub>", 
+            id: 1,
+            desc: `NO<sub>2</sub> is a gas emitted from burning fossil fuels, e.g., by vehicles or power plants (<a href="https://www.epa.gov/no2-pollution/basic-information-about-no2" target="_blank">click to learn more</a>).`
+        },
+        so2:  { 
+            name: "Sulfur Dioxide",   
+            abbr: "SO<sub>2</sub>", 
+            id: 2,
+            desc: `SO<sub>2</sub> is a gas produced by volcanic eruptions and industrial processes (<a href="https://www.epa.gov/so2-pollution/sulfur-dioxide-basics" target="_blank">click to learn more</a>).`
+        },
+        "2":  { 
+            name: "Sulfur Dioxide",   
+            abbr: "SO<sub>2</sub>", 
+            id: 2,
+            desc: `SO<sub>2</sub> is a gas produced by volcanic eruptions and industrial processes (<a href="https://www.epa.gov/so2-pollution/sulfur-dioxide-basics" target="_blank">click to learn more</a>).`
+        },
+        pm25: { 
+            name: "Particulate Matter", 
+            abbr: "PM<sub>2.5</sub>", 
+            id: 3,
+            desc: `PM<sub>2.5</sub> is a mix of tiny particles such as dust, soot, dirt, and smoke (<a href="https://www.epa.gov/pm-pollution/particulate-matter-pm-basics" target="_blank">click to learn more</a>).`
+        },
+        "3":  { 
+            name: "Particulate Matter", 
+            abbr: "PM<sub>2.5</sub>", 
+            id: 3,
+            desc: `PM<sub>2.5</sub> is a mix of tiny particles such as dust, soot, dirt, and smoke (<a href="https://www.epa.gov/pm-pollution/particulate-matter-pm-basics" target="_blank">click to learn more</a>).`
+        },
+        o3:   { 
+            name: "Ozone",            
+            abbr: "O<sub>3</sub>", 
+            id: 4,
+            desc: `Ozone at ground-level is harmful, and forms from reactions of other pollutants (<a href="https://www.epa.gov/ozone-pollution/ground-level-ozone-basics" target="_blank">click to learn more</a>).`
+        },
+        "4":  { 
+            name: "Ozone",            
+            abbr: "O<sub>3</sub>", 
+            id: 4,
+            desc: `Ozone at ground-level is harmful, and forms from reactions of other pollutants (<a href="https://www.epa.gov/ozone-pollution/ground-level-ozone-basics" target="_blank">click to learn more</a>).`
+        }
     };
     const p = pollutants[code?.toString().toLowerCase()];
-    if (!p) return format === "both" ? { name: "Unknown", abbr: "N/A" } : "N/A";
+    if (!p) {
+        if (format === "both") return { name: "Unknown", abbr: "N/A", desc: "No description available." };
+        if (format === "desc") return "No description available.";
+        return "N/A";
+    }
     if (format === "abbr") return p.abbr;
     if (format === "full") return `${p.name} (${p.abbr})`;
-    if (format === "both") return { name: p.name, abbr: p.abbr, id: p.id };
+    if (format === "desc") return p.desc;
+    if (format === "both") return { name: p.name, abbr: p.abbr, id: p.id, desc: p.desc };
     return "N/A";
 }
 
@@ -1280,6 +1325,8 @@ function readApiBaker(options = {}) {
                     `);
                     tabsContainer.append(`
                         <div class="tab-pane fade ${isActive} show" id="${tabId}" role="tabpanel" aria-labelledby="tab-${tabId}">
+                        <div class="frcst-plt-dets"> <h2>${pollutant_details(plot.param, "full")}</h2><p>${pollutant_details(plot.param, "desc")}</p></div>
+                        
                             <div class="plot-container" id="${plot.id}"></div>
                             <div class="aqi-container" id="aqi-${plot.id}"></div>
                         </div>
@@ -1557,9 +1604,9 @@ tabsContainer.append(`
         <div class="info-tab-content" style="padding: 1.5em;">
             <h4>Model Sources</h4>
             <ul>
-                <li><b>NO₂:</b> NASA GEOS-CF bias corrected using NASA Pandora and machine learning models</li>
-                <li><b>PM₂.₅:</b> NASA GEOS-FP bias corrected using AirNow observations and machine learning</li>
-                <li><b>O₃:</b> NASA GEOS-CF</li>
+                <li><b>NO<sub>2</sub>:</b> NASA GEOS-CF bias corrected using NASA Pandora and machine learning models</li>
+                <li><b>PM<sub>2.5</sub>:</b> NASA GEOS-FP bias corrected using AirNow observations and machine learning</li>
+                <li><b>O<sub>3</sub>:</b> NASA GEOS-CF</li>
             </ul>
             <h4 style="margin-top:1em;">AQI Scale (US EPA)</h4>
             <table class="table table-sm table-bordered">
@@ -1734,6 +1781,8 @@ function generateAqiElement(aqiValue, pollutant, userTimeZone, currentHour) {
             <h5>${hourStr}</h5>
             <span class="time"> US AQI (Primary Pollutant: ${pollutant_details(pollutant, format="abbr")})</span>
             <h2>${aqiValue !== null ? aqiValue : '--'}</h2>
+            <h4>${matchingLevel.level !== null ? matchingLevel.level : '--'} </h4>
+            
             <div class="aqi-scale-container">
                 <div class="aqi-scale">
                 </div>
