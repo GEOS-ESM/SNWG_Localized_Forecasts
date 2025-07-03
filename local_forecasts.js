@@ -1732,7 +1732,7 @@ function generateAqiElement(aqiValue, pollutant, userTimeZone, currentHour) {
     return `
         <div class="prediction-box" style="background: #80808017;">
             <h5>${hourStr}</h5>
-            <span class="time"> US AQI (Primary Pollutant: ${pollutant_details("pm25", format="abbr")})</span>
+            <span class="time"> US AQI (Primary Pollutant: ${pollutant_details(pollutant, format="abbr")})</span>
             <h2>${aqiValue !== null ? aqiValue : '--'}</h2>
             <div class="aqi-scale-container">
                 <div class="aqi-scale">
