@@ -1557,8 +1557,8 @@ tabsContainer.append(`
         <div class="info-tab-content" style="padding: 1.5em;">
             <h4>Model Sources</h4>
             <ul>
-                <li><b>NO₂:</b> NASA GEOS-CF, NASA Pandora</li>
-                <li><b>PM₂.₅:</b> NASA GEOS-FP+ML, AirNow</li>
+                <li><b>NO₂:</b> NASA GEOS-CF bias corrected using NASA Pandora and machine learning models</li>
+                <li><b>PM₂.₅:</b> NASA GEOS-FP bias corrected using AirNow observations and machine learning</li>
                 <li><b>O₃:</b> NASA GEOS-CF</li>
             </ul>
             <h4 style="margin-top:1em;">AQI Scale (US EPA)</h4>
