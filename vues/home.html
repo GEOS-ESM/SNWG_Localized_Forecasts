@@ -1,3 +1,4 @@
+
 <section class="wrapper image-wrapper bg-image bg-overlay bg-overlay-300">
     <div id='map'></div>
     <div id="map-hover-info" style="display:none; position:absolute; z-index:99999; pointer-events:none; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2); padding:8px; font-size:14px; min-width:120px;"></div>
@@ -42,22 +43,6 @@
         $('.forecasts_container').css('display', 'none');
     });
 
-    $(function() {
-        let isVisible = true;
-        $('#toggle-locations-box').on('click', function() {
-            if (isVisible) {
-                $('.locations-box').slideUp(300);
-                $(this).find('span').text('Show Locations');
-                $('#toggle-locations-icon').removeClass('bi-chevron-down').addClass('bi-chevron-up');
-            } else {
-                $('.locations-box').slideDown(300);
-                $(this).find('span').text('Hide Locations');
-                $('#toggle-locations-icon').removeClass('bi-chevron-up').addClass('bi-chevron-down');
-            }
-            isVisible = !isVisible;
-        });
-    });
-
 $(document).on('change', '#species-filter', function() {
     cleanupBanners();
     const selectedSpecies = $(this).val();
@@ -66,4 +51,39 @@ $(document).on('change', '#species-filter', function() {
 $(document).ready(function () {
     readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz",  "pm25");
 });
+
+
+
+
+    function getUrlParam(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+    }
+
+    $(function() {
+        // Check view parameter
+        const viewParam = getUrlParam('view');
+        if (viewParam === 'list') {
+            $('.locations-container').show();
+            $('#toggle-locations-box').find('span').text('Hide Locations');
+            $('#toggle-locations-icon').removeClass('bi-chevron-up').addClass('bi-chevron-down');
+        } else if (viewParam === 'globe') {
+            $('.locations-container').hide();
+        }
+        // ...rest of your code...
+        let isVisible = $('.locations-container').is(':visible');
+        $('#toggle-locations-box').on('click', function() {
+            if (isVisible) {
+                $('.locations-container').slideUp(300);
+                $(this).find('span').text('Show Locations');
+                $('#toggle-locations-icon').removeClass('bi-chevron-down').addClass('bi-chevron-up');
+            } else {
+                $('.locations-container').slideDown(300);
+                $(this).find('span').text('Hide Locations');
+                $('#toggle-locations-icon').removeClass('bi-chevron-up').addClass('bi-chevron-down');
+            }
+            isVisible = !isVisible;
+        });
+    });
+
 </script>
