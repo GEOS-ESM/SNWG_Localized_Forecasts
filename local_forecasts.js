@@ -2626,6 +2626,12 @@ function draw_plot(
                         stepmode: 'backward'
                     },
                     {
+                        count: 7,
+                        label: '1w',
+                        step: 'day',
+                        stepmode: 'backward'
+                    },
+                    {
                         count: 1,
                         label: '1m',
                         step: 'month',
@@ -2636,7 +2642,7 @@ function draw_plot(
                         label: 'All'
                     }
                 ]
-            }
+            },
         },
         yaxis: {
             autorange: true,
@@ -2688,6 +2694,58 @@ function draw_plot(
     };
 
     Plotly.newPlot(forecasts_div, traces, layout, {responsive: true});
+
+    $(`#${forecasts_div}`).on('plotly_relayout', function(e, d) {
+        if (d['xaxis.range[0]'] && d['xaxis.range[1]']) {
+            // Check if the range is about 7 days (1 week)
+            const start = new Date(d['xaxis.range[0]']);
+            const end = new Date(d['xaxis.range[1]']);
+            const diffDays = (end - start) / (1000 * 60 * 60 * 24);
+            if (diffDays > 6.5 && diffDays < 7.5) {
+                // Center the view on today
+                const today = new Date();
+                const center = today.getTime();
+                const halfWeek = 3.5 * 24 * 60 * 60 * 1000;
+                const newStart = new Date(center - halfWeek).toISOString();
+                const newEnd = new Date(center + halfWeek).toISOString();
+                Plotly.relayout(forecasts_div, {
+                    'xaxis.range': [newStart, newEnd]
+                });
+            }
+        }
+    });
+
+    const downloadDivId = `download-btns-${forecasts_div}`;
+    if (!$(`#${downloadDivId}`).length) {
+        $(`#${forecasts_div}`).before(`
+            <div class="download_plot_data" id="${downloadDivId}" style="margin-bottom:10px; text-align:right;">
+                <button class="btn btn-sm btn-outline-primary" id="download-csv-${forecasts_div}">Download CSV</button>
+                <button class="btn btn-sm btn-outline-secondary" id="download-json-${forecasts_div}">Download JSON</button>
+            </div>
+        `);
+
+        $(`#download-csv-${forecasts_div}`).on('click', function() {
+            const csv = formatToCSV(combined_dataset);
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `${forecasts_div}_data.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        $(`#download-json-${forecasts_div}`).on('click', function() {
+            const json = JSON.stringify(combined_dataset, null, 2);
+            const blob = new Blob([json], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `location_data.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    }
 }
 
 function get_plot(location_name, param, unit, forecasts_div, forecasts_resample_div,merge,precomputer_forecasts,historical){

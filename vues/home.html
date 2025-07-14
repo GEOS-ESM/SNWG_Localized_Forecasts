@@ -61,7 +61,7 @@ $(document).ready(function () {
     }
 
     $(function() {
-        // Check view parameter
+
         const viewParam = getUrlParam('view');
         if (viewParam === 'list') {
             $('.locations-container').show();
@@ -70,7 +70,6 @@ $(document).ready(function () {
         } else if (viewParam === 'globe') {
             $('.locations-container').hide();
         }
-        // ...rest of your code...
         let isVisible = $('.locations-container').is(':visible');
         $('#toggle-locations-box').on('click', function() {
             if (isVisible) {
