@@ -1633,7 +1633,20 @@ tabsContainer.append(`
         </div>
     </div>
 `);
-            
+
+
+            $(".nav-link").on("click", function () {
+                const targetTabId = $(this).attr("href").replace("#", "");
+                $(".tab-pane").removeClass("active show");
+                $(`#${targetTabId}`).addClass("active show");
+
+                $(`#${targetTabId} .plot-container`).each(function() {
+                    if (this.id) {
+                        Plotly.Plots.resize(this.id);
+                    }
+                });
+            });
+                        
 
             $('.loader').hide();
         })
@@ -2714,6 +2727,7 @@ function draw_plot(
             }
         }
     });
+    
 
     const downloadDivId = `download-btns-${forecasts_div}`;
     if (!$(`#${downloadDivId}`).length) {
