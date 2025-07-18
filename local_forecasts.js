@@ -672,7 +672,7 @@ function sitesArrayToGeoJSON(sites, param = "no2") {
             }
             
             else if (param === "pm25") {
-                aqi = currentForecast.pm25_aqi ?? currentForecast.pm25_conc_cnn ?? "N/A";
+                aqi = currentForecast.pm25_aqi ?? currentForecast.pm25_conc_cnn ?? calculateAqiForPm25(currentForecast.pm25) ?? "N/A";
             } else if (param === "o3") {
                 aqi = currentForecast.o3_aqi ?? "N/A";
             }
@@ -922,7 +922,7 @@ function add_the_banner(site, param) {
         const o3 = precomputed_forecasts?.[0]?.o3 || "--";  
         const o3_aqi = precomputed_forecasts?.[0]?.o3_aqi || "--";
         const pm25 = precomputed_forecasts?.[0]?.pm25 || "--";
-        const pm25_aqi = precomputed_forecasts?.[0]?.pm25_aqi || "--";
+        const pm25_aqi = precomputed_forecasts?.[0]?.pm25_aqi || calculateAqiForPm25(pm25) || "--";
 
 
         let aqiValue = 'N/A';
@@ -931,7 +931,9 @@ function add_the_banner(site, param) {
             source = "NASA GEOS CF, NASA Pandora";
         } else if (param === "pm25" || param === "pm2.5") {
             aqiValue = parseInt(pm25_aqi);
-            source = "NASA GEOS-FP, AirNow";
+            source = precomputed_forecasts?.[0]?.pm25_aqi 
+                ? "NASA GEOS-FP, AirNow"
+                : "NASA GEOS CF, NASA Pandora";
         } else if (param === "o3") {
             aqiValue = parseInt(o3_aqi)
             source = "NASA GEOS CF, NASA Pandora";
@@ -1151,7 +1153,30 @@ function readApiBaker(options = {}) {
                     masterData.master_pm25.push(forecast.pm25);
                 }
                 if (forecast.pm25_conc_cnn !== undefined) {
-                    masterData.master_pm25_conc_cnn.push(forecast.pm25_conc_cnn);
+                    // Check if forecast.local_time matches the current hour in its timezone
+                    let useCnn = false;
+                    if (forecast.local_time) {
+                        const forecastDate = new Date(forecast.local_time.replace(' ', 'T'));
+                        const now = new Date();
+                        // Get the forecast's timezone if available, otherwise use UTC
+                        const tz = forecast.timezone || "UTC";
+                        const nowLocal = new Date(now.toLocaleString("en-US", { timeZone: tz }));
+                        if (
+                            forecastDate.getFullYear() === nowLocal.getFullYear() &&
+                            forecastDate.getMonth() === nowLocal.getMonth() &&
+                            forecastDate.getDate() === nowLocal.getDate() &&
+                            forecastDate.getHours() === nowLocal.getHours()
+                        ) {
+                            useCnn = true;
+                        }
+                    }
+                    if (useCnn) {
+                        masterData.master_pm25_conc_cnn.push(forecast.pm25_conc_cnn);
+                        masterData.master_pm25_aqi.push(forecast.pm25_aqi);
+                    } else {
+                        masterData.master_pm25_conc_cnn.push(forecast.pm25);
+                        masterData.master_pm25_aqi.push(calculateAqiForPm25(forecast.pm25));
+                    }
                 }
                 if (forecast.corrected !== undefined) {
                     masterData.master_predicted.push(forecast.corrected);
@@ -1166,9 +1191,7 @@ function readApiBaker(options = {}) {
                 if (forecast.o3_aqi !== undefined) {
                     masterData.master_o3_aqi.push(forecast.o3_aqi);
                 }
-                if (forecast.pm25_aqi !== undefined) {
-                    masterData.master_pm25_aqi.push(forecast.pm25_aqi);
-                }
+                
                 // For corrected, calculate AQI if not present
                 if (forecast.corrected !== undefined) {
                     let aqi = forecast.no2_aqi;
@@ -1393,6 +1416,7 @@ function readApiBaker(options = {}) {
 
                 if (plot.displayAQI) {
                     const columnKey = plot.columns[0].column;
+                    console.log(columnKey);
                     const values = masterData[columnKey] || [];
                     const datetimes = masterData.master_datetime || [];
                     const siteTimeZone = timezone;

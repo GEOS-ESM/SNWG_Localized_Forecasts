@@ -6,14 +6,14 @@
     "timezone": "Africa/Accra",
     "message": "200",
     "status": "200",
-    "latest_update": "2025-07-17 10:00:00",
+    "latest_update": "2025-07-17 20:00:00",
     "sources": [
         "merra2",
         "geoscf"
     ],
     "metrics": {
         "validation_score": "N/A",
-        "total_observation": 108,
+        "total_observation": 111,
         "performance": {
             "metrics": [
                 {
@@ -31,7 +31,7 @@
             ]
         },
         "start_date": "2025-07-07 00:00:00",
-        "end_date": "2025-07-20 09:00:00"
+        "end_date": "2025-07-20 18:00:00"
     },
     "forecasts": [
         {
@@ -1642,16 +1642,61 @@
         {
             "time": "2025-07-20 09:00:00",
             "local_time": "2025-07-20 09:00:00",
-            "no2": 0.54,
+            "no2": 0.47,
             "no2_aqi": 1.0,
-            "o3": 26.28,
-            "o3_aqi": 24.0,
-            "pm25": 9.21,
+            "o3": 26.68,
+            "o3_aqi": 25.0,
+            "pm25": 8.96,
             "pm25_aqi": null,
-            "rh": 0.83,
-            "t10m": 298.16,
+            "rh": 0.82,
+            "t10m": 298.35,
             "tprec": 0.0,
-            "hcho": 1.1,
+            "hcho": 1.11,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-07-20 12:00:00",
+            "local_time": "2025-07-20 12:00:00",
+            "no2": 0.34,
+            "no2_aqi": 1.0,
+            "o3": 25.66,
+            "o3_aqi": 24.0,
+            "pm25": 7.28,
+            "pm25_aqi": null,
+            "rh": 0.79,
+            "t10m": 298.52,
+            "tprec": 0.0,
+            "hcho": 1.05,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-07-20 15:00:00",
+            "local_time": "2025-07-20 15:00:00",
+            "no2": 0.58,
+            "no2_aqi": 0.0,
+            "o3": 23.94,
+            "o3_aqi": 22.0,
+            "pm25": 7.6,
+            "pm25_aqi": null,
+            "rh": 0.84,
+            "t10m": 297.71,
+            "tprec": 0.0,
+            "hcho": 1.01,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-07-20 18:00:00",
+            "local_time": "2025-07-20 18:00:00",
+            "no2": 1.52,
+            "no2_aqi": 1.0,
+            "o3": 22.1,
+            "o3_aqi": 20.0,
+            "pm25": 10.19,
+            "pm25_aqi": null,
+            "rh": 0.92,
+            "t10m": 296.72,
+            "tprec": 0.0,
+            "hcho": 1.21,
             "pm25_conc_cnn": null
         }
     ]
