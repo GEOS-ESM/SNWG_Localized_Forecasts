@@ -1269,7 +1269,7 @@ function readApiBaker(options = {}) {
                     param: "pm25",
                     tabName: "Fine Particulate Matter (PM<sub>2.5</sub>)",
                     tabId: "tab_pm25",
-                    description: "PM2.5 Forecast",
+                    description: "NASA GEOS-CF PM2.5 Concentration Forecast",
                     columns: [
                         { column: "master_pm25_conc_cnn", name: "PM2.5", color: "green", width: 2 }
                     ],
