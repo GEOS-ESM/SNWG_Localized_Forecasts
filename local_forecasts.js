@@ -933,7 +933,7 @@ function add_the_banner(site, param) {
             aqiValue = parseInt(pm25_aqi);
             source = precomputed_forecasts?.[0]?.pm25_aqi 
                 ? "NASA GEOS-FP, AirNow"
-                : "NASA GEOS CF, NASA Pandora";
+                : "NASA GEOS CF";
         } else if (param === "o3") {
             aqiValue = parseInt(o3_aqi)
             source = "NASA GEOS CF, NASA Pandora";
