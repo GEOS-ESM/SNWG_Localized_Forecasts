@@ -1,0 +1,121 @@
+<script>
+    function getParamFromUrl(param) {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has(param)) return url.searchParams.get(param);
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+        const idx = pathParts.findIndex(p => p.toLowerCase() === param.toLowerCase());
+        if (idx !== -1 && pathParts.length > idx + 1) {
+            return decodeURIComponent(pathParts[idx + 1]);
+        }
+        return null;
+    }
+
+    const locationName = getParamFromUrl('location_name') || getParamFromUrl('location');
+    const pollutant = getParamFromUrl('pollutant');
+    const startDate = getParamFromUrl('start');
+    const endDate = getParamFromUrl('end');
+    const latest = getParamFromUrl('latest'); 
+
+    function filterForecasts(forecasts, pollutant, start, end, latest) {
+        return forecasts.filter(f => {
+            let dateOk = true;
+            let nowStr = null;
+            if (latest) {
+                const now = new Date();
+                now.setHours(0, 0, 0, 0);
+                nowStr = now.toISOString().slice(0, 10); 
+                dateOk = f.time >= nowStr;
+            } else {
+                if (start) dateOk = f.time >= start;
+                if (end && dateOk) dateOk = f.time <= end + " 23:59:59";
+            }
+            let pollutantOk = true;
+            if (pollutant) pollutantOk = (f.hasOwnProperty(pollutant) || f.hasOwnProperty(pollutant + "_aqi"));
+            return dateOk && pollutantOk;
+        });
+    }
+
+    function forecastsToCSV(forecasts, pollutant) {
+        if (!forecasts.length) return '';
+        let keys;
+        if (pollutant) {
+            keys = ['time', 'local_time', pollutant, pollutant + '_aqi'].filter(k =>
+                forecasts.some(f => f.hasOwnProperty(k))
+            );
+        } else {
+            keys = Object.keys(forecasts[0]);
+        }
+        const header = keys.join(',');
+        const rows = forecasts.map(f => keys.map(k => f[k] !== undefined ? f[k] : '').join(','));
+        return [header, ...rows].join('\n');
+    }
+
+    function renderResponse(site, latestForecast) {
+        return `
+        <div style="font-family:monospace; background:#f8f8f8; border-radius:8px; padding:18px; margin:18px 0;">
+            <h3 style="margin-top:0;">Site Info</h3>
+            <ul>
+                <li><b>Name:</b> ${site.site_name}</li>
+                <li><b>ID:</b> ${site.site_id !== null ? site.site_id : 'N/A'}</li>
+                <li><b>Lat:</b> ${site.site_lat}</li>
+                <li><b>Lon:</b> ${site.site_lon}</li>
+                <li><b>Species:</b> ${site.species}</li>
+            </ul>
+            <h3>Latest Forecast</h3>
+            <ul>
+                <li><b>Initialization Date:</b> ${latestForecast.forecast_initialization_date}</li>
+                <li><b>Species:</b> ${latestForecast.species}</li>
+                <li><b>Unit:</b> ${latestForecast.unit}</li>
+            </ul>
+            <h4>Forecast Data (CSV):</h4>
+            <pre style="max-width:100%;overflow-x:auto;background:#fff;border:1px solid #eee;padding:10px;">${latestForecast.data}</pre>
+        </div>
+        `;
+    }
+
+    if (locationName) {
+        const fileUrl = `precomputed/all_dts/${locationName}.json`;
+        fetch(fileUrl)
+            .then(response => {
+                if (!response.ok) throw new Error('Not found');
+                return response.json();
+            })
+            .then(data => {
+                const site = {
+                    site_name: data.location || locationName,
+                    site_id: data.site_id || null,
+                    site_lat: data.lat,
+                    site_lon: data.lon,
+                    species: pollutant || data.species
+                };
+
+                let filteredForecasts = [];
+                if (Array.isArray(data.forecasts)) {
+                    filteredForecasts = filterForecasts(
+                        data.forecasts,
+                        pollutant,
+                        startDate,
+                        endDate,
+                        latest
+                    );
+                }
+
+                const csvData = forecastsToCSV(filteredForecasts, pollutant);
+
+                const latestForecast = {
+                    forecast_initialization_date: data.latest_update || null,
+                    species: pollutant || data.species,
+                    unit: data.unit || "",
+                    data: csvData
+                };
+                document.body.innerHTML = renderResponse(site, latestForecast);
+            })
+            .catch(error => {
+                document.body.innerHTML = `<pre style="color:red;">Error: ${error.message}</pre>`;
+            });
+    } else {
+        document.body.innerHTML = `<pre style="color:red;">Error: location_name parameter missing in URL.</pre>`;
+    }
+
+
+</script>
