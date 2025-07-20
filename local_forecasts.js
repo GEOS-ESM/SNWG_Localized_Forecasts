@@ -627,80 +627,91 @@ function create_map(sites, param) {
     return map;
 }
 
-function sitesArrayToGeoJSON(sites, param = "no2") {
+function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
     return {
         type: "FeatureCollection",
-        features: sites.map(site => {
-           
-            const now = new Date();
-            const pad = n => n.toString().padStart(2, '0');
-            const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
-            const localYear = siteLocalNow.getFullYear();
-            const localMonth = pad(siteLocalNow.getMonth() + 1);
-            const localDate = pad(siteLocalNow.getDate());
-            const localHour = siteLocalNow.getHours();
-            const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(localHour)}`;
- 
-            let currentForecast = {};
-            if (param === "pm25") {
-                // For PM2.5, match if current hour is within any 3-hour window
-                currentForecast = (site.forecasts || []).find(forecast => {
-                    if (!forecast.local_time) return false;
-                    const forecastDate = forecast.local_time.slice(0, 10);
-                    const forecastHour = parseInt(forecast.local_time.slice(11, 13), 10);
-                    return (
-                        forecastDate === `${localYear}-${localMonth}-${localDate}` &&
-                        localHour >= forecastHour &&
-                        localHour < forecastHour + 3
-                    );
-                }) || {};
-            } else {
-                // For NO2 and O3, match exact hour
-                currentForecast = (site.forecasts || []).find(forecast => {
-                    if (!forecast.local_time) return false;
-                    const forecastHourStr = forecast.local_time.slice(0, 13);
-                    return forecastHourStr === currentLocalStr;
-                }) || {};
-            }
-            let value = "N/A";
-            let aqi = "N/A";
-            if (param === "no2") {
-                let no2_ppm = currentForecast.no2 !== undefined ? currentForecast.no2 / 1000 : undefined;
-                aqi = currentForecast.no2_aqi !== undefined
-                    ? currentForecast.no2_aqi
-                    : (no2_ppm !== undefined ? calculateAqiForNo2(no2_ppm) : "N/A");
-            }
-            
-            else if (param === "pm25") {
-                aqi = currentForecast.pm25_aqi ?? currentForecast.pm25_conc_cnn ?? calculateAqiForPm25(currentForecast.pm25) ?? "N/A";
-            } else if (param === "o3") {
-                aqi = currentForecast.o3_aqi ?? "N/A";
-            }
-            const aqiLevel = getAqiLevel(aqi, param);
+        features: sites
+            .filter(site => {
+                // Only include sites that have the selected source in their sources array
+                if (!Array.isArray(site.sources)) return false;
+                const siteSources = site.sources.map(s => s.toLowerCase());
+                const selectedSourceLower = (selectedSource || "").toLowerCase();
+                return siteSources.includes(selectedSourceLower);
+            })
+            .map(site => {
+                const now = new Date();
+                const pad = n => n.toString().padStart(2, '0');
+                const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
+                const localYear = siteLocalNow.getFullYear();
+                const localMonth = pad(siteLocalNow.getMonth() + 1);
+                const localDate = pad(siteLocalNow.getDate());
+                const localHour = siteLocalNow.getHours();
+                const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(localHour)}`;
 
-            let coordinates = [site.lon, site.lat];
+                let matchingForecast = null;
+                const siteSources = site.sources.map(s => s.toLowerCase());
+                const isMerra2 = siteSources.includes("merra2");
 
-            return {
-                type: "Feature",
-                properties: {
-                    location_id: site.location_id || site.location || "unknown_id",
-                    location_name: site.location || "Unknown Location",
-                    time_zone: site.timezone,
-                    forecasted_value: value,
-                    aqi_value: parseInt(aqi),
-                    aqi_color: aqiLevel.color,
-                    status: "active",
-                    observation_source: "NASA",
-                    parameter: param,
-                    obs_options: [currentForecast || null],
-                    precomputed_forecasts: [currentForecast || null]
-                },
-                geometry: {
-                    type: "Point",
-                    coordinates: coordinates
+                if (isMerra2) {
+                    // For MERRA2, use 3-hour window match
+                    matchingForecast = (site.forecasts || []).find(forecast => {
+                        if (!forecast.local_time) return false;
+                        const forecastStart = new Date(forecast.local_time.replace(' ', 'T'));
+                        const forecastEnd = new Date(forecastStart.getTime() + 3 * 60 * 60 * 1000);
+                        const nowLocal = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
+                        return nowLocal >= forecastStart && nowLocal < forecastEnd;
+                    });
+                } else {
+                    // For other sources, match exact hour
+                    matchingForecast = (site.forecasts || []).find(forecast => {
+                        if (!forecast.local_time) return false;
+                        const forecastHourStr = forecast.local_time.slice(0, 13);
+                        return forecastHourStr === currentLocalStr;
+                    });
                 }
-            };
-        })
+
+                matchingForecast = matchingForecast || {};
+
+                // Determine pollutant to display
+                const selected = (site.species || "").toLowerCase();
+                const isPm25 = selected === "pm25" || selected === "pm2.5";
+
+                let aqi = "N/A";
+                if (selected === "no2") {
+                    let no2_ppm = matchingForecast.no2 !== undefined ? matchingForecast.no2 / 1000 : undefined;
+                    aqi = matchingForecast.no2_aqi !== undefined
+                        ? matchingForecast.no2_aqi
+                        : (no2_ppm !== undefined ? calculateAqiForNo2(no2_ppm) : "N/A");
+                } else if (isPm25) {
+                    aqi = matchingForecast.pm25_aqi ?? matchingForecast.pm25_conc_cnn ?? calculateAqiForPm25(matchingForecast.pm25) ?? "N/A";
+                } else if (selected === "o3") {
+                    aqi = matchingForecast.o3_aqi ?? "N/A";
+                }
+                const aqiLevel = getAqiLevel(aqi, selected);
+
+                let coordinates = [site.lon, site.lat];
+
+                return {
+                    type: "Feature",
+                    properties: {
+                        location_id: site.location_id || site.location || "unknown_id",
+                        location_name: site.location || "Unknown Location",
+                        time_zone: site.timezone,
+                        forecasted_value: aqi,
+                        aqi_value: parseInt(aqi),
+                        aqi_color: aqiLevel.color,
+                        status: "active",
+                        observation_source: "NASA",
+                        parameter: selected,
+                        obs_options: [matchingForecast || null],
+                        precomputed_forecasts: [matchingForecast || null]
+                    },
+                    geometry: {
+                        type: "Point",
+                        coordinates: coordinates
+                    }
+                };
+            })
     };
 }
 
@@ -747,7 +758,7 @@ function generateSmallAqiBox(aqiValue, pollutant) {
     `;
 }
 
-function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
+function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
 
     if (window.currentForecastData) window.currentForecastData = null;
     showLoadingDiv();
@@ -763,7 +774,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
             return JSON.parse(sanitizedData); 
         })
         .then(data => {
-            console.log("Decompressed and parsed data:", data);
+             console.log("Selected source:", selectedSource);
             data.sort((a, b) => {
                 const nameA = (a.location_name || a.location || '').toLowerCase();
                 const nameB = (b.location_name || b.location || '').toLowerCase();
@@ -778,7 +789,6 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
                 return;
             }
 
-
             $(".pollutant-banner-o").empty();
 
             const now = new Date();
@@ -786,40 +796,36 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
             const filteredSites = [];
 
             data.forEach(site => {
-                const siteSpecies = (site.species || "").toLowerCase();
-                const selected = (selectedSpecies || "").toLowerCase();
-                const pm25Aliases = ["pm25", "pm2.5", "pm 2.5", "pm_2.5", "pm-2.5", "pm 25", "pm_25", "pm-25"];
-                const isPm25 = pm25Aliases.includes(selected.replace(/\s|_|-/g, ""));
-                const isSpeciesMatch = isPm25
-                    ? pm25Aliases.includes(siteSpecies.replace(/\s|_|-/g, ""))
-                    : siteSpecies === selected;
-            
-                if (!isSpeciesMatch) return;
+                // Filter by source (not species)
+                if (!Array.isArray(site.sources)) return;
+                console.log("Site sources:", site.sources);
+                const siteSources = site.sources.map(s => s.toLowerCase());
+                const selectedSourceLower = (selectedSource || "").toLowerCase();
+                if (!siteSources.includes(selectedSourceLower)) return;
                 if (!site.timezone || typeof site.timezone !== "string" || site.timezone === "null") return;
-            
+
                 const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
                 const localYear = siteLocalNow.getFullYear();
                 const localMonth = pad(siteLocalNow.getMonth() + 1);
                 const localDate = pad(siteLocalNow.getDate());
                 const localHour = siteLocalNow.getHours();
-            
+
                 let matchingForecast = null;
-            
-                if (isPm25) {
-                    // For PM2.5, always use 3-hour window match
+
+                // 3-hour average applies only for sources == "merra2"
+                const isMerra2 = siteSources.includes("merra2");
+
+                if (isMerra2) {
+                    // For MERRA2, always use 3-hour window match
                     matchingForecast = (site.forecasts || []).find(forecast => {
                         if (!forecast.local_time) return false;
-                        // Parse forecast start time as Date
                         const forecastStart = new Date(forecast.local_time.replace(' ', 'T'));
-                        // Forecast end is 3 hours later
                         const forecastEnd = new Date(forecastStart.getTime() + 3 * 60 * 60 * 1000);
-                        // Current site-local time
                         const nowLocal = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
                         return nowLocal >= forecastStart && nowLocal < forecastEnd;
                     });
-
-                   
                 } else {
+                    // For other sources, match exact hour
                     const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(localHour)}`;
                     matchingForecast = (site.forecasts || []).find(forecast => {
                         if (!forecast.local_time) return false;
@@ -827,16 +833,23 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
                         return forecastHourStr === currentLocalStr;
                     });
                 }
-            
+
                 matchingForecast = matchingForecast || {};
-            
+
+                // Determine which pollutant to display (NO2, PM2.5, O3, etc.)
+                // You may want to pass this as a parameter, here we try to infer from site.species
+                const selected = (site.species || "").toLowerCase();
+                const isPm25 = selected === "pm25" || selected === "pm2.5";
+
                 let forecasted_value = "N/A";
                 if (selected === "no2" && matchingForecast.corrected !== undefined ) {
                     forecasted_value = (matchingForecast.corrected / 1000).toFixed(3);
                 } else if (isPm25) {
                     forecasted_value = matchingForecast.pm25_aqi;
+                } else if (selected === "o3" && matchingForecast.o3_aqi !== undefined) {
+                    forecasted_value = matchingForecast.o3_aqi;
                 }
-            
+
                 if (forecasted_value !== "N/A") {
                     const obsOptions = {};
                     Object.keys(matchingForecast).forEach(key => {
@@ -847,7 +860,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
                             };
                         }
                     });
-            
+
                     const siteData = {
                         location_name: site.location,
                         observation_source: "NASA",
@@ -860,8 +873,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
                         obs_options: JSON.stringify(obsOptions),
                     };
 
-            
-                    add_the_banner(siteData, selectedSpecies);
+                    add_the_banner(siteData, selected);
                     filteredSites.push({
                         ...site,
                         forecasted_value: forecasted_value
@@ -869,9 +881,9 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSpecies) {
                 }
             });
 
-            const geojson = sitesArrayToGeoJSON(filteredSites, selectedSpecies);
+            const geojson = sitesArrayToGeoJSON(filteredSites, selectedSource);
 
-            create_map(geojson, selectedSpecies);
+            create_map(geojson, selectedSource);
 
             hideLoadingDiv();
         })
