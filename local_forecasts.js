@@ -1163,33 +1163,18 @@ function readApiBaker(options = {}) {
                 }
                 if (forecast.pm25 !== undefined) {
                     masterData.master_pm25.push(forecast.pm25);
-                }
-                if (forecast.pm25_conc_cnn !== undefined) {
-                    // Check if forecast.local_time matches the current hour in its timezone
-                    let useCnn = false;
-                    if (forecast.local_time) {
-                        const forecastDate = new Date(forecast.local_time.replace(' ', 'T'));
-                        const now = new Date();
-                        // Get the forecast's timezone if available, otherwise use UTC
-                        const tz = forecast.timezone || "UTC";
-                        const nowLocal = new Date(now.toLocaleString("en-US", { timeZone: tz }));
-                        if (
-                            forecastDate.getFullYear() === nowLocal.getFullYear() &&
-                            forecastDate.getMonth() === nowLocal.getMonth() &&
-                            forecastDate.getDate() === nowLocal.getDate() &&
-                            forecastDate.getHours() === nowLocal.getHours()
-                        ) {
-                            useCnn = true;
-                        }
-                    }
-                    if (useCnn) {
-                        masterData.master_pm25_conc_cnn.push(forecast.pm25_conc_cnn);
+                    if (forecast.pm25_aqi !== undefined) {
                         masterData.master_pm25_aqi.push(forecast.pm25_aqi);
                     } else {
-                        masterData.master_pm25_conc_cnn.push(forecast.pm25);
                         masterData.master_pm25_aqi.push(calculateAqiForPm25(forecast.pm25));
                     }
+                    if (forecast.pm25_conc_cnn !== undefined) {
+                        masterData.master_pm25_conc_cnn.push(forecast.pm25_conc_cnn);
+                    } else {
+                        masterData.master_pm25_conc_cnn.push(forecast.pm25);
+                    }
                 }
+
                 if (forecast.corrected !== undefined) {
                     masterData.master_predicted.push(forecast.corrected);
                 }
