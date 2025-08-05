@@ -812,11 +812,9 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
 
                 let matchingForecast = null;
 
-                // 3-hour average applies only for sources == "merra2"
                 const isMerra2 = siteSources.includes("merra2");
 
                 if (isMerra2) {
-                    // For MERRA2, always use 3-hour window match
                     matchingForecast = (site.forecasts || []).find(forecast => {
                         if (!forecast.local_time) return false;
                         const forecastStart = new Date(forecast.local_time.replace(' ', 'T'));
@@ -825,7 +823,6 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
                         return nowLocal >= forecastStart && nowLocal < forecastEnd;
                     });
                 } else {
-                    // For other sources, match exact hour
                     const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(localHour)}`;
                     matchingForecast = (site.forecasts || []).find(forecast => {
                         if (!forecast.local_time) return false;
@@ -836,8 +833,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
 
                 matchingForecast = matchingForecast || {};
 
-                // Determine which pollutant to display (NO2, PM2.5, O3, etc.)
-                // You may want to pass this as a parameter, here we try to infer from site.species
+
                 const selected = (site.species || "").toLowerCase();
                 const isPm25 = selected === "pm25" || selected === "pm2.5";
 
