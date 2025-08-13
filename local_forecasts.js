@@ -1159,15 +1159,19 @@ function readApiBaker(options = {}) {
                 }
                 if (forecast.pm25 !== undefined) {
                     masterData.master_pm25.push(forecast.pm25);
-                    if (forecast.pm25_aqi !== undefined) {
+                    if (forecast.pm25_aqi !== undefined && forecast.pm25_aqi !== null) {
                         masterData.master_pm25_aqi.push(forecast.pm25_aqi);
-                    } else {
+                    } else if (forecast.pm25 !== undefined && forecast.pm25 !== null) {
                         masterData.master_pm25_aqi.push(calculateAqiForPm25(forecast.pm25));
-                    }
-                    if (forecast.pm25_conc_cnn !== undefined) {
-                        masterData.master_pm25_conc_cnn.push(forecast.pm25_conc_cnn);
                     } else {
+                        masterData.master_pm25_aqi.push('N/A');
+                    }
+                    if (forecast.pm25_conc_cnn !== undefined && forecast.pm25_conc_cnn !== null) {
+                        masterData.master_pm25_conc_cnn.push(forecast.pm25_conc_cnn);
+                    } else if (forecast.pm25 !== undefined && forecast.pm25 !== null) {
                         masterData.master_pm25_conc_cnn.push(forecast.pm25);
+                    } else {
+                        masterData.master_pm25_conc_cnn.push('N/A');
                     }
                 }
 
