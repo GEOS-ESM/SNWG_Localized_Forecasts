@@ -6,14 +6,14 @@
     "timezone": "Africa/Malabo",
     "message": "200",
     "status": "200",
-    "latest_update": "2025-09-04 12:00:00",
+    "latest_update": "2025-09-04 21:00:00",
     "sources": [
         "merra2",
         "geoscf"
     ],
     "metrics": {
         "validation_score": "N/A",
-        "total_observation": 109,
+        "total_observation": 111,
         "performance": {
             "metrics": [
                 {
@@ -31,7 +31,7 @@
             ]
         },
         "start_date": "2025-08-25 00:00:00",
-        "end_date": "2025-09-07 12:00:00"
+        "end_date": "2025-09-07 18:00:00"
     },
     "forecasts": [
         {
@@ -1657,16 +1657,46 @@
         {
             "time": "2025-09-07 12:00:00",
             "local_time": "2025-09-07 13:00:00",
-            "no2": 0.1,
+            "no2": 0.13,
             "no2_aqi": 0.0,
-            "o3": 20.29,
+            "o3": 19.98,
             "o3_aqi": 19.0,
-            "pm25": 9.35,
+            "pm25": 9.64,
             "pm25_aqi": null,
-            "rh": 0.8,
-            "t10m": 299.34,
+            "rh": 0.81,
+            "t10m": 299.27,
             "tprec": 0.0,
-            "hcho": 0.87,
+            "hcho": 0.86,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 15:00:00",
+            "local_time": "2025-09-07 16:00:00",
+            "no2": 0.31,
+            "no2_aqi": 0.0,
+            "o3": 18.43,
+            "o3_aqi": 17.0,
+            "pm25": 10.6,
+            "pm25_aqi": null,
+            "rh": 0.85,
+            "t10m": 298.68,
+            "tprec": 0.0,
+            "hcho": 0.72,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 18:00:00",
+            "local_time": "2025-09-07 19:00:00",
+            "no2": 0.46,
+            "no2_aqi": 0.0,
+            "o3": 17.16,
+            "o3_aqi": 16.0,
+            "pm25": 11.1,
+            "pm25_aqi": null,
+            "rh": 0.86,
+            "t10m": 298.32,
+            "tprec": 0.0,
+            "hcho": 0.56,
             "pm25_conc_cnn": null
         }
     ]

@@ -6,14 +6,14 @@
     "timezone": "Africa/Monrovia",
     "message": "200",
     "status": "200",
-    "latest_update": "2025-09-04 12:00:00",
+    "latest_update": "2025-09-04 21:00:00",
     "sources": [
         "merra2",
         "geoscf"
     ],
     "metrics": {
         "validation_score": "N/A",
-        "total_observation": 109,
+        "total_observation": 111,
         "performance": {
             "metrics": [
                 {
@@ -31,7 +31,7 @@
             ]
         },
         "start_date": "2025-08-25 00:00:00",
-        "end_date": "2025-09-07 12:00:00"
+        "end_date": "2025-09-07 18:00:00"
     },
     "forecasts": [
         {
@@ -1659,14 +1659,44 @@
             "local_time": "2025-09-07 12:00:00",
             "no2": 0.11,
             "no2_aqi": 0.0,
-            "o3": 19.27,
+            "o3": 19.18,
             "o3_aqi": 18.0,
-            "pm25": 7.54,
+            "pm25": 7.55,
+            "pm25_aqi": null,
+            "rh": 0.72,
+            "t10m": 300.12,
+            "tprec": 0.0,
+            "hcho": 1.24,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 15:00:00",
+            "local_time": "2025-09-07 15:00:00",
+            "no2": 0.17,
+            "no2_aqi": 0.0,
+            "o3": 18.84,
+            "o3_aqi": 17.0,
+            "pm25": 7.9,
             "pm25_aqi": null,
             "rh": 0.73,
-            "t10m": 300.02,
+            "t10m": 299.83,
             "tprec": 0.0,
-            "hcho": 1.25,
+            "hcho": 1.26,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 18:00:00",
+            "local_time": "2025-09-07 18:00:00",
+            "no2": 0.64,
+            "no2_aqi": 0.0,
+            "o3": 17.79,
+            "o3_aqi": 16.0,
+            "pm25": 10.78,
+            "pm25_aqi": null,
+            "rh": 0.79,
+            "t10m": 298.66,
+            "tprec": 0.0,
+            "hcho": 1.79,
             "pm25_conc_cnn": null
         }
     ]

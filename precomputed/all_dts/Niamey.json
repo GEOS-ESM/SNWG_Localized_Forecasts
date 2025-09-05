@@ -6,14 +6,14 @@
     "timezone": "Africa/Niamey",
     "message": "200",
     "status": "200",
-    "latest_update": "2025-09-04 12:00:00",
+    "latest_update": "2025-09-04 21:00:00",
     "sources": [
         "merra2",
         "geoscf"
     ],
     "metrics": {
         "validation_score": "N/A",
-        "total_observation": 109,
+        "total_observation": 111,
         "performance": {
             "metrics": [
                 {
@@ -31,7 +31,7 @@
             ]
         },
         "start_date": "2025-08-25 00:00:00",
-        "end_date": "2025-09-07 12:00:00"
+        "end_date": "2025-09-07 18:00:00"
     },
     "forecasts": [
         {
@@ -1659,14 +1659,44 @@
             "local_time": "2025-09-07 13:00:00",
             "no2": 0.25,
             "no2_aqi": 1.0,
-            "o3": 46.39,
+            "o3": 46.53,
             "o3_aqi": 43.0,
-            "pm25": 11.82,
+            "pm25": 11.93,
             "pm25_aqi": null,
-            "rh": 0.29,
-            "t10m": 312.4,
+            "rh": 0.27,
+            "t10m": 312.93,
             "tprec": 0.0,
-            "hcho": 1.6,
+            "hcho": 1.54,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 15:00:00",
+            "local_time": "2025-09-07 16:00:00",
+            "no2": 0.48,
+            "no2_aqi": 0.0,
+            "o3": 45.79,
+            "o3_aqi": 42.0,
+            "pm25": 12.39,
+            "pm25_aqi": null,
+            "rh": 0.23,
+            "t10m": 312.43,
+            "tprec": 0.0,
+            "hcho": 1.38,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 18:00:00",
+            "local_time": "2025-09-07 19:00:00",
+            "no2": 2.46,
+            "no2_aqi": 1.0,
+            "o3": 42.65,
+            "o3_aqi": 39.0,
+            "pm25": 15.06,
+            "pm25_aqi": null,
+            "rh": 0.28,
+            "t10m": 309.66,
+            "tprec": 0.0,
+            "hcho": 1.72,
             "pm25_conc_cnn": null
         }
     ]

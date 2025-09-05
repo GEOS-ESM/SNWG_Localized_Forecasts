@@ -6,14 +6,14 @@
     "timezone": "America/Panama",
     "message": "200",
     "status": "200",
-    "latest_update": "2025-09-04 13:00:00",
+    "latest_update": "2025-09-04 21:00:00",
     "sources": [
         "merra2",
         "geoscf"
     ],
     "metrics": {
         "validation_score": "N/A",
-        "total_observation": 109,
+        "total_observation": 111,
         "performance": {
             "metrics": [
                 {
@@ -31,7 +31,7 @@
             ]
         },
         "start_date": "2025-08-25 00:00:00",
-        "end_date": "2025-09-07 12:00:00"
+        "end_date": "2025-09-07 18:00:00"
     },
     "forecasts": [
         {
@@ -1657,14 +1657,44 @@
         {
             "time": "2025-09-07 12:00:00",
             "local_time": "2025-09-07 07:00:00",
-            "no2": 1.0,
+            "no2": 0.8,
             "no2_aqi": 1.0,
-            "o3": 22.32,
+            "o3": 22.57,
             "o3_aqi": 21.0,
-            "pm25": 5.56,
+            "pm25": 5.16,
             "pm25_aqi": null,
-            "rh": 0.86,
-            "t10m": 299.46,
+            "rh": 0.85,
+            "t10m": 299.85,
+            "tprec": 0.0,
+            "hcho": 0.77,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 15:00:00",
+            "local_time": "2025-09-07 10:00:00",
+            "no2": 0.24,
+            "no2_aqi": 1.0,
+            "o3": 19.95,
+            "o3_aqi": 18.0,
+            "pm25": 4.52,
+            "pm25_aqi": null,
+            "rh": 0.8,
+            "t10m": 301.01,
+            "tprec": 0.0,
+            "hcho": 0.86,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 18:00:00",
+            "local_time": "2025-09-07 13:00:00",
+            "no2": 0.22,
+            "no2_aqi": 0.0,
+            "o3": 20.84,
+            "o3_aqi": 19.0,
+            "pm25": 4.85,
+            "pm25_aqi": null,
+            "rh": 0.81,
+            "t10m": 300.68,
             "tprec": 0.0,
             "hcho": 0.8,
             "pm25_conc_cnn": null

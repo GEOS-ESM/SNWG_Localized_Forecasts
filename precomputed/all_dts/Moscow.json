@@ -6,14 +6,14 @@
     "timezone": "Europe/Moscow",
     "message": "200",
     "status": "200",
-    "latest_update": "2025-09-04 12:00:00",
+    "latest_update": "2025-09-04 21:00:00",
     "sources": [
         "merra2",
         "geoscf"
     ],
     "metrics": {
         "validation_score": "N/A",
-        "total_observation": 109,
+        "total_observation": 111,
         "performance": {
             "metrics": [
                 {
@@ -31,7 +31,7 @@
             ]
         },
         "start_date": "2025-08-25 00:00:00",
-        "end_date": "2025-09-07 12:00:00"
+        "end_date": "2025-09-07 18:00:00"
     },
     "forecasts": [
         {
@@ -1657,16 +1657,46 @@
         {
             "time": "2025-09-07 12:00:00",
             "local_time": "2025-09-07 15:00:00",
-            "no2": 19.62,
-            "no2_aqi": 18.0,
-            "o3": 21.1,
-            "o3_aqi": 20.0,
-            "pm25": 13.99,
+            "no2": 24.03,
+            "no2_aqi": 20.0,
+            "o3": 16.54,
+            "o3_aqi": 15.0,
+            "pm25": 16.28,
             "pm25_aqi": null,
             "rh": 0.59,
-            "t10m": 290.46,
+            "t10m": 290.35,
             "tprec": 0.0,
-            "hcho": 1.22,
+            "hcho": 1.36,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 15:00:00",
+            "local_time": "2025-09-07 18:00:00",
+            "no2": 40.22,
+            "no2_aqi": 26.0,
+            "o3": 0.5,
+            "o3_aqi": 0.0,
+            "pm25": 34.92,
+            "pm25_aqi": null,
+            "rh": 0.67,
+            "t10m": 288.18,
+            "tprec": 0.0,
+            "hcho": 2.82,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 18:00:00",
+            "local_time": "2025-09-07 21:00:00",
+            "no2": 32.82,
+            "no2_aqi": 31.0,
+            "o3": 0.1,
+            "o3_aqi": 0.0,
+            "pm25": 41.34,
+            "pm25_aqi": null,
+            "rh": 0.86,
+            "t10m": 285.86,
+            "tprec": 0.0,
+            "hcho": 3.06,
             "pm25_conc_cnn": null
         }
     ]

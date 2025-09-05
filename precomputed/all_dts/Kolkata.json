@@ -6,14 +6,14 @@
     "timezone": "Asia/Kolkata",
     "message": "200",
     "status": "200",
-    "latest_update": "2025-09-04 12:00:00",
+    "latest_update": "2025-09-04 20:00:00",
     "sources": [
         "merra2",
         "geoscf"
     ],
     "metrics": {
         "validation_score": "N/A",
-        "total_observation": 109,
+        "total_observation": 111,
         "performance": {
             "metrics": [
                 {
@@ -31,7 +31,7 @@
             ]
         },
         "start_date": "2025-08-25 00:00:00",
-        "end_date": "2025-09-07 12:00:00"
+        "end_date": "2025-09-07 18:00:00"
     },
     "forecasts": [
         {
@@ -1657,16 +1657,46 @@
         {
             "time": "2025-09-07 12:00:00",
             "local_time": "2025-09-07 17:30:00",
-            "no2": 5.09,
+            "no2": 5.16,
             "no2_aqi": 3.0,
-            "o3": 58.73,
-            "o3_aqi": 63.0,
-            "pm25": 62.72,
+            "o3": 53.94,
+            "o3_aqi": 50.0,
+            "pm25": 66.43,
             "pm25_aqi": null,
-            "rh": 0.68,
-            "t10m": 302.9,
+            "rh": 0.76,
+            "t10m": 302.08,
             "tprec": 0.0,
-            "hcho": 2.19,
+            "hcho": 1.99,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 15:00:00",
+            "local_time": "2025-09-07 20:30:00",
+            "no2": 7.48,
+            "no2_aqi": 5.0,
+            "o3": 39.0,
+            "o3_aqi": 36.0,
+            "pm25": 82.13,
+            "pm25_aqi": null,
+            "rh": 0.92,
+            "t10m": 300.74,
+            "tprec": 0.0,
+            "hcho": 1.35,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 18:00:00",
+            "local_time": "2025-09-07 23:30:00",
+            "no2": 14.12,
+            "no2_aqi": 8.0,
+            "o3": 26.04,
+            "o3_aqi": 24.0,
+            "pm25": 91.93,
+            "pm25_aqi": null,
+            "rh": 0.95,
+            "t10m": 300.57,
+            "tprec": 0.0,
+            "hcho": 1.65,
             "pm25_conc_cnn": null
         }
     ]

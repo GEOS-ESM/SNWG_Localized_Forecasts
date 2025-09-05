@@ -6,14 +6,14 @@
     "timezone": "America/Grenada",
     "message": "200",
     "status": "200",
-    "latest_update": "2025-09-04 13:00:00",
+    "latest_update": "2025-09-04 21:00:00",
     "sources": [
         "merra2",
         "geoscf"
     ],
     "metrics": {
         "validation_score": "N/A",
-        "total_observation": 109,
+        "total_observation": 112,
         "performance": {
             "metrics": [
                 {
@@ -31,7 +31,7 @@
             ]
         },
         "start_date": "2025-08-25 00:00:00",
-        "end_date": "2025-09-07 12:00:00"
+        "end_date": "2025-09-07 21:00:00"
     },
     "forecasts": [
         {
@@ -1657,16 +1657,61 @@
         {
             "time": "2025-09-07 12:00:00",
             "local_time": "2025-09-07 08:00:00",
-            "no2": 0.13,
+            "no2": 0.14,
             "no2_aqi": 0.0,
-            "o3": 16.68,
+            "o3": 17.26,
+            "o3_aqi": 16.0,
+            "pm25": 17.42,
+            "pm25_aqi": null,
+            "rh": 0.72,
+            "t10m": 302.12,
+            "tprec": 0.0,
+            "hcho": 0.7,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 15:00:00",
+            "local_time": "2025-09-07 11:00:00",
+            "no2": 0.14,
+            "no2_aqi": 0.0,
+            "o3": 17.7,
+            "o3_aqi": 16.0,
+            "pm25": 16.81,
+            "pm25_aqi": null,
+            "rh": 0.7,
+            "t10m": 302.53,
+            "tprec": 0.0,
+            "hcho": 0.93,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 18:00:00",
+            "local_time": "2025-09-07 14:00:00",
+            "no2": 0.18,
+            "no2_aqi": 0.0,
+            "o3": 16.99,
+            "o3_aqi": 16.0,
+            "pm25": 15.7,
+            "pm25_aqi": null,
+            "rh": 0.7,
+            "t10m": 302.43,
+            "tprec": 0.0,
+            "hcho": 0.89,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 21:00:00",
+            "local_time": "2025-09-07 17:00:00",
+            "no2": 0.29,
+            "no2_aqi": 0.0,
+            "o3": 15.77,
             "o3_aqi": 15.0,
-            "pm25": 17.6,
+            "pm25": 14.97,
             "pm25_aqi": null,
             "rh": 0.73,
             "t10m": 301.9,
             "tprec": 0.0,
-            "hcho": 0.55,
+            "hcho": 0.66,
             "pm25_conc_cnn": null
         }
     ]

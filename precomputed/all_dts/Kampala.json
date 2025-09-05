@@ -6,14 +6,14 @@
     "timezone": "Africa/Kampala",
     "message": "200",
     "status": "200",
-    "latest_update": "2025-09-04 12:00:00",
+    "latest_update": "2025-09-04 20:00:00",
     "sources": [
         "merra2",
         "geoscf"
     ],
     "metrics": {
         "validation_score": "N/A",
-        "total_observation": 109,
+        "total_observation": 111,
         "performance": {
             "metrics": [
                 {
@@ -31,7 +31,7 @@
             ]
         },
         "start_date": "2025-08-25 00:00:00",
-        "end_date": "2025-09-07 12:00:00"
+        "end_date": "2025-09-07 18:00:00"
     },
     "forecasts": [
         {
@@ -1657,16 +1657,46 @@
         {
             "time": "2025-09-07 12:00:00",
             "local_time": "2025-09-07 15:00:00",
-            "no2": 0.22,
+            "no2": 0.3,
             "no2_aqi": 0.0,
-            "o3": 42.61,
-            "o3_aqi": 39.0,
-            "pm25": 19.88,
+            "o3": 41.42,
+            "o3_aqi": 38.0,
+            "pm25": 18.55,
             "pm25_aqi": null,
-            "rh": 0.57,
-            "t10m": 298.59,
+            "rh": 0.6,
+            "t10m": 297.73,
             "tprec": 0.0,
-            "hcho": 1.07,
+            "hcho": 1.03,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 15:00:00",
+            "local_time": "2025-09-07 18:00:00",
+            "no2": 1.1,
+            "no2_aqi": 0.0,
+            "o3": 38.84,
+            "o3_aqi": 36.0,
+            "pm25": 19.01,
+            "pm25_aqi": null,
+            "rh": 0.67,
+            "t10m": 294.47,
+            "tprec": 0.0,
+            "hcho": 1.21,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 18:00:00",
+            "local_time": "2025-09-07 21:00:00",
+            "no2": 1.77,
+            "no2_aqi": 1.0,
+            "o3": 37.76,
+            "o3_aqi": 35.0,
+            "pm25": 21.96,
+            "pm25_aqi": null,
+            "rh": 0.67,
+            "t10m": 294.66,
+            "tprec": 0.0,
+            "hcho": 1.43,
             "pm25_conc_cnn": null
         }
     ]

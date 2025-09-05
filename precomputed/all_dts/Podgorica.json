@@ -6,14 +6,14 @@
     "timezone": "Europe/Podgorica",
     "message": "200",
     "status": "200",
-    "latest_update": "2025-09-04 13:00:00",
+    "latest_update": "2025-09-04 21:00:00",
     "sources": [
         "merra2",
         "geoscf"
     ],
     "metrics": {
         "validation_score": "N/A",
-        "total_observation": 109,
+        "total_observation": 112,
         "performance": {
             "metrics": [
                 {
@@ -31,7 +31,7 @@
             ]
         },
         "start_date": "2025-08-25 00:00:00",
-        "end_date": "2025-09-07 12:00:00"
+        "end_date": "2025-09-07 21:00:00"
     },
     "forecasts": [
         {
@@ -1657,16 +1657,61 @@
         {
             "time": "2025-09-07 12:00:00",
             "local_time": "2025-09-07 14:00:00",
-            "no2": 0.28,
+            "no2": 0.31,
             "no2_aqi": 0.0,
-            "o3": 53.38,
-            "o3_aqi": 49.0,
-            "pm25": 8.41,
+            "o3": 53.49,
+            "o3_aqi": 50.0,
+            "pm25": 7.87,
             "pm25_aqi": null,
-            "rh": 0.3,
-            "t10m": 300.59,
+            "rh": 0.31,
+            "t10m": 300.23,
             "tprec": 0.0,
-            "hcho": 1.22,
+            "hcho": 1.19,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 15:00:00",
+            "local_time": "2025-09-07 17:00:00",
+            "no2": 1.24,
+            "no2_aqi": 1.0,
+            "o3": 52.21,
+            "o3_aqi": 48.0,
+            "pm25": 7.06,
+            "pm25_aqi": null,
+            "rh": 0.37,
+            "t10m": 296.78,
+            "tprec": 0.0,
+            "hcho": 1.18,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 18:00:00",
+            "local_time": "2025-09-07 20:00:00",
+            "no2": 3.11,
+            "no2_aqi": 1.0,
+            "o3": 48.66,
+            "o3_aqi": 45.0,
+            "pm25": 8.51,
+            "pm25_aqi": null,
+            "rh": 0.5,
+            "t10m": 293.66,
+            "tprec": 0.0,
+            "hcho": 1.32,
+            "pm25_conc_cnn": null
+        },
+        {
+            "time": "2025-09-07 21:00:00",
+            "local_time": "2025-09-07 23:00:00",
+            "no2": 3.49,
+            "no2_aqi": 2.0,
+            "o3": 46.86,
+            "o3_aqi": 43.0,
+            "pm25": 9.62,
+            "pm25_aqi": null,
+            "rh": 0.53,
+            "t10m": 292.58,
+            "tprec": 0.0,
+            "hcho": 1.4,
             "pm25_conc_cnn": null
         }
     ]
