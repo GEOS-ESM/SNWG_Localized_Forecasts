@@ -941,7 +941,7 @@ function add_the_banner(site, param) {
             aqiValue = parseInt(pm25_aqi);
             source = precomputed_forecasts?.[0]?.pm25_aqi 
                 ? "NASA GEOS-FP, AirNow"
-                : "NASA GEOS CF";
+                : "NASA GEOS-FP, AirNow";
         } else if (param === "o3") {
             aqiValue = parseInt(o3_aqi)
             source = "NASA GEOS CF, NASA Pandora";
@@ -1233,7 +1233,7 @@ function readApiBaker(options = {}) {
                     tabId: "tab_pm25",
                     description: (typeof options.param === "string" && options.param.toLowerCase().includes("pm25"))
                     ? "Source: NASA GEOS-FP+ML PM2.5 Forecast"
-                    : "Source: NASA GEOS-CF PM2.5 Forecast",
+                    : "Source: NASA GEOS-FP+ML PM2.5 Forecast",
                     columns: [
                         { column: "master_pm25_aqi", name: "PM2.5 AQI", color: "green", width: 2 }
                     ],
