@@ -1,0 +1,37 @@
+{
+    "location": "Banja_Luka",
+    "lat": 44.7725,
+    "lon": 17.185556,
+    "species": "pm25",
+    "timezone": "N/A",
+    "message": "200",
+    "status": "200",
+    "latest_update": "2025-09-26 13:00:00",
+    "sources": [
+        "merra2",
+        "geoscf"
+    ],
+    "metrics": {
+        "validation_score": "N/A",
+        "total_observation": 0,
+        "performance": {
+            "metrics": [
+                {
+                    "name": "r2",
+                    "value": "N/A"
+                },
+                {
+                    "name": "rmse",
+                    "value": "N/A"
+                },
+                {
+                    "name": "mae",
+                    "value": "N/A"
+                }
+            ]
+        },
+        "start_date": "N/A",
+        "end_date": "N/A"
+    },
+    "forecasts": []
+}
