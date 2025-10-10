@@ -1975,7 +1975,7 @@ function readAirNow(options = {}) {
     $('.loader').show();
     const siteTimeZone = timezone || "UTC";
     const paramCode = pollutant_details(param).id;
-    const fileUrl = `precomputed/all_dts/${location}.json`;
+    const fileUrl = `precomputed/all_dts/${location}.json?version=${new Date().getTime()}`;
 
     fetch(fileUrl)
         .then(response => {
