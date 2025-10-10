@@ -1107,12 +1107,12 @@ function readApiBaker(options = {}) {
     ];
     $('.loader').show();
 
-    const fileUrl = `precomputed/all_dts/${location.replace(/_/g, "-")}.json`;
+    const fileUrl = `precomputed/all_dts/${location.replace(/_/g, "-")}.json?version=${new Date().getTime()}`;
 
     fetch(fileUrl)
         .then(response => {
             if (!response.ok) {
-                const fallbackUrl = `precomputed/all_dts/${location.replace(/[-\s]/g, "_")}.json`;
+                const fallbackUrl = `precomputed/all_dts/${location.replace(/[-\s]/g, "_")}.json?version=${new Date().getTime()}`;
                 return fetch(fallbackUrl).then(fallbackResponse => {
                     if (!fallbackResponse.ok) throw new Error('Network response was not ok');
                     return fallbackResponse.text();
