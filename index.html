@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -284,6 +281,12 @@ header .nav-link.active,
                 <li class="nav-item"><a href="https://gmao.gsfc.nasa.gov/weather_prediction/GEOS-CF/" class="nav-link">NASA GEOS Composition Forecasting (GEOS-CF)</a></li>
                 <li class="nav-item"><a href="https://www.pandonia-global-network.org/" class="nav-link">NASA Pandora</a></li>
                 <li class="nav-item"><a href="https://www.earthdata.nasa.gov/about/nasa-support-snwg" class="nav-link">The Satellite Needs Working Group</a></li>
+                <li class="nav-item">
+                    <button id="toggle-locations-box-header" class="btn btn-soft-ash btn-sm rounded" style="position: relative;">
+                        <i class="bi bi-funnel" id="toggle-locations-icon-header" style="margin-right: 6px;"></i>
+                        <span>Hide Filters</span>
+                    </button>
+                </li>
             </ul>
         </div>
     </nav>
@@ -344,6 +347,23 @@ header .nav-link.active,
     <script src="https://unpkg.com/mapbox-gl-leaflet"></script>
     <script src="https://unpkg.com/georaster"></script>
     <script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
-</body>
 
+    <script>
+        $(document).ready(function() {
+            // Toggle locations button in header
+            let isVisible = $('.locations-container').is(':visible');
+            $('#toggle-locations-box-header').on('click', function() {
+                if (isVisible) {
+                    $('.locations-container').slideUp(300);
+                    $(this).find('span').text('Show Filters');
+                } else {
+                    $('.locations-container').slideDown(300);
+                    $(this).find('span').text('Hide Filters');
+                }
+                isVisible = !isVisible;
+            });
+        });
+    </script>
+
+</body>
 </html>

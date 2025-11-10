@@ -13,8 +13,8 @@
 <div class="locations-container">
     <div class="d-flex align-items-center justify-content-between" style="gap: 1rem; position: relative; margin-bottom: 0.5rem;">
         <button id="toggle-locations-box" class="btn btn-soft-ash btn-sm rounded" style="position: relative;">
-            <i class="bi bi-chevron-down" id="toggle-locations-icon" style="margin-right: 6px;"></i>
-            <span>Hide Locations</span>
+            <i class="bi bi-funnel" id="toggle-locations-icon" style="margin-right: 6px;"></i>
+            <span>Hide Filters</span>
         </button>
         <div id="species-filter-container" style="color: white;">
             <label for="species-filter" style="font-weight:600;margin-right:8px;">Locations</label>
@@ -65,8 +65,7 @@ $(document).ready(function () {
         const viewParam = getUrlParam('view');
         if (viewParam === 'list') {
             $('.locations-container').show();
-            $('#toggle-locations-box').find('span').text('Hide Locations');
-            $('#toggle-locations-icon').removeClass('bi-chevron-up').addClass('bi-chevron-down');
+            $('#toggle-locations-box').find('span').text('Hide Filters');
         } else if (viewParam === 'globe') {
             $('.locations-container').hide();
         }
@@ -74,12 +73,10 @@ $(document).ready(function () {
         $('#toggle-locations-box').on('click', function() {
             if (isVisible) {
                 $('.locations-container').slideUp(300);
-                $(this).find('span').text('Show Locations');
-                $('#toggle-locations-icon').removeClass('bi-chevron-down').addClass('bi-chevron-up');
+                $(this).find('span').text('Show Filters');
             } else {
                 $('.locations-container').slideDown(300);
-                $(this).find('span').text('Hide Locations');
-                $('#toggle-locations-icon').removeClass('bi-chevron-up').addClass('bi-chevron-down');
+                $(this).find('span').text('Hide Filters');
             }
             isVisible = !isVisible;
         });
