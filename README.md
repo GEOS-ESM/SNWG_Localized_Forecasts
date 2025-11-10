@@ -28,24 +28,24 @@ A lightweight forecasting tool leveraging NASA GMAO’s GEOS-CF model integrated
 - **Forecast visualization**: Generate and export forecast plots using built-in tools.
 - **Community contributions**: Support for saving models and sharing local data.
 - **Custom forecast generation**: One-call function to generate outputs in various formats:
-  - 📊 DataFrames
-  - 📈 Forecast plots
-  - 🧩 SHAP (SHapley Additive exPlanations) values for uncertainty and feature impact analysis
+  - DataFrames
+  - orecast plots
+  - SHAP (SHapley Additive exPlanations) values for uncertainty and feature impact analysis
 
 ---
 
 ## Access and Integration
 
-- 🌐 **Pandora data**: Available via the [Pandonia Global Network (PGN)](https://pandonia.net).
+- **Pandora data**: Available via the [Pandonia Global Network (PGN)](https://pandonia.net).
 - 📱 **PM2.5 Forecasts**: Accessible through this website.
 - 🔧 **GEOS-CF Forecast Tool**: Use the online tool for real-time model training and forecasting.
 
 ---
 
-## 📄 License
+## License
 
 [MIT License](LICENSE)
 
-## 🙌 Acknowledgments
+## Acknowledgments
 
 This project is supported by NASA and leverages contributions from the scientific community, developers, and atmospheric monitoring networks worldwide.
