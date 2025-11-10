@@ -282,7 +282,7 @@ header .nav-link.active,
                 <li class="nav-item"><a href="https://www.pandonia-global-network.org/" class="nav-link">NASA Pandora</a></li>
                 <li class="nav-item"><a href="https://www.earthdata.nasa.gov/about/nasa-support-snwg" class="nav-link">The Satellite Needs Working Group</a></li>
                 <li class="nav-item">
-                    <button id="toggle-locations-box-header" class="btn btn-soft-ash btn-sm rounded" style="position: relative;">
+                    <button id="toggle-locations-box-header" class="btn btn-soft-ash btn-sm rounded" style="position: relative; display: none;">
                         <i class="bi bi-funnel" id="toggle-locations-icon-header" style="margin-right: 6px;"></i>
                         <span>Hide Filters</span>
                     </button>
@@ -350,6 +350,7 @@ header .nav-link.active,
 
     <script>
         $(document).ready(function() {
+            // Toggle locations button in header
             let isVisible = $('.locations-container').is(':visible');
             $('#toggle-locations-box-header').on('click', function() {
                 if (isVisible) {
@@ -360,6 +361,13 @@ header .nav-link.active,
                     $(this).find('span').text('Hide Filters');
                 }
                 isVisible = !isVisible;
+            });
+
+            // Hide the button when navigating to non-home pages
+            $(document).on('click', '.nl_wave_routing', function() {
+                if ($(this).attr('href') !== 'home.html') {
+                    $('#toggle-locations-box-header').hide();
+                }
             });
         });
     </script>
