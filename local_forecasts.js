@@ -756,7 +756,7 @@ async function loadSiteForecasts(locationName, filename) {
     }
     
     try {
-        const response = await fetch(`precomputed/all_dts/${filename}`);
+        const response = await fetch(`precomputed/all_dts/${filename}?t=${Date.now()}`);
         if (!response.ok) throw new Error(`Failed to load ${filename}`);
         
         const text = await response.text();
@@ -922,7 +922,7 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
     showLoadingDiv();
 
     // Load the lightweight index first
-    fetch("precomputed/sites_index.json")
+    fetch(`precomputed/sites_index.json?t=${Date.now()}`)
         .then(response => {
             if (!response.ok) throw new Error('Failed to fetch sites index');
             return response.json();
@@ -970,7 +970,7 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
                     const snapshotPath = `precomputed/hourly_forecasts/${attemptDate.getFullYear()}-${String(attemptDate.getMonth() + 1).padStart(2, '0')}-${String(attemptDate.getDate()).padStart(2, '0')}_${String(attemptDate.getHours()).padStart(2, '0')}.json`;
                     
                     try {
-                        const response = await fetch(snapshotPath);
+                        const response = await fetch(`${snapshotPath}?t=${Date.now()}`);
                         if (response.ok) {
                             const hourlySnapshot = await response.json();
                             console.log(`Loaded hourly forecast from ${hoursBack} hours ago`);
@@ -1095,7 +1095,7 @@ function loadIndividualSitesOptimized(filteredIndices) {
         }
         
         Promise.all(batch.map(indexEntry => 
-            fetch(`precomputed/all_dts/${indexEntry.location_name}.json`)
+            fetch(`precomputed/all_dts/${indexEntry.location_name}.json?t=${Date.now()}`)
                 .then(r => r.json())
                 .then(data => ({...indexEntry, data}))
                 .catch(() => null)
