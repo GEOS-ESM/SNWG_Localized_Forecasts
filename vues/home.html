@@ -115,11 +115,15 @@ $(document).ready(function () {
         } else if (viewParam === 'globe') {
             $('.locations-container').hide();
         }
-        let isExpanded = false;
+        
+        // Banner expanded by default
+        let isExpanded = true;
+        const $banner = $('.locations-container.snwg-banner');
+        const $icon = $('#toggle-locations-icon');
+        $banner.addClass('expanded');
+        $icon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
+        
         $('#toggle-locations-box').on('click', function() {
-            const $banner = $('.locations-container.snwg-banner');
-            const $icon = $('#toggle-locations-icon');
-            
             if (isExpanded) {
                 // Collapse
                 $banner.removeClass('expanded');
