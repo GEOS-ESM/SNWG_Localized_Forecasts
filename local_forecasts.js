@@ -760,7 +760,6 @@ function getCurrentForecast(siteData, timezone) {
         console.warn("No forecasts available for site");
         return null;
     }
-    
     const now = new Date();
     
     // Get current time in site's timezone using Intl API for accuracy
