@@ -7,25 +7,37 @@ $(document).ready(function() {
         const page = $(this).attr('href');
         const $loadingDiv = $(".loading_div");
         const $forecastsContainer = $(".forecasts_container");
-        const messages = ["Please wait...", "Connecting..."];
-        
 
-        $loadingDiv.fadeIn(10);
-        let intervalId = setInterval(() => {
-            const message = messages[Math.floor(Math.random() * messages.length)];
-            $(".messages").html(message);
-        }, 100);
-
+        showLoadingToast();
+        $loadingDiv.addClass('show');
 
         $forecastsContainer.load("vues/" + page, function() {
             $forecastsContainer.fadeOut(10, function() {
                 $(this).fadeIn(10).addClass("noussair_animations zoom_in");
             });
-            $loadingDiv.fadeOut(10);
-            clearInterval(intervalId); 
+            setTimeout(() => {
+                $loadingDiv.removeClass('show');
+                showToast('Page loaded successfully', 'success');
+            }, 300);
         });
     });
 });
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    
+    const container = document.querySelector('.toast-notifications');
+    if (container) {
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+}
+
+function showLoadingToast() {
+    showToast('Loading data...', 'info');
+}
 
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibGF6cmFrbiIsImEiOiJjanZodzV3OXUwNmEwNDRxdnVsZGhnaml4In0.-ES_Lt127Id6DEf8H9E3rg';
@@ -841,6 +853,19 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
             console.log(`Found ${filteredIndices.length} sites for source: ${selectedSource}`);
             
             $(".pollutant-banner-o").empty();
+            
+            // Show skeleton loaders for better UX
+            const skeletonCount = Math.min(12, filteredIndices.length);
+            for (let i = 0; i < skeletonCount; i++) {
+                const skeleton = `
+                    <div class="col-3 skeleton-card">
+                        <div class="skeleton-title skeleton-shimmer"></div>
+                        <div class="skeleton-text skeleton-shimmer"></div>
+                        <div class="skeleton-value skeleton-shimmer"></div>
+                    </div>
+                `;
+                $(".pollutant-banner-o").append(skeleton);
+            }
 
             // Load site forecasts in parallel with concurrency limit
             const loadSiteData = async () => {
@@ -953,12 +978,13 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
 
 function showLoadingDiv() {
     const $div = $(".loading_div");
-    $div.removeClass("slide-up-out").addClass("slide-up-in").show();
+    $div.addClass("show");
+    showLoadingToast();
 }
 function hideLoadingDiv() {
     const $div = $(".loading_div");
-    $div.removeClass("slide-up-in").addClass("slide-up-out");
-    setTimeout(() => $div.hide(), 700); 
+    $div.removeClass("show");
+    showToast('Data loaded successfully', 'success');
 }
 
 function getUnitForParameter(parameter) {
@@ -1070,17 +1096,33 @@ function add_the_banner(site, param) {
             </div>
         `;
 
-        $(".pollutant-banner-o").append(html);
+        // Replace first skeleton or append
+        const skeletons = $(".pollutant-banner-o .skeleton-card");
+        if (skeletons.length > 0) {
+            skeletons.first().replaceWith(html);
+        } else {
+            $(".pollutant-banner-o").append(html);
+        }
     }
 }
 
 function cleanupBanners() {
-
-    $('.pollutant-banner-o').empty();
+    const cards = $('.pollutant-banner-o .pollutant-banner');
+    
+    // Animate exit for each card with stagger
+    cards.each(function(index) {
+        setTimeout(() => {
+            $(this).addClass('exit');
+            setTimeout(() => $(this).remove(), 400);
+        }, index * 50);
+    });
+    
+    // Clean skeletons immediately
+    $('.pollutant-banner-o .skeleton-card').remove();
+    
     if (window.currentForecastData) {
         window.currentForecastData = null;
     }
-
 }
 
 
