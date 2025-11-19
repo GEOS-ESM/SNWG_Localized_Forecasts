@@ -739,23 +739,25 @@ window.siteDataCache = window.siteDataCache || {};
 
 /**
  * Load forecast data for a specific site
- * Uses caching to avoid redundant loads
+ * Uses simple in-memory caching only (no IndexedDB)
  */
 async function loadSiteForecasts(locationName, filename) {
     const cacheKey = filename;
     
+    // Check in-memory cache only
     if (window.siteDataCache[cacheKey]) {
         return window.siteDataCache[cacheKey];
     }
     
     try {
-        const response = await fetch(`precomputed/all_dts/${filename}?v=${new Date().getTime()}`);
+        const response = await fetch(`precomputed/all_dts/${filename}`);
         if (!response.ok) throw new Error(`Failed to load ${filename}`);
         
         const text = await response.text();
         const sanitizedText = text.replace(/NaN/g, "null");
         const data = JSON.parse(sanitizedText);
         
+        // Cache in memory only
         window.siteDataCache[cacheKey] = data;
         return data;
     } catch (error) {
@@ -822,14 +824,14 @@ function getCurrentForecast(siteData, timezone) {
 }
 
 /**
- * New optimized function using global.json index
- * Loads only the sites that match the selected source on-demand
+ * Load pre-computed hourly forecast snapshot
+ * Much lighter than loading all individual site files
  */
 function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
     if (window.currentForecastData) window.currentForecastData = null;
     showLoadingDiv();
 
-    // Load the lightweight index first (only 2MB with all sites)
+    // Load the lightweight index first
     fetch("precomputed/sites_index.json")
         .then(response => {
             if (!response.ok) throw new Error('Failed to fetch sites index');
@@ -838,7 +840,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
         .then(siteIndex => {
             console.log("Selected source:", selectedSource);
             
-            // Filter sites by source immediately (lightweight operation)
+            // Filter sites by source
             const filteredIndices = siteIndex.filter(site => {
                 if (!Array.isArray(site.sources)) return false;
                 const siteSources = site.sources.map(s => s.toLowerCase());
@@ -854,7 +856,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
             
             $(".pollutant-banner-o").empty();
             
-            // Show skeleton loaders for better UX
+            // Show skeleton loaders
             const skeletonCount = Math.min(12, filteredIndices.length);
             for (let i = 0; i < skeletonCount; i++) {
                 const skeleton = `
@@ -867,113 +869,206 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
                 $(".pollutant-banner-o").append(skeleton);
             }
 
-            // Load site forecasts in parallel with concurrency limit
-            const loadSiteData = async () => {
-                const filteredSites = [];
-                const maxConcurrent = 8; // Increase concurrent requests for better performance
-                
-                for (let i = 0; i < filteredIndices.length; i += maxConcurrent) {
-                    const batch = filteredIndices.slice(i, i + maxConcurrent);
-                    
-                    const results = await Promise.all(
-                        batch.map(async (indexEntry) => {
-                            try {
-                                const siteData = await loadSiteForecasts(indexEntry.location_name, indexEntry.file);
-                                if (!siteData) return null;
-                                
-                                // Use timezone and species from the actual file, fallback to index if missing
-                                const fileTimezone = siteData.timezone || indexEntry.timezone;
-                                const matchingForecast = getCurrentForecast(siteData, fileTimezone);
-                                if (!matchingForecast) return null;
-                                
-                                const selected = (siteData.species || indexEntry.species || "no2").toLowerCase();
-                                const isPm25 = selected === "pm25" || selected === "pm2.5";
-                                
-                                let forecasted_value = "N/A";
-                                if (selected === "no2") {
-                                    // Use AQI for NO2
-                                    forecasted_value = matchingForecast.no2_aqi ?? "N/A";
-                                } else if (isPm25) {
-                                    forecasted_value = matchingForecast.pm25_aqi ?? calculateAqiForPm25(matchingForecast.pm25) ?? "N/A";
-                                } else if (selected === "o3") {
-                                    forecasted_value = matchingForecast.o3_aqi ?? "N/A";
-                                }
-                                
-                                if (forecasted_value !== "N/A") {
-                                    const obsOptions = {};
-                                    Object.keys(matchingForecast).forEach(key => {
-                                        if (key !== "time") {
-                                            obsOptions[key] = {
-                                                unit: getUnitForParameter(key),
-                                                value: matchingForecast[key] || "N/A"
-                                            };
-                                        }
-                                    });
-
-                                    const siteDisplayData = {
-                                        location_name: indexEntry.location_name,
-                                        observation_source: indexEntry.observation_source || "NASA",
-                                        forecasted_value: parseInt(forecasted_value),
-                                        status: "active",
-                                        latitude: indexEntry.lat,
-                                        longitude: indexEntry.lon,
-                                        timezone: fileTimezone,
-                                        precomputed_forecasts: JSON.stringify([matchingForecast]),
-                                        obs_options: JSON.stringify(obsOptions),
-                                    };
-
-                                    add_the_banner(siteDisplayData, selected);
-                                    
-                                    return {
-                                        location_id: indexEntry.location_id,
-                                        location_name: indexEntry.location_name,
-                                        lat: indexEntry.lat,
-                                        lon: indexEntry.lon,
-                                        timezone: fileTimezone,
-                                        observation_source: indexEntry.observation_source,
-                                        species: selected,
-                                        forecasted_value: forecasted_value,
-                                        current_forecast: matchingForecast,
-                                        sources: indexEntry.sources
-                                    };
-                                }
-                                return null;
-                            } catch (error) {
-                                console.warn(`Error loading site ${indexEntry.location_name}:`, error);
-                                return null;
-                            }
-                        })
-                    );
-                    
-                    filteredSites.push(...results.filter(r => r !== null));
-                }
-
-                return filteredSites;
-            };
-
-            return loadSiteData();
-        })
-        .then(filteredSites => {
-            if (!filteredSites || filteredSites.length === 0) {
-                console.error("No sites returned after filtering");
-                hideLoadingDiv();
-                return;
-            }
+            // Try loading hourly snapshot first
+            const now = new Date();
+            const snapshotPath = `precomputed/hourly_forecasts/${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}.json`;
             
-            console.log("Filtered sites:", filteredSites.length);
-            console.log("Sample site:", filteredSites[0]);
-            
-            const geojson = sitesArrayToGeoJSON(filteredSites, selectedSource);
-            console.log("GeoJSON features:", geojson.features.length);
-            console.log("Sample feature:", geojson.features[0]);
-            
-            create_map(geojson, selectedSource);
-            hideLoadingDiv();
+            fetch(snapshotPath)
+                .then(response => {
+                    if (!response.ok) throw new Error('Hourly snapshot not found');
+                    return response.json();
+                })
+                .then(hourlySnapshot => {
+                    processHourlySnapshot(hourlySnapshot, filteredIndices);
+                })
+                .catch(error => {
+                    console.log('Hourly snapshot not available, falling back to individual files:', error);
+                    loadIndividualSites(filteredIndices);
+                });
         })
         .catch(error => {
-            console.error("Error loading sites:", error);
             hideLoadingDiv();
+            console.error("Error loading sites index:", error);
+            showToast('Failed to load forecasts', 'error');
         });
+}
+
+function processHourlySnapshot(hourlySnapshot, filteredIndices) {
+    // Create lookup map
+    const snapshotMap = {};
+    hourlySnapshot.sites.forEach(site => {
+        snapshotMap[site.location_name] = site;
+    });
+    
+    const filteredSites = [];
+    let skeletonsRemoved = 0;
+    
+    for (const indexEntry of filteredIndices) {
+        try {
+            const snapshotData = snapshotMap[indexEntry.location_name];
+            if (!snapshotData) continue;
+            
+            const selected = (snapshotData.species || indexEntry.species || "no2").toLowerCase();
+            const isPm25 = selected === "pm25" || selected === "pm2.5";
+            
+            let forecasted_value = "N/A";
+            if (selected === "no2") {
+                forecasted_value = snapshotData.no2_aqi ?? "N/A";
+            } else if (isPm25) {
+                forecasted_value = snapshotData.pm25_aqi ?? calculateAqiForPm25(snapshotData.pm25) ?? "N/A";
+            } else if (selected === "o3") {
+                forecasted_value = snapshotData.o3_aqi ?? "N/A";
+            }
+            
+            if (forecasted_value !== "N/A") {
+                const obsOptions = {
+                    no2: { unit: "μg/m³", value: snapshotData.no2 || "N/A" },
+                    no2_aqi: { unit: "AQI", value: snapshotData.no2_aqi || "N/A" },
+                    o3: { unit: "μg/m³", value: snapshotData.o3 || "N/A" },
+                    o3_aqi: { unit: "AQI", value: snapshotData.o3_aqi || "N/A" },
+                    pm25: { unit: "μg/m³", value: snapshotData.pm25 || "N/A" },
+                    pm25_aqi: { unit: "AQI", value: snapshotData.pm25_aqi || "N/A" },
+                    t10m: { unit: "K", value: snapshotData.t10m || "N/A" },
+                    rh: { unit: "%", value: snapshotData.rh || "N/A" },
+                    wind_speed: { unit: "m/s", value: snapshotData.wind_speed || "N/A" }
+                };
+
+                const siteDisplayData = {
+                    location_name: indexEntry.location_name,
+                    observation_source: snapshotData.observation_source || "NASA",
+                    forecasted_value: parseInt(forecasted_value),
+                    status: "active",
+                    latitude: indexEntry.lat,
+                    longitude: indexEntry.lon,
+                    timezone: snapshotData.timezone,
+                    precomputed_forecasts: JSON.stringify([snapshotData]),
+                    obs_options: JSON.stringify(obsOptions),
+                };
+
+                add_the_banner(siteDisplayData, selected);
+                
+                if (skeletonsRemoved < 12) {
+                    $(".pollutant-banner-o .skeleton-card").eq(skeletonsRemoved).remove();
+                    skeletonsRemoved++;
+                }
+                
+                filteredSites.push({
+                    location_id: indexEntry.location_id,
+                    location_name: indexEntry.location_name,
+                    lat: indexEntry.lat,
+                    lon: indexEntry.lon,
+                    timezone: snapshotData.timezone,
+                    observation_source: indexEntry.observation_source,
+                    species: selected,
+                    forecasted_value: forecasted_value,
+                    current_forecast: snapshotData,
+                    sources: indexEntry.sources
+                });
+            }
+        } catch (error) {
+            console.warn(`Error processing ${indexEntry.location_name}:`, error);
+        }
+    }
+    
+    finalizeSitesLoading(filteredSites);
+}
+
+function loadIndividualSites(filteredIndices) {
+    const loadSiteData = async () => {
+        const filteredSites = [];
+        const maxConcurrent = 2; // Very conservative to avoid rate limits
+        let skeletonsRemoved = 0;
+        
+        for (let i = 0; i < filteredIndices.length; i += maxConcurrent) {
+            const batch = filteredIndices.slice(i, i + maxConcurrent);
+            
+            const results = await Promise.all(
+                batch.map(async (indexEntry) => {
+                    try {
+                        const siteData = await loadSiteForecasts(indexEntry.location_name, indexEntry.file);
+                        if (!siteData) return null;
+                        
+                        const fileTimezone = siteData.timezone || indexEntry.timezone;
+                        const matchingForecast = getCurrentForecast(siteData, fileTimezone);
+                        if (!matchingForecast) return null;
+                        
+                        const selected = (siteData.species || indexEntry.species || "no2").toLowerCase();
+                        const isPm25 = selected === "pm25" || selected === "pm2.5";
+                        
+                        let forecasted_value = "N/A";
+                        if (selected === "no2") {
+                            forecasted_value = matchingForecast.no2_aqi ?? "N/A";
+                        } else if (isPm25) {
+                            forecasted_value = matchingForecast.pm25_aqi ?? calculateAqiForPm25(matchingForecast.pm25) ?? "N/A";
+                        } else if (selected === "o3") {
+                            forecasted_value = matchingForecast.o3_aqi ?? "N/A";
+                        }
+                        
+                        if (forecasted_value !== "N/A") {
+                            const obsOptions = {};
+                            Object.keys(matchingForecast).forEach(key => {
+                                if (key !== "time") {
+                                    obsOptions[key] = {
+                                        unit: getUnitForParameter(key),
+                                        value: matchingForecast[key] || "N/A"
+                                    };
+                                }
+                            });
+
+                            const siteDisplayData = {
+                                location_name: indexEntry.location_name,
+                                observation_source: indexEntry.observation_source || "NASA",
+                                forecasted_value: parseInt(forecasted_value),
+                                status: "active",
+                                latitude: indexEntry.lat,
+                                longitude: indexEntry.lon,
+                                timezone: fileTimezone,
+                                precomputed_forecasts: JSON.stringify([matchingForecast]),
+                                obs_options: JSON.stringify(obsOptions),
+                            };
+
+                            add_the_banner(siteDisplayData, selected);
+                            
+                            if (skeletonsRemoved < 12) {
+                                $(".pollutant-banner-o .skeleton-card").eq(skeletonsRemoved).remove();
+                                skeletonsRemoved++;
+                            }
+                            
+                            return {
+                                location_id: indexEntry.location_id,
+                                location_name: indexEntry.location_name,
+                                lat: indexEntry.lat,
+                                lon: indexEntry.lon,
+                                timezone: fileTimezone,
+                                observation_source: indexEntry.observation_source,
+                                species: selected,
+                                forecasted_value: forecasted_value,
+                                current_forecast: matchingForecast,
+                                sources: indexEntry.sources
+                            };
+                        }
+                        return null;
+                    } catch (error) {
+                        console.warn(`Error loading ${indexEntry.location_name}:`, error);
+                        return null;
+                    }
+                })
+            );
+            
+            filteredSites.push(...results.filter(r => r !== null));
+        }
+        
+        finalizeSitesLoading(filteredSites);
+    };
+    
+    loadSiteData();
+}
+
+function finalizeSitesLoading(filteredSites) {
+    window.currentForecastData = filteredSites;
+    const geojson = sitesArrayToGeoJSON(filteredSites);
+    create_map(geojson);
+    hideLoadingDiv();
 }
 
 function showLoadingDiv() {
