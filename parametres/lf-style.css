@@ -2427,7 +2427,7 @@ html, body {
 /* Main banner container - fixed at bottom */
 .snwg-banner {
     position: fixed;
-    bottom: 0;
+    bottom: -60px;
     left: 0;
     right: 0;
     width: 100%;
@@ -2435,17 +2435,19 @@ html, body {
     background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
     border-top: 2px solid #1e3a8a;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
-    z-index: 1000;
+    z-index: 998;
     display: flex;
     flex-direction: column;
     max-height: 180px;
     overflow: hidden;
-    transition: max-height 0.3s ease-in-out;
+    transition: max-height 0.3s ease-in-out, bottom 0.3s ease-in-out;
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .snwg-banner.expanded {
-    max-height: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    bottom: 109px;
 }
 
 /* Banner control header */
@@ -2503,6 +2505,44 @@ html, body {
     color: #cbd5e1;
     font-weight: 600;
     letter-spacing: 0.5px;
+}
+
+/* Search controls */
+.search-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    max-width: 300px;
+}
+
+.banner-search {
+    background: rgba(30, 58, 138, 0.6);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    color: #e0e7ff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 500;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.banner-search::placeholder {
+    color: rgba(224, 231, 255, 0.5);
+}
+
+.banner-search:hover {
+    border-color: #60a5fa;
+    background: rgba(30, 58, 138, 0.8);
+}
+
+.banner-search:focus {
+    outline: none;
+    border-color: #60a5fa;
+    background: rgba(30, 58, 138, 0.9);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
 }
 
 .banner-select {
@@ -2893,7 +2933,7 @@ ease;
 
 .locations-container.snwg-banner {
     position: fixed !important;
-    bottom: 0 !important;
+    bottom: -60px !important;
     left: 0 !important;
     right: 0 !important;
     top: unset !important;
@@ -2903,12 +2943,12 @@ ease;
     background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%) !important;
     border-top: 2px solid #1e3a8a !important;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
-    z-index: 1000 !important;
+    z-index: 998 !important;
     display: flex !important;
     flex-direction: column !important;
     max-height: 180px !important;
     overflow: hidden !important;
-    transition: max-height 0.3s ease-in-out !important;
+    transition: max-height 0.3s ease-in-out, bottom 0.3s ease-in-out !important;
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -2916,7 +2956,9 @@ ease;
 }
 
 .locations-container.snwg-banner.expanded {
-    max-height: 400px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    bottom: 109px !important;
 }
 
 .locations-container.snwg-banner .locations-box {
@@ -3034,7 +3076,141 @@ ease;
 
 html, body {
     overflow-x: hidden !important;
+}
+
+/* Home page body - account for both banner and footer */
+body.home-page {
     padding-bottom: 180px !important;
+}
+
+/* SNWG Footer for home page */
+.snwg-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 16px 0;
+    z-index: 999;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.footer-left,
+.footer-right {
+    margin: 0;
+}
+
+.footer-left p,
+.footer-right p {
+    margin: 0;
+    font-size: 13px;
+}
+
+.footer-logos {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+}
+
+.footer-logo-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.footer-logo-img {
+    height: 32px;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .snwg-footer {
+        padding: 12px 0;
+    }
+
+    .footer-container {
+        padding: 0 16px;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .footer-logos {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .footer-logo-img {
+        height: 28px;
+    }
+}
+
+/* Site page layout fix - ensure content is visible */
+body:not(.home-page) {
+    padding-bottom: 0 !important;
+    overflow: auto !important;
+}
+
+body:not(.home-page) .forecasts-box {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+    min-height: auto;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+body:not(.home-page) .thewindow {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+body:not(.home-page) .modal-dialog {
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+body:not(.home-page) .modal-content {
+    max-height: none !important;
+    height: auto !important;
+}
+
+body:not(.home-page) .modal-dialog.modal-dialog-centered.modal-md {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+body:not(.home-page) .forecasts_container {
+    max-height: none !important;
+    overflow: visible !important;
+    position: relative !important;
+}
+
+body:not(.home-page) .modal-header,
+body:not(.home-page) .modal-body {
+    max-height: none !important;
+    overflow: visible !important;
 }
 
 #toggle-locations-box-header {

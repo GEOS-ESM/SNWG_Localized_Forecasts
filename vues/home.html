@@ -26,6 +26,9 @@
                     <option value="openaq">OpenAQ</option>
                 </select>
             </div>
+            <div id="location-search-container" class="search-controls">
+                <input type="text" id="location-search-input" class="banner-search" placeholder="Search locations..." />
+            </div>
         </div>
     </div>
     <div class="locations-box" data-margin="0" data-dots="false" data-items-md="5" data-items-xs="1">
@@ -34,6 +37,27 @@
         </div>
     </div>
 </div>
+
+<footer class="snwg-footer">
+    <div class="footer-container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <p class="mb-0">© 2025 SNWG Localized Forecasts.</p>
+            </div>
+            <div class="footer-right">
+                <p class="mb-0">Version: 1.1</p>
+            </div>
+        </div>
+        <div class="footer-logos">
+            <a href="https://gmao.gsfc.nasa.gov/" target="_blank" rel="noopener" class="footer-logo-link">
+                <img src="parametres/ESD-logo.png" alt="NASA Logo" class="footer-logo-img">
+            </a>
+            <a href="https://marroninstitute.nyu.edu/" target="_blank" rel="noopener" class="footer-logo-link">
+                <img src="parametres/Marron_logo.png" alt="NYU Marron Logo" class="footer-logo-img">
+            </a>
+        </div>
+    </div>
+</footer>
 
 <script src="local_forecasts.js?v=1.4.0"></script>
 <script src="local_forecasts_assets.js?v=1.4.0"></script>
@@ -93,13 +117,16 @@ $(document).ready(function () {
         }
         let isExpanded = false;
         $('#toggle-locations-box').on('click', function() {
-            const $container = $('.snwg-banner');
+            const $banner = $('.locations-container.snwg-banner');
             const $icon = $('#toggle-locations-icon');
+            
             if (isExpanded) {
-                $container.removeClass('expanded');
+                // Collapse
+                $banner.removeClass('expanded');
                 $icon.removeClass('bi-chevron-down').addClass('bi-chevron-up');
             } else {
-                $container.addClass('expanded');
+                // Expand
+                $banner.addClass('expanded');
                 $icon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
             }
             isExpanded = !isExpanded;
@@ -138,6 +165,25 @@ $(document).ready(function () {
                 lastKnownFilter = currentUrlFilter;
             }
         }, 300);
+
+        // Location search functionality
+        $('#location-search-input').on('keyup', function() {
+            const searchText = $(this).val().toLowerCase().trim();
+            if (searchText === '') {
+                // Show all locations
+                $('.pollutant-banner').show();
+            } else {
+                // Filter locations by name - search in location-name element
+                $('.pollutant-banner').each(function() {
+                    const locationName = $(this).find('.location-name').text().toLowerCase();
+                    if (locationName.includes(searchText)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+        });
     });
 
 </script>
