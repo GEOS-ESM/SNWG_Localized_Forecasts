@@ -11,6 +11,12 @@ body {
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
+    background: white !important;
+}
+
+/* Home page specific styling */
+body.home-page {
+    background: black !important;
 }
 
 .bg-forecasts {
