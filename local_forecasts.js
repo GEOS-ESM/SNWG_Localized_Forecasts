@@ -875,22 +875,36 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
                 $(".pollutant-banner-o").append(skeleton);
             }
 
-            // Try loading hourly snapshot first
+            // Try loading hourly snapshot first - attempt current hour and fallback to previous hours
             const now = new Date();
-            const snapshotPath = `precomputed/hourly_forecasts/${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}.json`;
+            const attemptHourlyLoad = async () => {
+                // Try current hour and up to 6 hours back
+                for (let hoursBack = 0; hoursBack <= 6; hoursBack++) {
+                    const attemptDate = new Date(now);
+                    attemptDate.setHours(attemptDate.getHours() - hoursBack);
+                    
+                    const snapshotPath = `precomputed/hourly_forecasts/${attemptDate.getFullYear()}-${String(attemptDate.getMonth() + 1).padStart(2, '0')}-${String(attemptDate.getDate()).padStart(2, '0')}_${String(attemptDate.getHours()).padStart(2, '0')}.json`;
+                    
+                    try {
+                        const response = await fetch(snapshotPath);
+                        if (response.ok) {
+                            const hourlySnapshot = await response.json();
+                            console.log(`Loaded hourly forecast from ${hoursBack} hours ago`);
+                            processHourlySnapshot(hourlySnapshot, filteredIndices);
+                            return;
+                        }
+                    } catch (error) {
+                        // Try next hour back
+                        continue;
+                    }
+                }
+                
+                // If no hourly forecasts found, fall back to individual sites
+                console.log('No recent hourly forecasts available, loading individual sites...');
+                loadIndividualSites(filteredIndices);
+            };
             
-            fetch(snapshotPath)
-                .then(response => {
-                    if (!response.ok) throw new Error('Hourly snapshot not found');
-                    return response.json();
-                })
-                .then(hourlySnapshot => {
-                    processHourlySnapshot(hourlySnapshot, filteredIndices);
-                })
-                .catch(error => {
-                    console.log('Hourly snapshot not available, falling back to individual files:', error);
-                    loadIndividualSites(filteredIndices);
-                });
+            attemptHourlyLoad();
         })
         .catch(error => {
             hideLoadingDiv();
@@ -945,22 +959,36 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
                 $(".pollutant-banner-o").append(skeleton);
             }
 
-            // Try loading hourly snapshot first
+            // Try loading hourly snapshot first - attempt current hour and fallback to previous hours
             const now = new Date();
-            const snapshotPath = `precomputed/hourly_forecasts/${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}.json`;
+            const attemptHourlyLoadOptimized = async () => {
+                // Try current hour and up to 6 hours back
+                for (let hoursBack = 0; hoursBack <= 6; hoursBack++) {
+                    const attemptDate = new Date(now);
+                    attemptDate.setHours(attemptDate.getHours() - hoursBack);
+                    
+                    const snapshotPath = `precomputed/hourly_forecasts/${attemptDate.getFullYear()}-${String(attemptDate.getMonth() + 1).padStart(2, '0')}-${String(attemptDate.getDate()).padStart(2, '0')}_${String(attemptDate.getHours()).padStart(2, '0')}.json`;
+                    
+                    try {
+                        const response = await fetch(snapshotPath);
+                        if (response.ok) {
+                            const hourlySnapshot = await response.json();
+                            console.log(`Loaded hourly forecast from ${hoursBack} hours ago`);
+                            processHourlySnapshotOptimized(hourlySnapshot, filteredIndices);
+                            return;
+                        }
+                    } catch (error) {
+                        // Try next hour back
+                        continue;
+                    }
+                }
+                
+                // If no hourly forecasts found, fall back to individual sites
+                console.log('No recent hourly forecasts available, loading individual sites...');
+                loadIndividualSitesOptimized(filteredIndices);
+            };
             
-            fetch(snapshotPath)
-                .then(response => {
-                    if (!response.ok) throw new Error('Hourly snapshot not found');
-                    return response.json();
-                })
-                .then(hourlySnapshot => {
-                    processHourlySnapshotOptimized(hourlySnapshot, filteredIndices);
-                })
-                .catch(error => {
-                    console.log('Hourly snapshot not available, falling back to individual files:', error);
-                    loadIndividualSitesOptimized(filteredIndices);
-                });
+            attemptHourlyLoadOptimized();
         })
         .catch(error => {
             hideLoadingDiv();
