@@ -361,24 +361,30 @@ function get_open_aq_observations(site_id, param) {
 
 function create_map(sites, param) {
 
-    if (window.currentMap && window.currentMap.remove) {
-        window.currentMap.remove();
-        window.currentMap = null;
+    // Only recreate map on first load, not on every filter change
+    let map = window.currentMap;
+    if (!map || !map.isStyleLoaded()) {
+        if (window.currentMap && window.currentMap.remove) {
+            window.currentMap.remove();
+            window.currentMap = null;
+        }
+        $('#map').html('');
+        var deltaDistance = 100;
+        var center_point = [30.1272444, -1.9297706];
+        map = new mapboxgl.Map({
+            style: 'mapbox://styles/lazrakn/clhoolpb603b701pah3tpcs3a',
+            center: center_point,
+            zoom: 2,
+            pitch: 0,
+            bearing: 0,
+            container: 'map',
+            minZoom: 1,
+            maxZoom: 10
+           
+        });
+        // Store reference for future updates
+        window.currentMap = map;
     }
-    $('#map').html('');
-    var deltaDistance = 100;
-    var center_point = [30.1272444, -1.9297706];
-    var map = new mapboxgl.Map({
-        style: 'mapbox://styles/lazrakn/clhoolpb603b701pah3tpcs3a',
-        center: center_point,
-        zoom: 2,
-        pitch: 0,
-        bearing: 0,
-        container: 'map',
-        minZoom: 1,
-        maxZoom: 10
-       
-    });
     map.setRenderWorldCopies(false);
     const bounds = [
     [-180, -85], 
@@ -893,6 +899,217 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
         });
 }
 
+/**
+ * Optimized filter update - reuses existing map and only updates markers
+ * Called when filter changes to avoid expensive map recreation
+ */
+function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
+    if (window.currentForecastData) window.currentForecastData = null;
+    showLoadingDiv();
+
+    // Load the lightweight index first
+    fetch("precomputed/sites_index.json")
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to fetch sites index');
+            return response.json();
+        })
+        .then(siteIndex => {
+            console.log("Selected source:", selectedSource);
+            
+            // Filter sites by source
+            const filteredIndices = siteIndex.filter(site => {
+                if (!Array.isArray(site.sources)) return false;
+                const siteSources = site.sources.map(s => s.toLowerCase());
+                const selectedSourceLower = (selectedSource || "").toLowerCase();
+                return siteSources.includes(selectedSourceLower);
+            }).sort((a, b) => {
+                const nameA = (a.location_name || '').toLowerCase();
+                const nameB = (b.location_name || '').toLowerCase();
+                return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+            });
+
+            console.log(`Found ${filteredIndices.length} sites for source: ${selectedSource}`);
+            
+            $(".pollutant-banner-o").empty();
+            
+            // Show skeleton loaders
+            const skeletonCount = Math.min(12, filteredIndices.length);
+            for (let i = 0; i < skeletonCount; i++) {
+                const skeleton = `
+                    <div class="col-3 skeleton-card">
+                        <div class="skeleton-title skeleton-shimmer"></div>
+                        <div class="skeleton-text skeleton-shimmer"></div>
+                        <div class="skeleton-value skeleton-shimmer"></div>
+                    </div>
+                `;
+                $(".pollutant-banner-o").append(skeleton);
+            }
+
+            // Try loading hourly snapshot first
+            const now = new Date();
+            const snapshotPath = `precomputed/hourly_forecasts/${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}.json`;
+            
+            fetch(snapshotPath)
+                .then(response => {
+                    if (!response.ok) throw new Error('Hourly snapshot not found');
+                    return response.json();
+                })
+                .then(hourlySnapshot => {
+                    processHourlySnapshotOptimized(hourlySnapshot, filteredIndices);
+                })
+                .catch(error => {
+                    console.log('Hourly snapshot not available, falling back to individual files:', error);
+                    loadIndividualSitesOptimized(filteredIndices);
+                });
+        })
+        .catch(error => {
+            hideLoadingDiv();
+            console.error("Error loading sites index:", error);
+            showToast('Failed to load forecasts', 'error');
+        });
+}
+
+/**
+ * Process hourly snapshot without recreating map
+ */
+function processHourlySnapshotOptimized(hourlySnapshot, filteredIndices) {
+    // Create lookup map
+    const snapshotMap = {};
+    hourlySnapshot.sites.forEach(site => {
+        snapshotMap[site.location_name] = site;
+    });
+    
+    const filteredSites = [];
+    let skeletonsRemoved = 0;
+    
+    for (const indexEntry of filteredIndices) {
+        try {
+            const snapshotData = snapshotMap[indexEntry.location_name];
+            if (!snapshotData) continue;
+            
+            const selected = (snapshotData.species || indexEntry.species || "no2").toLowerCase();
+            const isPm25 = selected === "pm25" || selected === "pm2.5";
+            
+            let forecasted_value = "N/A";
+            if (selected === "no2") {
+                forecasted_value = snapshotData.no2_aqi ?? "N/A";
+            } else if (isPm25) {
+                forecasted_value = snapshotData.pm25_aqi ?? calculateAqiForPm25(snapshotData.pm25) ?? "N/A";
+            } else if (selected === "o3") {
+                forecasted_value = snapshotData.o3_aqi ?? "N/A";
+            }
+            
+            if (forecasted_value !== "N/A") {
+                const obsOptions = {
+                    no2: { unit: "μg/m³", value: snapshotData.no2 || "N/A" },
+                    no2_aqi: { unit: "AQI", value: snapshotData.no2_aqi || "N/A" },
+                    o3: { unit: "μg/m³", value: snapshotData.o3 || "N/A" },
+                    o3_aqi: { unit: "AQI", value: snapshotData.o3_aqi || "N/A" },
+                    pm25: { unit: "μg/m³", value: snapshotData.pm25 || "N/A" },
+                    pm25_aqi: { unit: "AQI", value: snapshotData.pm25_aqi || "N/A" },
+                    t10m: { unit: "K", value: snapshotData.t10m || "N/A" },
+                    rh: { unit: "%", value: snapshotData.rh || "N/A" },
+                    wind_speed: { unit: "m/s", value: snapshotData.wind_speed || "N/A" }
+                };
+
+                const siteDisplayData = {
+                    location_name: indexEntry.location_name,
+                    observation_source: snapshotData.observation_source || "NASA",
+                    forecasted_value: parseInt(forecasted_value),
+                    status: "active",
+                    latitude: indexEntry.lat,
+                    longitude: indexEntry.lon,
+                    timezone: snapshotData.timezone,
+                    precomputed_forecasts: JSON.stringify([snapshotData]),
+                    obs_options: JSON.stringify(obsOptions),
+                };
+
+                add_the_banner(siteDisplayData, selected);
+                
+                if (skeletonsRemoved < 12) {
+                    $(".pollutant-banner-o .skeleton-card").eq(skeletonsRemoved).remove();
+                    skeletonsRemoved++;
+                }
+                
+                filteredSites.push({
+                    location_id: indexEntry.location_id,
+                    location_name: indexEntry.location_name,
+                    lat: indexEntry.lat,
+                    lon: indexEntry.lon,
+                    timezone: snapshotData.timezone,
+                    species: selected,
+                    observation_source: snapshotData.observation_source,
+                    precomputed_forecasts: [snapshotData],
+                    current_forecast: snapshotData
+                });
+            }
+        } catch (error) {
+            console.error(`Error processing site ${indexEntry.location_name}:`, error);
+        }
+    }
+    
+    finalizeSitesLoadingOptimized(filteredSites);
+}
+
+/**
+ * Load individual sites without recreating map
+ */
+function loadIndividualSitesOptimized(filteredIndices) {
+    const batchSize = 2; // Limit concurrent requests
+    const filteredSites = [];
+    let processed = 0;
+    
+    const loadSiteData = () => {
+        const batch = filteredIndices.slice(processed, processed + batchSize);
+        if (batch.length === 0) {
+            finalizeSitesLoadingOptimized(filteredSites);
+            return;
+        }
+        
+        Promise.all(batch.map(indexEntry => 
+            fetch(`precomputed/all_dts/${indexEntry.location_name}.json`)
+                .then(r => r.json())
+                .then(data => ({...indexEntry, data}))
+                .catch(() => null)
+        ))
+        .then(results => {
+            results.forEach(result => {
+                if (result && result.data && result.data.forecasts) {
+                    const selected = (result.data.species || "no2").toLowerCase();
+                    const currentForecast = getCurrentForecast(result.data, selected);
+                    
+                    filteredSites.push({
+                        location_id: result.location_id,
+                        location_name: result.location_name,
+                        lat: result.lat,
+                        lon: result.lon,
+                        timezone: result.data.timezone,
+                        species: selected,
+                        observation_source: result.data.observation_source,
+                        precomputed_forecasts: result.data.forecasts,
+                        current_forecast: currentForecast
+                    });
+                }
+            });
+            processed += batchSize;
+            loadSiteData();
+        });
+    };
+    
+    loadSiteData();
+}
+
+/**
+ * Finalize without recreating map - just update markers
+ */
+function finalizeSitesLoadingOptimized(filteredSites) {
+    window.currentForecastData = filteredSites;
+    const geojson = sitesArrayToGeoJSON(filteredSites);
+    // Always update markers, never recreate map when optimized
+    updateMapMarkers(geojson);
+    hideLoadingDiv();
+}
+
 function processHourlySnapshot(hourlySnapshot, filteredIndices) {
     // Create lookup map
     const snapshotMap = {};
@@ -1067,19 +1284,72 @@ function loadIndividualSites(filteredIndices) {
 function finalizeSitesLoading(filteredSites) {
     window.currentForecastData = filteredSites;
     const geojson = sitesArrayToGeoJSON(filteredSites);
-    create_map(geojson);
+    
+    // If map already exists, just update the data layer
+    if (window.currentMap && window.currentMap.isStyleLoaded()) {
+        updateMapMarkers(geojson);
+    } else {
+        // Create map for the first time
+        create_map(geojson);
+    }
     hideLoadingDiv();
 }
 
-function showLoadingDiv() {
-    const $div = $(".loading_div");
-    $div.addClass("show");
-    showLoadingToast();
+/**
+ * Update map markers without recreating the map
+ * Much faster than full map recreation on filter changes
+ */
+function updateMapMarkers(geojson) {
+    const map = window.currentMap;
+    
+    // Add loading effect to map
+    if (map && map.getContainer()) {
+        const container = map.getContainer();
+        container.style.opacity = '0.6';
+        container.style.pointerEvents = 'none';
+    }
+    
+    // Update the data source instead of recreating the map
+    const source = map.getSource('locations_dst');
+    if (source && typeof source.setData === 'function') {
+        source.setData(geojson);
+        console.log(`Updated ${geojson.features.length} map markers`);
+        
+        // Remove loading effect after a short delay
+        setTimeout(() => {
+            if (map && map.getContainer()) {
+                const container = map.getContainer();
+                container.style.opacity = '1';
+                container.style.pointerEvents = 'auto';
+            }
+        }, 300);
+    }
 }
+
+function showLoadingDiv() {
+    // Create loading div if it doesn't exist
+    if ($(".loading-div").length === 0) {
+        const loadingHtml = `
+            <div class="loading-div">
+                <div class="loading-overlay">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Loading markers...</div>
+                </div>
+            </div>
+        `;
+        $("body").append(loadingHtml);
+    }
+    
+    const $div = $(".loading-div");
+    $div.addClass("show");
+}
+
 function hideLoadingDiv() {
-    const $div = $(".loading_div");
+    const $div = $(".loading-div");
     $div.removeClass("show");
-    showToast('Data loaded successfully', 'success');
+    setTimeout(() => {
+        showToast('Markers updated successfully', 'success');
+    }, 300);
 }
 
 function getUnitForParameter(parameter) {

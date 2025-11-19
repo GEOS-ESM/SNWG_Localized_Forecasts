@@ -2,11 +2,15 @@
 
 html,
 body {
-
     font-weight: bold;
     font-family: 'Manrope', sans-serif;
     font-weight: 100;
-
+    overflow-x: hidden !important;
+    padding-bottom: 0 !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 .bg-forecasts {
@@ -769,7 +773,6 @@ a#global-view {
 
 .locations-box {
     position: relative;
-    bottom: 37px;
 }
 
 @media (max-width: 600px) {
@@ -908,19 +911,19 @@ input#filter-input {
 
 @media (max-width: 600px) {
      .locations-container {
-        position: fixed;
-        top: 15%;
-        left: 0;
-        width: 100% !important;
-        height: 82vh !important;
-        z-index: 9;
-        background: #000000f2;
-        display: flex
-;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: stretch;
-        transition: transform 0.3s;
+        /* Old mobile styles disabled - using SNWG banner instead */
+        position: unset !important;
+        top: unset !important;
+        left: unset !important;
+        width: unset !important;
+        height: unset !important;
+        z-index: unset !important;
+        background: unset !important;
+        display: flex !important;
+        flex-direction: unset !important;
+        justify-content: unset !important;
+        align-items: unset !important;
+        transition: unset !important;
     }
     button#toggle-locations-box {
         display: none;
@@ -957,9 +960,9 @@ input#filter-input {
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   }
   #map {
-    width: 100vw !important;
-    height: 100vh !important;
-    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
     top: 0;
     left: 0;
     z-index: 1;
@@ -992,7 +995,11 @@ h5.plot_title {
 }
 
 section.wrapper.image-wrapper.bg-image.bg-overlay.bg-overlay-300 {
-    min-height: 90vh;
+    flex: 1 1 auto !important;
+    height: auto !important;
+    display: flex !important;
+    min-height: 0 !important;
+    position: relative !important;
 }
 
 div#species-filter-container {
@@ -2402,6 +2409,626 @@ li.nav-item.model_infos a {
 .frcst-plt-dets h2 {
     font-weight: 700;
     font-size: x-large !important;
+}
+
+/* ============ SNWG-STYLE FIXED BOTTOM BANNER ============ */
+
+/* Root level styling to hide horizontal scroll */
+html, body {
+    overflow-x: hidden !important;
+}
+
+/* Main banner container - fixed at bottom */
+.snwg-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+    border-top: 2px solid #1e3a8a;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    max-height: 180px;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.snwg-banner.expanded {
+    max-height: 400px;
+}
+
+/* Banner control header */
+.banner-controls {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: rgba(15, 23, 42, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 48px;
+    gap: 16px;
+}
+
+.controls-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Toggle button - SNWG style */
+.btn-banner-toggle {
+    background: transparent;
+    border: none;
+    color: #60a5fa;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    min-width: 32px;
+    height: 32px;
+}
+
+.btn-banner-toggle:hover {
+    color: #93c5fd;
+    background: rgba(96, 165, 250, 0.1);
+    border-radius: 4px;
+}
+
+/* Filter controls */
+.filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #e0e7ff;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.filter-controls label {
+    margin: 0;
+    color: #cbd5e1;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.banner-select {
+    background: rgba(30, 58, 138, 0.6);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    color: #e0e7ff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.banner-select:hover {
+    border-color: #60a5fa;
+    background: rgba(30, 58, 138, 0.8);
+}
+
+.banner-select:focus {
+    outline: none;
+    border-color: #60a5fa;
+    background: rgba(30, 58, 138, 1);
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+
+.banner-select option {
+    background: #1e3a8a;
+    color: #e0e7ff;
+}
+
+/* Locations box - scrollable container */
+.locations-box {
+    background-color: #000000;
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 16px;
+    /* Custom scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(96, 165, 250, 0.5) transparent;
+}
+
+.locations-box::-webkit-scrollbar {
+    height: 6px;
+}
+
+.locations-box::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.locations-box::-webkit-scrollbar-thumb {
+    background: rgba(96, 165, 250, 0.5);
+    border-radius: 3px;
+}
+
+.locations-box::-webkit-scrollbar-thumb:hover {
+    background: rgba(96, 165, 250, 0.8);
+}
+
+/* Container for banner cards */
+.pollutants-banner-container {
+    display: flex;
+    gap: 8px;
+    min-width: min-content;
+    padding-right: 16px;
+}
+
+.pollutant-banner-o {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+}
+
+.pollutant-banner-o .col-3 {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+}
+
+/* Individual banner card styling */
+.pollutant-banner {
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s 
+ease;
+    cursor: pointer;
+    background: linear-gradient(135deg, #000000 0%, #002854 100%);
+    border: none;
+}
+
+.pollutant-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(96, 165, 250, 0.2);
+    border-color: rgba(96, 165, 250, 0.4);
+}
+
+.pollutant-banner.launch-local-forecasts {
+    min-width: 260px;
+    max-width: 260px;
+}
+
+/* Banner header styling */
+.banner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(96, 165, 250, 0.1);
+    gap: 8px;
+}
+
+.location-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.location-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #e0e7ff;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.source {
+    font-size: 9px;
+    color: #94a3b8;
+    margin: 0;
+    display: none;
+}
+
+.timezone_text {
+    font-size: 8px;
+    color: #64748b;
+    margin: 0;
+}
+
+.aqi-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.aqi-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+}
+
+.aqi-value {
+    font-weight: 900;
+    font-size: 16px;
+}
+
+.aqi-level {
+    font-size: 9px;
+    font-weight: 700;
+    color: #e0e7ff;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Banner body */
+.banner-body {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 10px;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.5);
+}
+
+.banner-body.compact {
+    padding: 6px 8px;
+}
+
+.weather-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #cbd5e1;
+    flex: 1;
+}
+
+.info-icon {
+    color: #60a5fa;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #e0e7ff;
+}
+
+/* Skeleton loaders */
+.skeleton-card {
+    flex: 0 0 auto !important;
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+    height: 140px;
+    background: rgba(30, 58, 138, 0.4);
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skeleton-shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(90deg, rgba(96, 165, 250, 0.1) 0%, rgba(96, 165, 250, 0.2) 50%, rgba(96, 165, 250, 0.1) 100%);
+    background-size: 200% 100%;
+}
+
+.skeleton-title {
+    height: 12px;
+    border-radius: 4px;
+    width: 70%;
+}
+
+.skeleton-text {
+    height: 10px;
+    border-radius: 4px;
+    width: 50%;
+}
+
+.skeleton-value {
+    height: 24px;
+    border-radius: 4px;
+    width: 40%;
+    margin-top: 4px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .snwg-banner {
+        max-height: 160px;
+    }
+
+    .snwg-banner.expanded {
+        max-height: 350px;
+    }
+
+    .banner-controls {
+        padding: 6px 12px;
+        min-height: 44px;
+        gap: 12px;
+    }
+
+    .pollutant-banner-o .col-3 {
+        min-width: 220px !important;
+        max-width: 220px !important;
+    }
+
+    .pollutant-banner.launch-local-forecasts {
+        min-width: 220px;
+        max-width: 220px;
+    }
+
+    .skeleton-card {
+        width: 220px !important;
+        min-width: 220px !important;
+        max-width: 220px !important;
+    }
+
+    .aqi-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .aqi-value {
+        font-size: 14px;
+    }
+
+    .location-name {
+        font-size: 11px;
+    }
+
+    .info-item {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .snwg-banner {
+        max-height: 140px;
+    }
+
+    .snwg-banner.expanded {
+        max-height: 300px;
+    }
+
+    .filter-controls {
+        font-size: 11px;
+        gap: 6px;
+    }
+
+    .banner-select {
+        font-size: 11px;
+        padding: 5px 8px;
+        min-width: 100px;
+    }
+
+    .pollutant-banner-o .col-3 {
+        min-width: 180px !important;
+        max-width: 180px !important;
+    }
+
+    .pollutant-banner.launch-local-forecasts {
+        min-width: 180px;
+        max-width: 180px;
+    }
+
+    .skeleton-card {
+        width: 180px !important;
+        min-width: 180px !important;
+        max-width: 180px !important;
+    }
+
+    .banner-header {
+        padding: 8px 10px;
+    }
+
+    .aqi-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 12px;
+    }
+
+    .aqi-value {
+        font-size: 12px;
+    }
+
+    .location-name {
+        font-size: 10px;
+    }
+
+    .info-item {
+        font-size: 9px;
+    }
+}
+
+/* ============ FINAL SNWG BANNER OVERRIDES ============ */
+/* These rules ensure SNWG banner takes precedence over all old styles */
+
+.locations-container.snwg-banner {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: unset !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%) !important;
+    border-top: 2px solid #1e3a8a !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 180px !important;
+    overflow: hidden !important;
+    transition: max-height 0.3s ease-in-out !important;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    margin-top: 0 !important;
+}
+
+.locations-container.snwg-banner.expanded {
+    max-height: 400px !important;
+}
+
+.locations-container.snwg-banner .locations-box {
+    flex: 1 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 8px 16px !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(96, 165, 250, 0.5) transparent !important;
+    margin: 0 !important;
+    margin-top: 14px !important;
+}
+
+.locations-container.snwg-banner .banner-controls {
+    display: flex !important;
+    align-items: center !important;
+    padding: 8px 16px !important;
+    background: rgba(15, 23, 42, 0.8) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    min-height: 48px !important;
+    gap: 16px !important;
+}
+
+.locations-container.snwg-banner .btn-banner-toggle {
+    background: transparent !important;
+    border: none !important;
+    color: #60a5fa !important;
+    font-size: 18px !important;
+    cursor: pointer !important;
+    padding: 4px 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    min-width: 32px !important;
+    height: 32px !important;
+}
+
+.locations-container.snwg-banner .btn-banner-toggle:hover {
+    color: #93c5fd !important;
+    background: rgba(96, 165, 250, 0.1) !important;
+    border-radius: 4px !important;
+}
+
+.locations-container.snwg-banner .filter-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    color: #e0e7ff !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+
+.locations-container.snwg-banner .banner-select {
+    background: rgba(30, 58, 138, 0.6) !important;
+    border: 1px solid rgba(96, 165, 250, 0.3) !important;
+    color: #e0e7ff !important;
+    padding: 6px 10px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    font-family: 'Manrope', sans-serif !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    min-width: 120px !important;
+}
+
+.locations-container.snwg-banner .pollutant-banner-o {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.locations-container.snwg-banner .col-3 {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.locations-container.snwg-banner .pollutant-banner {
+    flex-shrink: 0 !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    background: linear-gradient(135deg, #1e3a8a 0%, #1a3a5c 100%) !important;
+    border: 1px solid rgba(96, 165, 250, 0.2) !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.locations-container.snwg-banner .pollutant-banner:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(96, 165, 250, 0.2) !important;
+    border-color: rgba(96, 165, 250, 0.4) !important;
+}
+
+/* Ensure old conflicting styles don't apply */
+.locations-container.snwg-banner .locations-box input {
+    margin-bottom: unset !important;
+    padding-left: unset !important;
+}
+
+html, body {
+    overflow-x: hidden !important;
+    padding-bottom: 180px !important;
 }
 
 #toggle-locations-box-header {

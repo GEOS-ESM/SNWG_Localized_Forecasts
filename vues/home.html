@@ -10,29 +10,27 @@
 
 <div class="forecasts_container"></div>
 
-<div class="locations-container">
-    <div class="d-flex align-items-center justify-content-between" style="gap: 1rem; position: relative; margin-bottom: 0.5rem;">
-        <button id="toggle-locations-box" class="btn btn-soft-ash btn-sm rounded" style="position: relative;">
-            <i class="bi bi-funnel" id="toggle-locations-icon" style="margin-right: 6px;"></i>
-            <span>Hide Filters</span>
-        </button>
-        <div id="species-filter-container" style="color: white;">
-            <label for="species-filter" style="font-weight:600;margin-right:8px;">Locations</label>
-            <select id="species-filter" class="form-select form-select-sm" style="width:auto;display:inline-block;">
-                <option value="pandora">NASA Pandora</option>
-                <option value="dos_missions" selected>DoS Missions</option>
-                <option value="remmaq">REMMAQ</option>
-                <option value="aeronet">AERONET</option>
-                <option value="openaq">OpenAQ</option>
-            </select>
+<div class="locations-container snwg-banner">
+    <div class="banner-controls">
+        <div class="controls-left">
+            <button id="toggle-locations-box" class="btn-banner-toggle" title="Show/Hide filters">
+                <i class="bi bi-chevron-up" id="toggle-locations-icon"></i>
+            </button>
+            <div id="species-filter-container" class="filter-controls">
+                <label for="species-filter">Locations:</label>
+                <select id="species-filter" class="banner-select">
+                    <option value="pandora">NASA Pandora</option>
+                    <option value="dos_missions" selected>DoS Missions</option>
+                    <option value="remmaq">REMMAQ</option>
+                    <option value="aeronet">AERONET</option>
+                    <option value="openaq">OpenAQ</option>
+                </select>
+            </div>
         </div>
     </div>
-    <div class="locations-box" data-margin="0" data-dots="true"
-        data-items-md="5" data-items-xs="1">
-        <ul class="pollutant_param list-inline mb-0"></ul>
-        <input type="text" id="filter-input" placeholder="Search" />
-        <div class="pollutants-banner">
-            <div class="pollutant-banner-o row gx-md-8 gy-8 swiper-desactivated"></div>
+    <div class="locations-box" data-margin="0" data-dots="false" data-items-md="5" data-items-xs="1">
+        <div class="pollutants-banner-container">
+            <div class="pollutant-banner-o swiper-desactivated"></div>
         </div>
     </div>
 </div>
@@ -48,10 +46,30 @@
 $(document).on('change', '#species-filter', function() {
     cleanupBanners();
     const selectedSpecies = $(this).val();
-    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", selectedSpecies);
+    
+    // Update URL with new filter
+    const url = new URL(window.location);
+    url.searchParams.set('filter', selectedSpecies);
+    window.history.pushState({ filter: selectedSpecies }, '', url);
+    
+    // Use optimized filter update that keeps map without reloading
+    readCompressedJsonAndAddBannersOptimized("precomputed/combined_forecasts.json.gz", selectedSpecies);
 });
 $(document).ready(function () {
-    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz",  "dos_missions");
+    // Load filter from URL parameter if available
+    const urlFilter = getUrlParam('filter');
+    const defaultFilter = urlFilter || 'dos_missions';
+    
+    // Set the default filter in URL if not already present
+    if (!urlFilter) {
+        const url = new URL(window.location);
+        url.searchParams.set('filter', defaultFilter);
+        window.history.replaceState({ filter: defaultFilter }, '', url);
+    }
+    
+    $('#species-filter').val(defaultFilter);
+    
+    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", defaultFilter);
     $('#toggle-locations-box-header').show();
 });
 
@@ -64,7 +82,6 @@ $(document).ready(function () {
     }
 
     $(function() {
-
         const viewParam = getUrlParam('view');
         if (viewParam === 'list') {
             $('.locations-container').show();
@@ -72,17 +89,53 @@ $(document).ready(function () {
         } else if (viewParam === 'globe') {
             $('.locations-container').hide();
         }
-        let isVisible = $('.locations-container').is(':visible');
+        let isExpanded = false;
         $('#toggle-locations-box').on('click', function() {
-            if (isVisible) {
-                $('.locations-container').slideUp(300);
-                $(this).find('span').text('Show Filters');
+            const $container = $('.snwg-banner');
+            const $icon = $('#toggle-locations-icon');
+            if (isExpanded) {
+                $container.removeClass('expanded');
+                $icon.removeClass('bi-chevron-down').addClass('bi-chevron-up');
             } else {
-                $('.locations-container').slideDown(300);
-                $(this).find('span').text('Hide Filters');
+                $container.addClass('expanded');
+                $icon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
             }
-            isVisible = !isVisible;
+            isExpanded = !isExpanded;
         });
+
+        // Listen for URL changes (browser back/forward buttons)
+        window.addEventListener('popstate', function(event) {
+            const urlFilter = getUrlParam('filter') || 'dos_missions';
+            const currentFilter = $('#species-filter').val();
+            
+            // Only update if filter in URL is different from current
+            if (urlFilter !== currentFilter) {
+                $('#species-filter').val(urlFilter);
+                cleanupBanners();
+                readCompressedJsonAndAddBannersOptimized("precomputed/combined_forecasts.json.gz", urlFilter);
+            }
+        });
+
+        // Monitor URL changes (including direct manual edits in address bar)
+        let lastKnownFilter = getUrlParam('filter') || 'dos_missions';
+        setInterval(function() {
+            const currentUrlFilter = getUrlParam('filter') || 'dos_missions';
+            const currentDropdownFilter = $('#species-filter').val();
+            
+            // If URL changed from last check and it's different from dropdown
+            if (currentUrlFilter !== lastKnownFilter && currentUrlFilter !== currentDropdownFilter) {
+                console.log('URL filter changed to:', currentUrlFilter);
+                lastKnownFilter = currentUrlFilter;
+                
+                // Update dropdown and load new filter
+                $('#species-filter').val(currentUrlFilter);
+                cleanupBanners();
+                readCompressedJsonAndAddBannersOptimized("precomputed/combined_forecasts.json.gz", currentUrlFilter);
+            } else {
+                // Just track the latest URL filter even if we don't update
+                lastKnownFilter = currentUrlFilter;
+            }
+        }, 300);
     });
 
 </script>
