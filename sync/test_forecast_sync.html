@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Forecast Sync Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .info { background: #e3f2fd; padding: 10px; margin: 10px 0; border-left: 4px solid #2196F3; border-radius: 3px; }
+        .check { padding: 10px; margin: 5px 0; background: #d4edda; border-left: 4px solid #28a745; border-radius: 3px; }
+        .mismatch { background: #f8d7da; border-left: 4px solid #f5c6cb; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Forecast Timestamp Sync Verification</h1>
+    <p>This test verifies that the forecast shown on the map matches the one displayed in the detail view.</p>
+
+    <div id="results"></div>
+
+    <script>
+    async function testForecastSync() {
+        const results = document.getElementById('results');
+        
+        // Test with a few sites
+        const testSites = [
+            { name: 'Ecuador_Quito_Belisario', tz: 'America/Guayaquil' },
+            { name: 'Bangkok', tz: 'Asia/Bangkok' },
+        ];
+
+        for (const site of testSites) {
+            try {
+                const response = await fetch(`precomputed/all_dts/${site.name}.json`);
+                if (!response.ok) {
+                    results.innerHTML += `<div class="section"><p style="color:red;">✗ ${site.name}: File not found</p></div>`;
+                    continue;
+                }
+                
+                const data = await response.json();
+                
+                // Simulate what the map does: get current forecast for this timezone
+                const now = new Date();
+                const formatter = new Intl.DateTimeFormat('en-US', {
+                    timeZone: site.tz,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+                
+                const parts = formatter.formatToParts(now);
+                const partMap = {};
+                parts.forEach(p => {
+                    partMap[p.type] = p.value;
+                });
+                
+                const localTimeStr = `${partMap.year}-${partMap.month}-${partMap.day} ${partMap.hour}:${partMap.minute}:${partMap.second}`;
+                const localNow = new Date(localTimeStr.replace(' ', 'T'));
+                
+                // Find closest forecast (what appears on the map)
+                let mapForecast = null;
+                let mapDiff = Infinity;
+                
+                for (const fc of data.forecasts) {
+                    if (!fc.local_time) continue;
+                    try {
+                        const fcTime = new Date(fc.local_time.replace(' ', 'T'));
+                        const diff = Math.abs(localNow - fcTime);
+                        if (diff < mapDiff) {
+                            mapForecast = fc;
+                            mapDiff = diff;
+                        }
+                    } catch (e) { }
+                }
+                
+                if (!mapForecast) {
+                    results.innerHTML += `<div class="section"><p style="color:red;">✗ ${site.name}: No forecast found</p></div>`;
+                    continue;
+                }
+                
+                // Simulate scrolling to that timestamp (what the detail view does)
+                const targetTime = new Date(mapForecast.local_time.replace(' ', 'T'));
+                const halfDay = 12 * 60 * 60 * 1000;
+                const rangeStart = new Date(targetTime.getTime() - halfDay);
+                const rangeEnd = new Date(targetTime.getTime() + halfDay);
+                
+                // Check if the current forecast is within the displayed range
+                const isInRange = localNow >= rangeStart && localNow <= rangeEnd;
+                
+                const html = `
+                    <div class="section">
+                        <h3>${site.name}</h3>
+                        <div class="info">
+                            <strong>Timezone:</strong> ${site.tz}<br>
+                            <strong>Local Now:</strong> ${localTimeStr}<br>
+                        </div>
+                        <div class="check">
+                            <strong>Map shows:</strong> ${mapForecast.local_time}<br>
+                            <strong>NO2 AQI:</strong> ${mapForecast.no2_aqi || 'N/A'} | 
+                            <strong>PM2.5 AQI:</strong> ${mapForecast.pm25_aqi || 'N/A'}
+                        </div>
+                        <div class="${isInRange ? 'check' : 'check mismatch'}">
+                            <strong>Detail view will scroll to range:</strong> ${rangeStart.toISOString().split('T')[0]} ${rangeStart.getHours().toString().padStart(2,'0')}:00 - ${rangeEnd.getHours().toString().padStart(2,'0')}:00<br>
+                            <strong>Current forecast in range:</strong> ${isInRange ? '✓ YES - MATCH!' : '✗ NO - MISMATCH'}
+                        </div>
+                    </div>
+                `;
+                results.innerHTML += html;
+            } catch (error) {
+                results.innerHTML += `<div class="section" style="color:red;">Error testing ${site.name}: ${error.message}</div>`;
+            }
+        }
+    }
+    
+    window.addEventListener('load', testForecastSync);
+    </script>
+</body>
+</html>

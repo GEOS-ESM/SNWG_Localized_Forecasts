@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complete REMMAQ Test</title>
+    <style>
+        body { background: #f5f5f5; font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { background: white; padding: 20px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 3px; }
+        button:hover { background: #0056b3; }
+        .result { padding: 10px; margin: 10px 0; border-radius: 3px; border-left: 4px solid #ddd; }
+        .pass { background: #d4edda; border-color: #28a745; color: #155724; }
+        .fail { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Complete REMMAQ Loading Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Load Sites Index</h2>
+        <button onclick="testLoadIndex()">Run Test</button>
+        <div id="test1-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Filter REMMAQ Sites</h2>
+        <button onclick="testFilterREMMAQ()">Run Test</button>
+        <div id="test2-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Load REMMAQ Forecast Files</h2>
+        <button onclick="testLoadREMMAQFiles()">Run Test</button>
+        <div id="test3-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Get Current Forecast</h2>
+        <button onclick="testGetCurrentForecast()">Run Test</button>
+        <div id="test4-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 5: Convert to GeoJSON</h2>
+        <button onclick="testGeoJSON()">Run Test</button>
+        <div id="test5-result"></div>
+    </div>
+
+    <script>
+    async function testLoadIndex() {
+        const div = document.getElementById('test1-result');
+        try {
+            const response = await fetch('precomputed/sites_index.json');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const index = await response.json();
+            div.innerHTML = `<div class="result pass">✓ Loaded index with ${index.length} sites</div>`;
+        } catch (error) {
+            div.innerHTML = `<div class="result fail">✗ Error: ${error.message}</div>`;
+        }
+    }
+
+    async function testFilterREMMAQ() {
+        const div = document.getElementById('test2-result');
+        try {
+            const response = await fetch('precomputed/sites_index.json');
+            const index = await response.json();
+            
+            const remmaq = index.filter(s => {
+                if (!Array.isArray(s.sources)) return false;
+                return s.sources.map(x => x.toLowerCase()).includes("remmaq");
+            });
+            
+            div.innerHTML = `<div class="result pass">✓ Found ${remmaq.length} REMMAQ sites</div>`;
+            remmaq.slice(0, 3).forEach(site => {
+                div.innerHTML += `<div class="result info">  - ${site.location_name} (${site.lat}, ${site.lon})</div>`;
+            });
+        } catch (error) {
+            div.innerHTML = `<div class="result fail">✗ Error: ${error.message}</div>`;
+        }
+    }
+
+    async function testLoadREMMAQFiles() {
+        const div = document.getElementById('test3-result');
+        try {
+            const response = await fetch('precomputed/sites_index.json');
+            const index = await response.json();
+            
+            const remmaq = index.filter(s => {
+                if (!Array.isArray(s.sources)) return false;
+                return s.sources.map(x => x.toLowerCase()).includes("remmaq");
+            });
+            
+            let success = 0;
+            for (const site of remmaq.slice(0, 2)) {
+                try {
+                    const fileResp = await fetch(`precomputed/all_dts/${site.file}`);
+                    if (!fileResp.ok) throw new Error(`HTTP ${fileResp.status}`);
+                    const data = await fileResp.json();
+                    div.innerHTML += `<div class="result pass">✓ ${site.location_name}: ${data.forecasts.length} forecasts</div>`;
+                    success++;
+                } catch (e) {
+                    div.innerHTML += `<div class="result fail">✗ ${site.location_name}: ${e.message}</div>`;
+                }
+            }
+            if (success === 0) throw new Error("Could not load any REMMAQ files");
+        } catch (error) {
+            div.innerHTML = `<div class="result fail">✗ Error: ${error.message}</div>`;
+        }
+    }
+
+    async function testGetCurrentForecast() {
+        const div = document.getElementById('test4-result');
+        try {
+            // Simulate getCurrentForecast logic
+            const response = await fetch('precomputed/sites_index.json');
+            const index = await response.json();
+            
+            const site = index.find(s => {
+                if (!Array.isArray(s.sources)) return false;
+                return s.sources.map(x => x.toLowerCase()).includes("remmaq");
+            });
+            
+            if (!site) throw new Error("No REMMAQ site found");
+            
+            const fileResp = await fetch(`precomputed/all_dts/${site.file}`);
+            const siteData = await fileResp.json();
+            
+            // Get current time in site's timezone
+            const now = new Date();
+            const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: site.timezone }));
+            
+            // Find closest forecast
+            let bestMatch = null;
+            let bestDiff = Infinity;
+            
+            for (const forecast of siteData.forecasts) {
+                if (!forecast.local_time) continue;
+                try {
+                    const forecastTime = new Date(forecast.local_time.replace(' ', 'T'));
+                    const diff = Math.abs(siteLocalNow - forecastTime);
+                    if (diff < bestDiff) {
+                        bestMatch = forecast;
+                        bestDiff = diff;
+                    }
+                } catch (e) { }
+            }
+            
+            if (!bestMatch) throw new Error("No forecast found");
+            
+            div.innerHTML = `<div class="result pass">✓ Found closest forecast</div>`;
+            div.innerHTML += `<div class="result info">  - Local Time: ${bestMatch.local_time}</div>`;
+            div.innerHTML += `<div class="result info">  - NO2 AQI: ${bestMatch.no2_aqi}</div>`;
+            div.innerHTML += `<div class="result info">  - PM2.5 AQI: ${bestMatch.pm25_aqi}</div>`;
+            div.innerHTML += `<div class="result info">  - O3 AQI: ${bestMatch.o3_aqi}</div>`;
+        } catch (error) {
+            div.innerHTML = `<div class="result fail">✗ Error: ${error.message}</div>`;
+        }
+    }
+
+    async function testGeoJSON() {
+        const div = document.getElementById('test5-result');
+        try {
+            const response = await fetch('precomputed/sites_index.json');
+            const index = await response.json();
+            
+            const remmaq = index.filter(s => {
+                if (!Array.isArray(s.sources)) return false;
+                return s.sources.map(x => x.toLowerCase()).includes("remmaq");
+            });
+            
+            // Simulate sitesArrayToGeoJSON
+            const features = remmaq.slice(0, 2).map(site => ({
+                type: "Feature",
+                properties: {
+                    location_id: site.location_id,
+                    location_name: site.location_name,
+                    aqi_value: Math.floor(Math.random() * 100),
+                    aqi_color: "#00ff00"
+                },
+                geometry: {
+                    type: "Point",
+                    coordinates: [site.lon, site.lat]
+                }
+            }));
+            
+            const geojson = {
+                type: "FeatureCollection",
+                features: features
+            };
+            
+            div.innerHTML = `<div class="result pass">✓ Created GeoJSON with ${features.length} features</div>`;
+            features.forEach(f => {
+                div.innerHTML += `<div class="result info">  - ${f.properties.location_name}: (${f.geometry.coordinates[1]}, ${f.geometry.coordinates[0]})</div>`;
+            });
+        } catch (error) {
+            div.innerHTML = `<div class="result fail">✗ Error: ${error.message}</div>`;
+        }
+    }
+
+    // Auto-run all tests on page load
+    window.addEventListener('load', function() {
+        testLoadIndex();
+        testFilterREMMAQ();
+        testLoadREMMAQFiles();
+        testGetCurrentForecast();
+        testGeoJSON();
+    });
+    </script>
+</body>
+</html>

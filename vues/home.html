@@ -20,8 +20,10 @@
             <label for="species-filter" style="font-weight:600;margin-right:8px;">Locations</label>
             <select id="species-filter" class="form-select form-select-sm" style="width:auto;display:inline-block;">
                 <option value="pandora">NASA Pandora</option>
-                <option value="merra2" selected>DoS Missions</option>
-                <option value="local">REMMAQ</option>
+                <option value="dos_missions" selected>DoS Missions</option>
+                <option value="remmaq">REMMAQ</option>
+                <option value="aeronet">AERONET</option>
+                <option value="openaq">OpenAQ</option>
             </select>
         </div>
     </div>
@@ -49,7 +51,7 @@ $(document).on('change', '#species-filter', function() {
     readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", selectedSpecies);
 });
 $(document).ready(function () {
-    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz",  "merra2");
+    readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz",  "dos_missions");
     $('#toggle-locations-box-header').show();
 });
 
