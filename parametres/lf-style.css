@@ -2933,7 +2933,7 @@ ease;
 
 .locations-container.snwg-banner {
     position: fixed !important;
-    bottom: -74px !important;
+    bottom: -20px !important;
     left: 0 !important;
     right: 0 !important;
     top: unset !important;
@@ -2958,7 +2958,7 @@ ease;
 .locations-container.snwg-banner.expanded {
     max-height: 90vh !important;
     overflow-y: auto !important;
-    bottom: 55px !important;
+    bottom: 109px !important;
 }
 
 .locations-container.snwg-banner .locations-box {
