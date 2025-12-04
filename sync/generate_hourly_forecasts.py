@@ -21,25 +21,25 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 import glob
 
-def get_forecast_for_hour(site_data, site_name, target_datetime):
-    """Extract forecast for a specific hour from a site's data"""
+def get_forecast_for_hour(site_data, site_name, target_utc, site_index_entry=None):
+    """Extract forecast matching the current UTC hour, including local time from forecasts file"""
     try:
         timezone_str = site_data.get('timezone', 'UTC')
-        tz = ZoneInfo(timezone_str)
+        target_hour_utc = target_utc.strftime('%Y-%m-%d %H:00:00')
         
-        # Convert target UTC time to site's local timezone
-        target_local = target_datetime.astimezone(tz)
-        hour_key = target_local.strftime('%Y-%m-%d %H:00:00')
+        species = site_index_entry.get('species', 'no2') if site_index_entry else site_data.get('species', 'no2')
+        sources = site_index_entry.get('sources', []) if site_index_entry else site_data.get('sources', [])
         
-        # Find exact matching forecast
         for forecast in site_data.get('forecasts', []):
-            if forecast.get('local_time') == hour_key:
+            if forecast.get('time') == target_hour_utc:
                 return {
                     'location_name': site_name,
                     'timezone': timezone_str,
-                    'species': site_data.get('species', 'no2'),
+                    'species': species,
+                    'sources': sources,
                     'observation_source': site_data.get('observation_source', 'NASA'),
-                    'local_time': hour_key,
+                    'time': target_hour_utc,
+                    'local_time': forecast.get('local_time'),
                     'no2': forecast.get('no2'),
                     'no2_aqi': forecast.get('no2_aqi'),
                     'o3': forecast.get('o3'),
@@ -51,44 +51,33 @@ def get_forecast_for_hour(site_data, site_name, target_datetime):
                     'wind_speed': forecast.get('wind_speed')
                 }
         
-        # If exact hour not found, find closest forecast (prefer future, but allow past if no future exists)
         closest_forecast = None
         min_diff = float('inf')
+        tz = ZoneInfo(timezone_str)
+        target_hour = target_utc.replace(minute=0, second=0, microsecond=0)
         
-        try:
-            target_hour = target_local.replace(minute=0, second=0, microsecond=0)
-            future_found = False
-            
-            for forecast in site_data.get('forecasts', []):
-                try:
-                    fc_time_str = forecast.get('local_time', '').replace(' ', 'T')
-                    fc_time = datetime.fromisoformat(fc_time_str)
-                    # Make aware if naive (treat as local timezone)
-                    if fc_time.tzinfo is None:
-                        fc_time = fc_time.replace(tzinfo=tz)
-                    
-                    diff = (fc_time - target_hour).total_seconds()
-                    
-                    # Prefer future forecasts (diff >= 0)
-                    if diff >= 0 and diff < min_diff:
-                        min_diff = diff
-                        closest_forecast = forecast
-                        future_found = True
-                    # But if no future exists, take closest past forecast
-                    elif not future_found and abs(diff) < min_diff:
-                        min_diff = abs(diff)
-                        closest_forecast = forecast
-                except:
-                    pass
-        except:
-            pass
+        for forecast in site_data.get('forecasts', []):
+            try:
+                fc_time_str = forecast.get('time', '').replace(' ', 'T')
+                fc_time = datetime.fromisoformat(fc_time_str)
+                if fc_time.tzinfo is None:
+                    fc_time = fc_time.replace(tzinfo=ZoneInfo('UTC'))
+                
+                diff = abs((fc_time - target_hour).total_seconds())
+                if diff < min_diff:
+                    min_diff = diff
+                    closest_forecast = forecast
+            except:
+                pass
         
         if closest_forecast:
             return {
                 'location_name': site_name,
                 'timezone': timezone_str,
-                'species': site_data.get('species', 'no2'),
+                'species': species,
+                'sources': sources,
                 'observation_source': site_data.get('observation_source', 'NASA'),
+                'time': target_hour_utc,
                 'local_time': closest_forecast.get('local_time'),
                 'no2': closest_forecast.get('no2'),
                 'no2_aqi': closest_forecast.get('no2_aqi'),
@@ -101,27 +90,31 @@ def get_forecast_for_hour(site_data, site_name, target_datetime):
                 'wind_speed': closest_forecast.get('wind_speed')
             }
     except Exception as e:
-        print(f"Error processing {site_name} for hour: {e}")
+        pass
     
     return None
 
 def generate_all_hourly_snapshots():
     """Generate hourly snapshot files for current day + 3 days ahead (96 hours)"""
     
-    # Create output directory
     output_dir = Path('precomputed/hourly_forecasts')
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    # Get current time in UTC
     now_utc = datetime.now(ZoneInfo('UTC'))
-    
-    # Generate for 96 hours (current day + 3 days ahead)
     num_hours = 96
     
     print(f"Generating {num_hours} hourly forecast files...")
     print(f"Starting from: {now_utc.strftime('%Y-%m-%d %H:%M:%S UTC')}")
     
-    # Load all site files once
+    sites_index_list = []
+    try:
+        with open('precomputed/sites_index.json', 'r') as f:
+            sites_index_list = json.load(f)
+        print(f"Loaded {len(sites_index_list)} site entries from sites_index.json\n")
+    except Exception as e:
+        print(f"ERROR: Failed to load sites_index.json: {e}")
+        raise
+    
     site_files = glob.glob('precomputed/all_dts/*.json')
     sites_data = {}
     
@@ -138,35 +131,42 @@ def generate_all_hourly_snapshots():
     
     print(f"Loaded {len(sites_data)} sites\n")
     
-    # Generate snapshots for each hour
     generated_files = []
     failed_hours = 0
     
     for hour_offset in range(num_hours):
         try:
-            # Calculate target hour in UTC
             target_utc = now_utc + timedelta(hours=hour_offset)
             filename = target_utc.strftime('%Y-%m-%d_%H.json')
             filepath = output_dir / filename
             
-            # Collect all forecasts for this hour
             hourly_data = {
                 'generated_at': datetime.now(ZoneInfo('UTC')).isoformat(),
                 'forecast_hour': target_utc.isoformat(),
                 'sites': []
             }
             
-            # Process all sites
             for site_name, site_data in sites_data.items():
                 try:
-                    forecast = get_forecast_for_hour(site_data, site_name, target_utc)
+                    site_index_entry = None
+                    site_data_sources = site_data.get('sources', [])
+                    
+                    for index_entry in sites_index_list:
+                        if index_entry['location_name'] == site_name:
+                            index_sources = set(index_entry.get('sources', []))
+                            data_sources = set(site_data_sources)
+                            
+                            if index_sources & data_sources:
+                                site_index_entry = index_entry
+                                break
+                    
+                    forecast = get_forecast_for_hour(site_data, site_name, target_utc, site_index_entry)
                     if forecast:
                         hourly_data['sites'].append(forecast)
                 except Exception as e:
-                    pass  # Skip sites with errors for this hour
+                    pass
             
-            # Write snapshot file
-            if hourly_data['sites']:  # Only write if we have sites
+            if hourly_data['sites']:
                 with open(filepath, 'w') as f:
                     json.dump(hourly_data, f, separators=(',', ':'))
                 
@@ -174,15 +174,13 @@ def generate_all_hourly_snapshots():
                 generated_files.append(filename)
                 
                 if (hour_offset + 1) % 24 == 0:
-                    print(f"  [{hour_offset + 1}/{num_hours}] Generated {filename}: {file_size_kb:.1f}KB ({len(hourly_data['sites'])} sites)")
+                    print(f"  [{hour_offset + 1}/{num_hours}] {filename}: {file_size_kb:.1f}KB ({len(hourly_data['sites'])} sites)")
             else:
                 failed_hours += 1
                 
         except Exception as e:
-            print(f"Error generating snapshot for hour {hour_offset}: {e}")
             failed_hours += 1
     
-    # Cleanup old files (keep only last 4 days = 96 hours)
     print(f"\nCleaning up old files (keeping last 96 hours)...")
     cutoff_time = datetime.now().timestamp() - (96 * 3600)
     removed_count = 0
@@ -194,7 +192,6 @@ def generate_all_hourly_snapshots():
     
     print(f"Removed {removed_count} old files")
     
-    # Summary
     print(f"\n{'='*60}")
     print(f"✓ Generated: {len(generated_files)} hourly forecast files")
     print(f"✓ Failed: {failed_hours} hours")
