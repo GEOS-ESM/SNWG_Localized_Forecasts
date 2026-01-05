@@ -6,15 +6,15 @@
   "timezone": "Europe/Athens",
   "message": "200",
   "status": "200",
-  "latest_update": "2026-01-03 17:00:00",
+  "latest_update": "2026-01-04 16:00:00",
   "sources": [
     "geoscf",
     "pandora"
   ],
   "metrics": {
-    "RMSE": 6.03,
+    "RMSE": 6.13,
     "R2": 0.29,
-    "MAE": 4.68
+    "MAE": 4.74
   },
   "forecasts": [
     {
@@ -144468,7 +144468,7 @@
     },
     {
       "no2": 2.37,
-      "corrected": 13.38,
+      "corrected": 13.17,
       "no2_aqi": 4.0,
       "pandora": null,
       "o3": 29.57,
@@ -144485,7 +144485,7 @@
     },
     {
       "no2": 3.33,
-      "corrected": 12.8,
+      "corrected": 12.04,
       "no2_aqi": 8.0,
       "pandora": null,
       "o3": 28.0,
@@ -144502,7 +144502,7 @@
     },
     {
       "no2": 5.36,
-      "corrected": 12.79,
+      "corrected": 12.23,
       "no2_aqi": 12.0,
       "pandora": null,
       "o3": 25.61,
@@ -144519,8 +144519,8 @@
     },
     {
       "no2": 8.47,
-      "corrected": 12.36,
-      "no2_aqi": 12.0,
+      "corrected": 11.02,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 22.53,
       "o3_aqi": 21.0,
@@ -144536,7 +144536,7 @@
     },
     {
       "no2": 11.07,
-      "corrected": 11.24,
+      "corrected": 10.51,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 20.08,
@@ -144553,7 +144553,7 @@
     },
     {
       "no2": 13.45,
-      "corrected": 8.97,
+      "corrected": 9.33,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 17.87,
@@ -144570,7 +144570,7 @@
     },
     {
       "no2": 15.45,
-      "corrected": 9.88,
+      "corrected": 9.37,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 15.92,
@@ -144587,7 +144587,7 @@
     },
     {
       "no2": 16.71,
-      "corrected": 10.6,
+      "corrected": 11.29,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 14.8,
@@ -144604,7 +144604,7 @@
     },
     {
       "no2": 17.4,
-      "corrected": 11.87,
+      "corrected": 11.85,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 14.26,
@@ -144621,8 +144621,8 @@
     },
     {
       "no2": 17.87,
-      "corrected": 13.59,
-      "no2_aqi": 11.0,
+      "corrected": 13.49,
+      "no2_aqi": 12.0,
       "pandora": null,
       "o3": 14.07,
       "o3_aqi": 13.0,
@@ -144638,7 +144638,7 @@
     },
     {
       "no2": 18.13,
-      "corrected": 13.17,
+      "corrected": 13.54,
       "no2_aqi": 12.0,
       "pandora": null,
       "o3": 14.0,
@@ -144655,7 +144655,7 @@
     },
     {
       "no2": 17.78,
-      "corrected": 13.68,
+      "corrected": 13.39,
       "no2_aqi": 13.0,
       "pandora": null,
       "o3": 14.32,
@@ -144672,7 +144672,7 @@
     },
     {
       "no2": 17.2,
-      "corrected": 14.87,
+      "corrected": 14.66,
       "no2_aqi": 13.0,
       "pandora": null,
       "o3": 14.78,
@@ -144689,7 +144689,7 @@
     },
     {
       "no2": 16.85,
-      "corrected": 15.59,
+      "corrected": 15.03,
       "no2_aqi": 14.0,
       "pandora": null,
       "o3": 14.8,
@@ -144706,7 +144706,7 @@
     },
     {
       "no2": 16.53,
-      "corrected": 15.23,
+      "corrected": 14.25,
       "no2_aqi": 14.0,
       "pandora": null,
       "o3": 14.71,
@@ -144723,7 +144723,7 @@
     },
     {
       "no2": 15.66,
-      "corrected": 15.89,
+      "corrected": 18.8,
       "no2_aqi": 15.0,
       "pandora": null,
       "o3": 15.63,
@@ -144740,8 +144740,8 @@
     },
     {
       "no2": 14.46,
-      "corrected": 17.64,
-      "no2_aqi": 15.0,
+      "corrected": 19.27,
+      "no2_aqi": 16.0,
       "pandora": null,
       "o3": 17.35,
       "o3_aqi": 16.0,
@@ -144757,8 +144757,8 @@
     },
     {
       "no2": 14.13,
-      "corrected": 19.97,
-      "no2_aqi": 17.0,
+      "corrected": 18.42,
+      "no2_aqi": 18.0,
       "pandora": null,
       "o3": 18.66,
       "o3_aqi": 17.0,
@@ -144774,8 +144774,8 @@
     },
     {
       "no2": 13.59,
-      "corrected": 20.08,
-      "no2_aqi": 18.0,
+      "corrected": 15.25,
+      "no2_aqi": 17.0,
       "pandora": null,
       "o3": 20.2,
       "o3_aqi": 19.0,
@@ -144791,8 +144791,8 @@
     },
     {
       "no2": 10.61,
-      "corrected": 23.55,
-      "no2_aqi": 20.0,
+      "corrected": 19.59,
+      "no2_aqi": 17.0,
       "pandora": null,
       "o3": 23.69,
       "o3_aqi": 22.0,
@@ -144808,8 +144808,8 @@
     },
     {
       "no2": 5.08,
-      "corrected": 20.22,
-      "no2_aqi": 20.0,
+      "corrected": 23.11,
+      "no2_aqi": 18.0,
       "pandora": null,
       "o3": 30.44,
       "o3_aqi": 28.0,
@@ -144825,7 +144825,7 @@
     },
     {
       "no2": 3.41,
-      "corrected": 18.57,
+      "corrected": 19.31,
       "no2_aqi": 20.0,
       "pandora": null,
       "o3": 33.7,
@@ -144842,7 +144842,7 @@
     },
     {
       "no2": 2.99,
-      "corrected": 17.04,
+      "corrected": 14.93,
       "no2_aqi": 18.0,
       "pandora": null,
       "o3": 35.16,
@@ -144859,8 +144859,8 @@
     },
     {
       "no2": 3.0,
-      "corrected": 14.72,
-      "no2_aqi": 16.0,
+      "corrected": 14.31,
+      "no2_aqi": 15.0,
       "pandora": null,
       "o3": 35.68,
       "o3_aqi": 33.0,
@@ -144876,8 +144876,8 @@
     },
     {
       "no2": 3.31,
-      "corrected": 12.96,
-      "no2_aqi": 14.0,
+      "corrected": 11.71,
+      "no2_aqi": 13.0,
       "pandora": null,
       "o3": 35.74,
       "o3_aqi": 33.0,
@@ -144893,8 +144893,8 @@
     },
     {
       "no2": 4.42,
-      "corrected": 14.13,
-      "no2_aqi": 13.0,
+      "corrected": 13.03,
+      "no2_aqi": 12.0,
       "pandora": null,
       "o3": 34.81,
       "o3_aqi": 32.0,
@@ -144910,8 +144910,8 @@
     },
     {
       "no2": 8.59,
-      "corrected": 13.02,
-      "no2_aqi": 13.0,
+      "corrected": 12.5,
+      "no2_aqi": 12.0,
       "pandora": null,
       "o3": 30.5,
       "o3_aqi": 28.0,
@@ -144927,7 +144927,7 @@
     },
     {
       "no2": 14.22,
-      "corrected": 11.83,
+      "corrected": 11.06,
       "no2_aqi": 12.0,
       "pandora": null,
       "o3": 24.33,
@@ -144944,8 +144944,8 @@
     },
     {
       "no2": 17.08,
-      "corrected": 7.92,
-      "no2_aqi": 10.0,
+      "corrected": 10.23,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 21.07,
       "o3_aqi": 20.0,
@@ -144961,7 +144961,7 @@
     },
     {
       "no2": 15.08,
-      "corrected": 14.28,
+      "corrected": 12.99,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 23.34,
@@ -144978,7 +144978,7 @@
     },
     {
       "no2": 9.44,
-      "corrected": 12.42,
+      "corrected": 11.67,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 28.9,
@@ -144995,8 +144995,8 @@
     },
     {
       "no2": 5.22,
-      "corrected": 10.06,
-      "no2_aqi": 12.0,
+      "corrected": 10.36,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 34.34,
       "o3_aqi": 32.0,
@@ -145012,7 +145012,7 @@
     },
     {
       "no2": 4.11,
-      "corrected": 10.77,
+      "corrected": 10.2,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 35.56,
@@ -145029,7 +145029,7 @@
     },
     {
       "no2": 3.95,
-      "corrected": 12.2,
+      "corrected": 11.99,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 34.98,
@@ -145046,7 +145046,7 @@
     },
     {
       "no2": 4.12,
-      "corrected": 12.77,
+      "corrected": 12.21,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 33.53,
@@ -145063,8 +145063,8 @@
     },
     {
       "no2": 4.21,
-      "corrected": 12.71,
-      "no2_aqi": 12.0,
+      "corrected": 12.26,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 32.01,
       "o3_aqi": 30.0,
@@ -145080,7 +145080,7 @@
     },
     {
       "no2": 4.13,
-      "corrected": 13.42,
+      "corrected": 12.63,
       "no2_aqi": 12.0,
       "pandora": null,
       "o3": 30.73,
@@ -145097,8 +145097,8 @@
     },
     {
       "no2": 4.16,
-      "corrected": 12.2,
-      "no2_aqi": 12.0,
+      "corrected": 10.38,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 29.66,
       "o3_aqi": 27.0,
@@ -145114,8 +145114,8 @@
     },
     {
       "no2": 4.34,
-      "corrected": 10.97,
-      "no2_aqi": 12.0,
+      "corrected": 10.36,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 28.78,
       "o3_aqi": 27.0,
@@ -145131,8 +145131,8 @@
     },
     {
       "no2": 4.66,
-      "corrected": 11.86,
-      "no2_aqi": 11.0,
+      "corrected": 11.87,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 27.94,
       "o3_aqi": 26.0,
@@ -145148,8 +145148,8 @@
     },
     {
       "no2": 5.28,
-      "corrected": 15.52,
-      "no2_aqi": 12.0,
+      "corrected": 13.78,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 26.83,
       "o3_aqi": 25.0,
@@ -145165,7 +145165,7 @@
     },
     {
       "no2": 6.86,
-      "corrected": 18.47,
+      "corrected": 17.72,
       "no2_aqi": 14.0,
       "pandora": null,
       "o3": 24.83,
@@ -145182,8 +145182,8 @@
     },
     {
       "no2": 8.8,
-      "corrected": 17.19,
-      "no2_aqi": 16.0,
+      "corrected": 15.89,
+      "no2_aqi": 15.0,
       "pandora": null,
       "o3": 22.58,
       "o3_aqi": 21.0,
@@ -145199,7 +145199,7 @@
     },
     {
       "no2": 6.26,
-      "corrected": 22.79,
+      "corrected": 22.83,
       "no2_aqi": 18.0,
       "pandora": null,
       "o3": 24.94,
@@ -145216,8 +145216,8 @@
     },
     {
       "no2": 3.75,
-      "corrected": 18.12,
-      "no2_aqi": 18.0,
+      "corrected": 16.62,
+      "no2_aqi": 17.0,
       "pandora": null,
       "o3": 27.8,
       "o3_aqi": 26.0,
@@ -145233,7 +145233,7 @@
     },
     {
       "no2": 3.13,
-      "corrected": 16.53,
+      "corrected": 16.64,
       "no2_aqi": 18.0,
       "pandora": null,
       "o3": 29.37,
@@ -145250,7 +145250,7 @@
     },
     {
       "no2": 3.01,
-      "corrected": 14.88,
+      "corrected": 17.42,
       "no2_aqi": 16.0,
       "pandora": null,
       "o3": 30.68,
@@ -145267,7 +145267,7 @@
     },
     {
       "no2": 3.32,
-      "corrected": 15.25,
+      "corrected": 14.43,
       "no2_aqi": 15.0,
       "pandora": null,
       "o3": 31.2,
@@ -145284,8 +145284,8 @@
     },
     {
       "no2": 4.13,
-      "corrected": 15.97,
-      "no2_aqi": 14.0,
+      "corrected": 17.71,
+      "no2_aqi": 16.0,
       "pandora": null,
       "o3": 30.91,
       "o3_aqi": 29.0,
@@ -145301,7 +145301,7 @@
     },
     {
       "no2": 5.92,
-      "corrected": 17.72,
+      "corrected": 16.93,
       "no2_aqi": 15.0,
       "pandora": null,
       "o3": 29.31,
@@ -145318,7 +145318,7 @@
     },
     {
       "no2": 11.44,
-      "corrected": 14.9,
+      "corrected": 14.44,
       "no2_aqi": 15.0,
       "pandora": null,
       "o3": 23.69,
@@ -145335,8 +145335,8 @@
     },
     {
       "no2": 18.1,
-      "corrected": 12.48,
-      "no2_aqi": 14.0,
+      "corrected": 15.17,
+      "no2_aqi": 15.0,
       "pandora": null,
       "o3": 16.47,
       "o3_aqi": 15.0,
@@ -145352,8 +145352,8 @@
     },
     {
       "no2": 22.26,
-      "corrected": 14.71,
-      "no2_aqi": 13.0,
+      "corrected": 15.25,
+      "no2_aqi": 14.0,
       "pandora": null,
       "o3": 11.85,
       "o3_aqi": 11.0,
@@ -145369,8 +145369,8 @@
     },
     {
       "no2": 25.47,
-      "corrected": 14.79,
-      "no2_aqi": 13.0,
+      "corrected": 17.09,
+      "no2_aqi": 15.0,
       "pandora": null,
       "o3": 8.56,
       "o3_aqi": 8.0,
@@ -145386,8 +145386,8 @@
     },
     {
       "no2": 26.6,
-      "corrected": 15.99,
-      "no2_aqi": 14.0,
+      "corrected": 18.16,
+      "no2_aqi": 16.0,
       "pandora": null,
       "o3": 7.84,
       "o3_aqi": 7.0,
@@ -145403,8 +145403,8 @@
     },
     {
       "no2": 23.6,
-      "corrected": 15.66,
-      "no2_aqi": 15.0,
+      "corrected": 16.89,
+      "no2_aqi": 16.0,
       "pandora": null,
       "o3": 11.47,
       "o3_aqi": 11.0,
@@ -145421,7 +145421,7 @@
     {
       "no2": 13.74,
       "corrected": 0.1,
-      "no2_aqi": 10.0,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 36.67,
       "o3_aqi": 34.0,
@@ -146457,7 +146457,7 @@
     },
     {
       "no2": 1.66,
-      "corrected": 14.81,
+      "corrected": 15.73,
       "no2_aqi": 5.0,
       "pandora": null,
       "o3": 34.05,
@@ -146474,8 +146474,8 @@
     },
     {
       "no2": 1.5,
-      "corrected": 14.16,
-      "no2_aqi": 9.0,
+      "corrected": 14.81,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 34.92,
       "o3_aqi": 32.0,
@@ -146491,8 +146491,8 @@
     },
     {
       "no2": 1.54,
-      "corrected": 13.1,
-      "no2_aqi": 13.0,
+      "corrected": 14.77,
+      "no2_aqi": 14.0,
       "pandora": null,
       "o3": 35.62,
       "o3_aqi": 33.0,
@@ -146508,8 +146508,8 @@
     },
     {
       "no2": 1.75,
-      "corrected": 13.13,
-      "no2_aqi": 13.0,
+      "corrected": 14.19,
+      "no2_aqi": 14.0,
       "pandora": null,
       "o3": 36.03,
       "o3_aqi": 33.0,
@@ -146525,7 +146525,7 @@
     },
     {
       "no2": 2.34,
-      "corrected": 12.39,
+      "corrected": 9.42,
       "no2_aqi": 12.0,
       "pandora": null,
       "o3": 35.74,
@@ -146542,8 +146542,8 @@
     },
     {
       "no2": 4.61,
-      "corrected": 12.59,
-      "no2_aqi": 12.0,
+      "corrected": 11.13,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 33.41,
       "o3_aqi": 31.0,
@@ -146559,8 +146559,8 @@
     },
     {
       "no2": 8.82,
-      "corrected": 10.9,
-      "no2_aqi": 11.0,
+      "corrected": 9.38,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 28.9,
       "o3_aqi": 27.0,
@@ -146576,8 +146576,8 @@
     },
     {
       "no2": 12.12,
-      "corrected": 11.61,
-      "no2_aqi": 11.0,
+      "corrected": 11.75,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 25.06,
       "o3_aqi": 23.0,
@@ -146593,8 +146593,8 @@
     },
     {
       "no2": 14.28,
-      "corrected": 12.3,
-      "no2_aqi": 11.0,
+      "corrected": 11.84,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 22.35,
       "o3_aqi": 21.0,
@@ -146610,8 +146610,8 @@
     },
     {
       "no2": 15.51,
-      "corrected": 8.63,
-      "no2_aqi": 10.0,
+      "corrected": 9.94,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 20.58,
       "o3_aqi": 19.0,
@@ -146627,7 +146627,7 @@
     },
     {
       "no2": 15.86,
-      "corrected": 9.91,
+      "corrected": 9.7,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 19.73,
@@ -146644,7 +146644,7 @@
     },
     {
       "no2": 15.75,
-      "corrected": 11.83,
+      "corrected": 12.3,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 19.35,
@@ -146661,7 +146661,7 @@
     },
     {
       "no2": 15.45,
-      "corrected": 14.1,
+      "corrected": 13.14,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 19.3,
@@ -146678,7 +146678,7 @@
     },
     {
       "no2": 14.64,
-      "corrected": 14.38,
+      "corrected": 14.63,
       "no2_aqi": 13.0,
       "pandora": null,
       "o3": 19.85,
@@ -146695,7 +146695,7 @@
     },
     {
       "no2": 13.2,
-      "corrected": 12.96,
+      "corrected": 14.19,
       "no2_aqi": 13.0,
       "pandora": null,
       "o3": 21.25,
@@ -146712,8 +146712,8 @@
     },
     {
       "no2": 11.86,
-      "corrected": 16.06,
-      "no2_aqi": 14.0,
+      "corrected": 17.63,
+      "no2_aqi": 15.0,
       "pandora": null,
       "o3": 22.61,
       "o3_aqi": 21.0,
@@ -146729,8 +146729,8 @@
     },
     {
       "no2": 10.72,
-      "corrected": 16.41,
-      "no2_aqi": 14.0,
+      "corrected": 16.61,
+      "no2_aqi": 15.0,
       "pandora": null,
       "o3": 23.92,
       "o3_aqi": 22.0,
@@ -146746,7 +146746,7 @@
     },
     {
       "no2": 9.78,
-      "corrected": 17.52,
+      "corrected": 15.8,
       "no2_aqi": 16.0,
       "pandora": null,
       "o3": 25.49,
@@ -146763,8 +146763,8 @@
     },
     {
       "no2": 9.31,
-      "corrected": 17.16,
-      "no2_aqi": 16.0,
+      "corrected": 15.79,
+      "no2_aqi": 15.0,
       "pandora": null,
       "o3": 26.95,
       "o3_aqi": 25.0,
@@ -146780,7 +146780,7 @@
     },
     {
       "no2": 8.66,
-      "corrected": 17.25,
+      "corrected": 18.16,
       "no2_aqi": 16.0,
       "pandora": null,
       "o3": 28.67,
@@ -146797,7 +146797,7 @@
     },
     {
       "no2": 9.04,
-      "corrected": 17.02,
+      "corrected": 16.03,
       "no2_aqi": 16.0,
       "pandora": null,
       "o3": 29.19,
@@ -146814,8 +146814,8 @@
     },
     {
       "no2": 9.81,
-      "corrected": 18.62,
-      "no2_aqi": 17.0,
+      "corrected": 17.09,
+      "no2_aqi": 16.0,
       "pandora": null,
       "o3": 29.19,
       "o3_aqi": 27.0,
@@ -146831,8 +146831,8 @@
     },
     {
       "no2": 7.97,
-      "corrected": 22.04,
-      "no2_aqi": 18.0,
+      "corrected": 20.85,
+      "no2_aqi": 17.0,
       "pandora": null,
       "o3": 31.32,
       "o3_aqi": 29.0,
@@ -146848,8 +146848,8 @@
     },
     {
       "no2": 4.67,
-      "corrected": 22.68,
-      "no2_aqi": 20.0,
+      "corrected": 22.15,
+      "no2_aqi": 19.0,
       "pandora": null,
       "o3": 34.63,
       "o3_aqi": 32.0,
@@ -146865,8 +146865,8 @@
     },
     {
       "no2": 3.45,
-      "corrected": 18.89,
-      "no2_aqi": 20.0,
+      "corrected": 17.45,
+      "no2_aqi": 19.0,
       "pandora": null,
       "o3": 36.15,
       "o3_aqi": 33.0,
@@ -146882,8 +146882,8 @@
     },
     {
       "no2": 3.0,
-      "corrected": 19.31,
-      "no2_aqi": 19.0,
+      "corrected": 17.93,
+      "no2_aqi": 18.0,
       "pandora": null,
       "o3": 37.14,
       "o3_aqi": 34.0,
@@ -146899,8 +146899,8 @@
     },
     {
       "no2": 2.94,
-      "corrected": 18.66,
-      "no2_aqi": 18.0,
+      "corrected": 16.35,
+      "no2_aqi": 16.0,
       "pandora": null,
       "o3": 37.66,
       "o3_aqi": 35.0,
@@ -146916,8 +146916,8 @@
     },
     {
       "no2": 3.25,
-      "corrected": 15.59,
-      "no2_aqi": 17.0,
+      "corrected": 14.54,
+      "no2_aqi": 15.0,
       "pandora": null,
       "o3": 37.78,
       "o3_aqi": 35.0,
@@ -146933,8 +146933,8 @@
     },
     {
       "no2": 4.63,
-      "corrected": 15.63,
-      "no2_aqi": 16.0,
+      "corrected": 15.57,
+      "no2_aqi": 15.0,
       "pandora": null,
       "o3": 36.67,
       "o3_aqi": 34.0,
@@ -146950,8 +146950,8 @@
     },
     {
       "no2": 9.59,
-      "corrected": 15.44,
-      "no2_aqi": 15.0,
+      "corrected": 15.99,
+      "no2_aqi": 14.0,
       "pandora": null,
       "o3": 31.72,
       "o3_aqi": 29.0,
@@ -146967,8 +146967,8 @@
     },
     {
       "no2": 15.8,
-      "corrected": 14.72,
-      "no2_aqi": 14.0,
+      "corrected": 15.17,
+      "no2_aqi": 15.0,
       "pandora": null,
       "o3": 25.23,
       "o3_aqi": 23.0,
@@ -146984,8 +146984,8 @@
     },
     {
       "no2": 19.3,
-      "corrected": 15.0,
-      "no2_aqi": 14.0,
+      "corrected": 15.44,
+      "no2_aqi": 15.0,
       "pandora": null,
       "o3": 21.45,
       "o3_aqi": 20.0,
@@ -147001,7 +147001,7 @@
     },
     {
       "no2": 19.88,
-      "corrected": 13.39,
+      "corrected": 13.84,
       "no2_aqi": 14.0,
       "pandora": null,
       "o3": 20.72,
@@ -147018,8 +147018,8 @@
     },
     {
       "no2": 16.44,
-      "corrected": 13.29,
-      "no2_aqi": 13.0,
+      "corrected": 15.08,
+      "no2_aqi": 14.0,
       "pandora": null,
       "o3": 24.27,
       "o3_aqi": 22.0,
@@ -147035,8 +147035,8 @@
     },
     {
       "no2": 10.11,
-      "corrected": 15.1,
-      "no2_aqi": 13.0,
+      "corrected": 14.27,
+      "no2_aqi": 14.0,
       "pandora": null,
       "o3": 30.68,
       "o3_aqi": 28.0,
@@ -147052,7 +147052,7 @@
     },
     {
       "no2": 5.27,
-      "corrected": 15.38,
+      "corrected": 15.0,
       "no2_aqi": 14.0,
       "pandora": null,
       "o3": 34.81,
@@ -147069,7 +147069,7 @@
     },
     {
       "no2": 4.27,
-      "corrected": 16.26,
+      "corrected": 16.97,
       "no2_aqi": 15.0,
       "pandora": null,
       "o3": 35.51,
@@ -147086,7 +147086,7 @@
     },
     {
       "no2": 3.48,
-      "corrected": 13.92,
+      "corrected": 12.49,
       "no2_aqi": 14.0,
       "pandora": null,
       "o3": 36.38,
@@ -147103,7 +147103,7 @@
     },
     {
       "no2": 2.78,
-      "corrected": 11.12,
+      "corrected": 11.26,
       "no2_aqi": 13.0,
       "pandora": null,
       "o3": 37.19,
@@ -147120,8 +147120,8 @@
     },
     {
       "no2": 2.41,
-      "corrected": 11.71,
-      "no2_aqi": 12.0,
+      "corrected": 11.74,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 37.54,
       "o3_aqi": 35.0,
@@ -147137,8 +147137,8 @@
     },
     {
       "no2": 2.18,
-      "corrected": 11.37,
-      "no2_aqi": 11.0,
+      "corrected": 9.56,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.3,
       "o3_aqi": 35.0,
@@ -147154,8 +147154,8 @@
     },
     {
       "no2": 1.97,
-      "corrected": 11.42,
-      "no2_aqi": 11.0,
+      "corrected": 10.03,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.82,
       "o3_aqi": 36.0,
@@ -147171,8 +147171,8 @@
     },
     {
       "no2": 1.95,
-      "corrected": 12.32,
-      "no2_aqi": 11.0,
+      "corrected": 11.22,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.59,
       "o3_aqi": 36.0,
@@ -147188,8 +147188,8 @@
     },
     {
       "no2": 2.0,
-      "corrected": 11.66,
-      "no2_aqi": 11.0,
+      "corrected": 11.48,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.3,
       "o3_aqi": 35.0,
@@ -147205,7 +147205,7 @@
     },
     {
       "no2": 2.42,
-      "corrected": 9.04,
+      "corrected": 8.51,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.83,
@@ -147222,8 +147222,8 @@
     },
     {
       "no2": 3.03,
-      "corrected": 10.41,
-      "no2_aqi": 10.0,
+      "corrected": 8.55,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 37.25,
       "o3_aqi": 34.0,
@@ -147239,8 +147239,8 @@
     },
     {
       "no2": 2.83,
-      "corrected": 9.49,
-      "no2_aqi": 9.0,
+      "corrected": 7.86,
+      "no2_aqi": 8.0,
       "pandora": null,
       "o3": 37.66,
       "o3_aqi": 35.0,
@@ -147256,8 +147256,8 @@
     },
     {
       "no2": 1.86,
-      "corrected": 9.46,
-      "no2_aqi": 9.0,
+      "corrected": 10.37,
+      "no2_aqi": 8.0,
       "pandora": null,
       "o3": 39.29,
       "o3_aqi": 36.0,
@@ -147273,8 +147273,8 @@
     },
     {
       "no2": 1.26,
-      "corrected": 8.31,
-      "no2_aqi": 9.0,
+      "corrected": 8.15,
+      "no2_aqi": 8.0,
       "pandora": null,
       "o3": 41.04,
       "o3_aqi": 38.0,
@@ -147290,7 +147290,7 @@
     },
     {
       "no2": 1.16,
-      "corrected": 6.9,
+      "corrected": 8.1,
       "no2_aqi": 8.0,
       "pandora": null,
       "o3": 41.62,
@@ -147307,8 +147307,8 @@
     },
     {
       "no2": 1.3,
-      "corrected": 7.69,
-      "no2_aqi": 7.0,
+      "corrected": 7.79,
+      "no2_aqi": 8.0,
       "pandora": null,
       "o3": 41.5,
       "o3_aqi": 38.0,
@@ -147324,7 +147324,7 @@
     },
     {
       "no2": 1.69,
-      "corrected": 9.51,
+      "corrected": 9.66,
       "no2_aqi": 8.0,
       "pandora": null,
       "o3": 40.98,
@@ -147341,7 +147341,7 @@
     },
     {
       "no2": 2.44,
-      "corrected": 10.63,
+      "corrected": 9.9,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 40.05,
@@ -147358,8 +147358,8 @@
     },
     {
       "no2": 3.2,
-      "corrected": 11.17,
-      "no2_aqi": 10.0,
+      "corrected": 10.0,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 39.12,
       "o3_aqi": 36.0,
@@ -147375,8 +147375,8 @@
     },
     {
       "no2": 3.91,
-      "corrected": 11.68,
-      "no2_aqi": 11.0,
+      "corrected": 10.77,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.24,
       "o3_aqi": 35.0,
@@ -147392,8 +147392,8 @@
     },
     {
       "no2": 4.51,
-      "corrected": 10.72,
-      "no2_aqi": 11.0,
+      "corrected": 10.08,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.6,
       "o3_aqi": 35.0,
@@ -147409,8 +147409,8 @@
     },
     {
       "no2": 4.53,
-      "corrected": 11.4,
-      "no2_aqi": 11.0,
+      "corrected": 11.45,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.54,
       "o3_aqi": 35.0,
@@ -147426,7 +147426,7 @@
     },
     {
       "no2": 4.11,
-      "corrected": 10.74,
+      "corrected": 10.65,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.07,
@@ -147443,7 +147443,7 @@
     },
     {
       "no2": 3.76,
-      "corrected": 10.19,
+      "corrected": 10.17,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.59,
@@ -147460,7 +147460,7 @@
     },
     {
       "no2": 3.47,
-      "corrected": 10.5,
+      "corrected": 10.16,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 39.12,
@@ -147477,8 +147477,8 @@
     },
     {
       "no2": 3.28,
-      "corrected": 10.24,
-      "no2_aqi": 10.0,
+      "corrected": 9.3,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 39.41,
       "o3_aqi": 36.0,
@@ -147494,8 +147494,8 @@
     },
     {
       "no2": 2.95,
-      "corrected": 13.62,
-      "no2_aqi": 11.0,
+      "corrected": 11.45,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 39.81,
       "o3_aqi": 37.0,
@@ -147511,8 +147511,8 @@
     },
     {
       "no2": 2.59,
-      "corrected": 13.3,
-      "no2_aqi": 12.0,
+      "corrected": 12.36,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 40.16,
       "o3_aqi": 37.0,
@@ -147528,8 +147528,8 @@
     },
     {
       "no2": 2.39,
-      "corrected": 12.34,
-      "no2_aqi": 12.0,
+      "corrected": 12.26,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 40.28,
       "o3_aqi": 37.0,
@@ -147545,7 +147545,7 @@
     },
     {
       "no2": 2.36,
-      "corrected": 13.12,
+      "corrected": 12.73,
       "no2_aqi": 12.0,
       "pandora": null,
       "o3": 40.28,
@@ -147562,7 +147562,7 @@
     },
     {
       "no2": 2.4,
-      "corrected": 13.8,
+      "corrected": 12.79,
       "no2_aqi": 12.0,
       "pandora": null,
       "o3": 40.05,
@@ -147579,8 +147579,8 @@
     },
     {
       "no2": 2.5,
-      "corrected": 14.19,
-      "no2_aqi": 13.0,
+      "corrected": 12.57,
+      "no2_aqi": 12.0,
       "pandora": null,
       "o3": 39.7,
       "o3_aqi": 37.0,
@@ -147596,8 +147596,8 @@
     },
     {
       "no2": 2.72,
-      "corrected": 13.64,
-      "no2_aqi": 13.0,
+      "corrected": 11.07,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 39.29,
       "o3_aqi": 36.0,
@@ -147613,8 +147613,8 @@
     },
     {
       "no2": 3.49,
-      "corrected": 12.11,
-      "no2_aqi": 13.0,
+      "corrected": 10.78,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 38.53,
       "o3_aqi": 36.0,
@@ -147630,8 +147630,8 @@
     },
     {
       "no2": 4.53,
-      "corrected": 10.26,
-      "no2_aqi": 11.0,
+      "corrected": 10.07,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.72,
       "o3_aqi": 35.0,
@@ -147647,8 +147647,8 @@
     },
     {
       "no2": 3.87,
-      "corrected": 12.11,
-      "no2_aqi": 11.0,
+      "corrected": 11.99,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.77,
       "o3_aqi": 36.0,
@@ -147664,7 +147664,7 @@
     },
     {
       "no2": 2.22,
-      "corrected": 10.11,
+      "corrected": 10.78,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 40.86,
@@ -147681,7 +147681,7 @@
     },
     {
       "no2": 1.67,
-      "corrected": 10.29,
+      "corrected": 10.3,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 41.79,
@@ -147698,7 +147698,7 @@
     },
     {
       "no2": 1.67,
-      "corrected": 10.4,
+      "corrected": 10.76,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 41.97,
@@ -147715,7 +147715,7 @@
     },
     {
       "no2": 1.88,
-      "corrected": 9.8,
+      "corrected": 9.33,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 41.56,
@@ -147732,7 +147732,7 @@
     },
     {
       "no2": 1.55,
-      "corrected": 10.8,
+      "corrected": 11.68,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 39.52,
@@ -147749,7 +147749,7 @@
     },
     {
       "no2": 2.26,
-      "corrected": 10.78,
+      "corrected": 10.81,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.65,
@@ -147766,7 +147766,7 @@
     },
     {
       "no2": 3.19,
-      "corrected": 10.5,
+      "corrected": 10.15,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.72,
@@ -147783,7 +147783,7 @@
     },
     {
       "no2": 3.69,
-      "corrected": 10.39,
+      "corrected": 10.34,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.37,
@@ -147800,7 +147800,7 @@
     },
     {
       "no2": 3.92,
-      "corrected": 10.66,
+      "corrected": 10.36,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.25,
@@ -147817,7 +147817,7 @@
     },
     {
       "no2": 3.89,
-      "corrected": 10.25,
+      "corrected": 10.08,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.31,
@@ -147834,7 +147834,7 @@
     },
     {
       "no2": 3.62,
-      "corrected": 11.2,
+      "corrected": 10.6,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.54,
@@ -147851,7 +147851,7 @@
     },
     {
       "no2": 3.12,
-      "corrected": 11.58,
+      "corrected": 10.48,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.01,
@@ -147868,8 +147868,8 @@
     },
     {
       "no2": 2.84,
-      "corrected": 11.8,
-      "no2_aqi": 11.0,
+      "corrected": 10.74,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.48,
       "o3_aqi": 36.0,
@@ -147885,8 +147885,8 @@
     },
     {
       "no2": 2.7,
-      "corrected": 11.7,
-      "no2_aqi": 11.0,
+      "corrected": 11.53,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.71,
       "o3_aqi": 36.0,
@@ -147902,7 +147902,7 @@
     },
     {
       "no2": 2.61,
-      "corrected": 12.09,
+      "corrected": 12.67,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 38.88,
@@ -147919,7 +147919,7 @@
     },
     {
       "no2": 2.34,
-      "corrected": 12.69,
+      "corrected": 11.94,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 38.94,
@@ -147936,7 +147936,7 @@
     },
     {
       "no2": 2.27,
-      "corrected": 11.75,
+      "corrected": 11.8,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 38.88,
@@ -147953,8 +147953,8 @@
     },
     {
       "no2": 2.38,
-      "corrected": 12.16,
-      "no2_aqi": 12.0,
+      "corrected": 12.07,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 38.59,
       "o3_aqi": 36.0,
@@ -147970,7 +147970,7 @@
     },
     {
       "no2": 2.4,
-      "corrected": 11.84,
+      "corrected": 11.37,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 38.3,
@@ -147987,7 +147987,7 @@
     },
     {
       "no2": 2.52,
-      "corrected": 11.71,
+      "corrected": 11.63,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 37.95,
@@ -148004,8 +148004,8 @@
     },
     {
       "no2": 2.81,
-      "corrected": 11.16,
-      "no2_aqi": 11.0,
+      "corrected": 10.22,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.37,
       "o3_aqi": 35.0,
@@ -148021,7 +148021,7 @@
     },
     {
       "no2": 3.66,
-      "corrected": 10.33,
+      "corrected": 9.97,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 36.21,
@@ -148038,8 +148038,8 @@
     },
     {
       "no2": 4.73,
-      "corrected": 9.07,
-      "no2_aqi": 10.0,
+      "corrected": 9.45,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 34.92,
       "o3_aqi": 32.0,
@@ -148055,7 +148055,7 @@
     },
     {
       "no2": 4.15,
-      "corrected": 8.93,
+      "corrected": 10.08,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 35.33,
@@ -148072,7 +148072,7 @@
     },
     {
       "no2": 2.7,
-      "corrected": 10.11,
+      "corrected": 10.19,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 36.9,
@@ -148089,8 +148089,8 @@
     },
     {
       "no2": 2.29,
-      "corrected": 10.11,
-      "no2_aqi": 9.0,
+      "corrected": 10.19,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.37,
       "o3_aqi": 35.0,
@@ -148106,7 +148106,7 @@
     },
     {
       "no2": 1.97,
-      "corrected": 10.1,
+      "corrected": 10.56,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.72,
@@ -148123,8 +148123,8 @@
     },
     {
       "no2": 1.78,
-      "corrected": 9.78,
-      "no2_aqi": 9.0,
+      "corrected": 10.56,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 38.13,
       "o3_aqi": 35.0,
@@ -148140,8 +148140,8 @@
     },
     {
       "no2": 1.73,
-      "corrected": 8.51,
-      "no2_aqi": 9.0,
+      "corrected": 10.36,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.66,
       "o3_aqi": 35.0,
@@ -148157,8 +148157,8 @@
     },
     {
       "no2": 2.28,
-      "corrected": 8.26,
-      "no2_aqi": 8.0,
+      "corrected": 9.64,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 37.08,
       "o3_aqi": 34.0,
@@ -148174,8 +148174,8 @@
     },
     {
       "no2": 3.67,
-      "corrected": 8.91,
-      "no2_aqi": 8.0,
+      "corrected": 9.15,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 35.39,
       "o3_aqi": 33.0,
@@ -148191,7 +148191,7 @@
     },
     {
       "no2": 5.16,
-      "corrected": 9.93,
+      "corrected": 9.7,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 33.76,
@@ -148208,7 +148208,7 @@
     },
     {
       "no2": 5.51,
-      "corrected": 10.71,
+      "corrected": 10.91,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 33.64,
@@ -148225,7 +148225,7 @@
     },
     {
       "no2": 5.19,
-      "corrected": 11.78,
+      "corrected": 9.93,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 34.23,
@@ -148242,7 +148242,7 @@
     },
     {
       "no2": 4.64,
-      "corrected": 9.44,
+      "corrected": 9.61,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 35.04,
@@ -148259,8 +148259,8 @@
     },
     {
       "no2": 4.21,
-      "corrected": 9.97,
-      "no2_aqi": 10.0,
+      "corrected": 10.18,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 35.68,
       "o3_aqi": 33.0,
@@ -148276,7 +148276,7 @@
     },
     {
       "no2": 3.97,
-      "corrected": 9.27,
+      "corrected": 10.23,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 36.15,
@@ -148293,7 +148293,7 @@
     },
     {
       "no2": 3.62,
-      "corrected": 9.96,
+      "corrected": 9.46,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 36.85,
@@ -148310,8 +148310,8 @@
     },
     {
       "no2": 2.85,
-      "corrected": 11.09,
-      "no2_aqi": 10.0,
+      "corrected": 9.54,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 38.01,
       "o3_aqi": 35.0,
@@ -148327,8 +148327,8 @@
     },
     {
       "no2": 2.48,
-      "corrected": 10.34,
-      "no2_aqi": 10.0,
+      "corrected": 8.87,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 37.54,
       "o3_aqi": 35.0,
@@ -148344,8 +148344,8 @@
     },
     {
       "no2": 2.87,
-      "corrected": 10.5,
-      "no2_aqi": 10.0,
+      "corrected": 8.86,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 37.08,
       "o3_aqi": 34.0,
@@ -148361,8 +148361,8 @@
     },
     {
       "no2": 2.79,
-      "corrected": 8.23,
-      "no2_aqi": 9.0,
+      "corrected": 8.34,
+      "no2_aqi": 8.0,
       "pandora": null,
       "o3": 37.19,
       "o3_aqi": 34.0,
@@ -148378,7 +148378,7 @@
     },
     {
       "no2": 2.36,
-      "corrected": 7.54,
+      "corrected": 9.17,
       "no2_aqi": 8.0,
       "pandora": null,
       "o3": 36.79,
@@ -148395,8 +148395,8 @@
     },
     {
       "no2": 2.32,
-      "corrected": 7.51,
-      "no2_aqi": 7.0,
+      "corrected": 8.18,
+      "no2_aqi": 8.0,
       "pandora": null,
       "o3": 36.21,
       "o3_aqi": 34.0,
@@ -148412,8 +148412,8 @@
     },
     {
       "no2": 2.66,
-      "corrected": 8.1,
-      "no2_aqi": 7.0,
+      "corrected": 7.63,
+      "no2_aqi": 8.0,
       "pandora": null,
       "o3": 34.11,
       "o3_aqi": 32.0,
@@ -148429,7 +148429,7 @@
     },
     {
       "no2": 3.58,
-      "corrected": 6.97,
+      "corrected": 7.58,
       "no2_aqi": 7.0,
       "pandora": null,
       "o3": 30.5,
@@ -148446,7 +148446,7 @@
     },
     {
       "no2": 4.67,
-      "corrected": 10.05,
+      "corrected": 9.46,
       "no2_aqi": 8.0,
       "pandora": null,
       "o3": 27.91,
@@ -148463,7 +148463,7 @@
     },
     {
       "no2": 4.29,
-      "corrected": 10.21,
+      "corrected": 10.12,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 27.5,
@@ -148480,7 +148480,7 @@
     },
     {
       "no2": 2.69,
-      "corrected": 8.94,
+      "corrected": 8.8,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 28.9,
@@ -148497,8 +148497,8 @@
     },
     {
       "no2": 2.04,
-      "corrected": 7.82,
-      "no2_aqi": 8.0,
+      "corrected": 9.06,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 30.33,
       "o3_aqi": 28.0,
@@ -148514,8 +148514,8 @@
     },
     {
       "no2": 1.92,
-      "corrected": 8.04,
-      "no2_aqi": 8.0,
+      "corrected": 9.25,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 31.55,
       "o3_aqi": 29.0,
@@ -148531,8 +148531,8 @@
     },
     {
       "no2": 1.88,
-      "corrected": 8.89,
-      "no2_aqi": 8.0,
+      "corrected": 9.71,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 32.54,
       "o3_aqi": 30.0,
@@ -148548,7 +148548,7 @@
     },
     {
       "no2": 1.99,
-      "corrected": 10.53,
+      "corrected": 10.75,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 33.64,
@@ -148565,7 +148565,7 @@
     },
     {
       "no2": 3.22,
-      "corrected": 8.6,
+      "corrected": 7.89,
       "no2_aqi": 9.0,
       "pandora": null,
       "o3": 32.42,
@@ -148582,8 +148582,8 @@
     },
     {
       "no2": 4.46,
-      "corrected": 8.46,
-      "no2_aqi": 9.0,
+      "corrected": 7.36,
+      "no2_aqi": 8.0,
       "pandora": null,
       "o3": 31.32,
       "o3_aqi": 29.0,
@@ -148599,7 +148599,7 @@
     },
     {
       "no2": 4.25,
-      "corrected": 9.24,
+      "corrected": 9.56,
       "no2_aqi": 8.0,
       "pandora": null,
       "o3": 31.78,
@@ -148616,7 +148616,7 @@
     },
     {
       "no2": 7.13,
-      "corrected": 7.63,
+      "corrected": 8.55,
       "no2_aqi": 8.0,
       "pandora": null,
       "o3": 29.02,
@@ -148633,7 +148633,7 @@
     },
     {
       "no2": 7.49,
-      "corrected": 8.25,
+      "corrected": 8.19,
       "no2_aqi": 8.0,
       "pandora": null,
       "o3": 28.78,
@@ -148650,7 +148650,7 @@
     },
     {
       "no2": 6.82,
-      "corrected": 8.19,
+      "corrected": 8.58,
       "no2_aqi": 8.0,
       "pandora": null,
       "o3": 29.45,
@@ -148667,7 +148667,7 @@
     },
     {
       "no2": 6.16,
-      "corrected": 8.59,
+      "corrected": 9.86,
       "no2_aqi": 8.0,
       "pandora": null,
       "o3": 29.92,
@@ -148684,8 +148684,8 @@
     },
     {
       "no2": 5.74,
-      "corrected": 9.85,
-      "no2_aqi": 8.0,
+      "corrected": 11.18,
+      "no2_aqi": 9.0,
       "pandora": null,
       "o3": 30.15,
       "o3_aqi": 28.0,
@@ -148701,8 +148701,8 @@
     },
     {
       "no2": 5.6,
-      "corrected": 10.18,
-      "no2_aqi": 9.0,
+      "corrected": 10.96,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 30.15,
       "o3_aqi": 28.0,
@@ -148718,8 +148718,8 @@
     },
     {
       "no2": 5.22,
-      "corrected": 10.67,
-      "no2_aqi": 10.0,
+      "corrected": 11.32,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 30.5,
       "o3_aqi": 28.0,
@@ -148735,8 +148735,8 @@
     },
     {
       "no2": 4.62,
-      "corrected": 11.63,
-      "no2_aqi": 10.0,
+      "corrected": 11.31,
+      "no2_aqi": 11.0,
       "pandora": null,
       "o3": 31.2,
       "o3_aqi": 29.0,
@@ -148752,7 +148752,7 @@
     },
     {
       "no2": 4.18,
-      "corrected": 12.07,
+      "corrected": 11.0,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 31.32,
@@ -148769,8 +148769,8 @@
     },
     {
       "no2": 4.12,
-      "corrected": 12.09,
-      "no2_aqi": 11.0,
+      "corrected": 10.83,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 30.44,
       "o3_aqi": 28.0,
@@ -148786,8 +148786,8 @@
     },
     {
       "no2": 4.35,
-      "corrected": 12.38,
-      "no2_aqi": 11.0,
+      "corrected": 10.95,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 28.9,
       "o3_aqi": 27.0,
@@ -148803,8 +148803,8 @@
     },
     {
       "no2": 4.71,
-      "corrected": 11.34,
-      "no2_aqi": 11.0,
+      "corrected": 11.14,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 27.56,
       "o3_aqi": 26.0,
@@ -148820,7 +148820,7 @@
     },
     {
       "no2": 5.33,
-      "corrected": 11.38,
+      "corrected": 11.91,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 26.14,
@@ -148837,7 +148837,7 @@
     },
     {
       "no2": 6.65,
-      "corrected": 11.63,
+      "corrected": 12.36,
       "no2_aqi": 11.0,
       "pandora": null,
       "o3": 24.21,
@@ -148854,7 +148854,7 @@
     },
     {
       "no2": 7.93,
-      "corrected": 14.91,
+      "corrected": 14.74,
       "no2_aqi": 12.0,
       "pandora": null,
       "o3": 22.73,
@@ -148871,7 +148871,7 @@
     },
     {
       "no2": 7.06,
-      "corrected": 11.33,
+      "corrected": 12.59,
       "no2_aqi": 12.0,
       "pandora": null,
       "o3": 23.49,
@@ -148888,8 +148888,8 @@
     },
     {
       "no2": 4.42,
-      "corrected": 10.28,
-      "no2_aqi": 11.0,
+      "corrected": 10.95,
+      "no2_aqi": 12.0,
       "pandora": null,
       "o3": 26.63,
       "o3_aqi": 25.0,
@@ -148905,7 +148905,7 @@
     },
     {
       "no2": 2.85,
-      "corrected": 8.82,
+      "corrected": 9.37,
       "no2_aqi": 10.0,
       "pandora": null,
       "o3": 29.66,
@@ -148922,8 +148922,8 @@
     },
     {
       "no2": 2.39,
-      "corrected": 10.08,
-      "no2_aqi": 9.0,
+      "corrected": 12.31,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 31.37,
       "o3_aqi": 29.0,
@@ -148939,8 +148939,8 @@
     },
     {
       "no2": 2.35,
-      "corrected": 7.57,
-      "no2_aqi": 8.0,
+      "corrected": 9.09,
+      "no2_aqi": 10.0,
       "pandora": null,
       "o3": 32.13,
       "o3_aqi": 30.0,
