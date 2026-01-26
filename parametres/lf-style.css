@@ -7,8 +7,6 @@ body {
     font-weight: 100;
     overflow-x: hidden !important;
     padding-bottom: 0 !important;
-    height: 100vh !important;
-    overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
     background: white !important;
@@ -17,6 +15,8 @@ body {
 /* Home page specific styling */
 body.home-page {
     background: black !important;
+    height: 100vh !important;
+    overflow: hidden !important;
 }
 
 .bg-forecasts {

@@ -16,8 +16,11 @@
             <button id="toggle-locations-box" class="btn-banner-toggle" title="Show/Hide filters">
                 <i class="bi bi-chevron-up" id="toggle-locations-icon"></i>
             </button>
+            <div id="location-search-container" class="search-controls" style="order: -1; margin-right: 15px;">
+                <input type="text" id="location-search-input" class="banner-search" placeholder=" Search locations..." style="min-width: 250px; background: rgba(59, 130, 246, 0.2) !important; border: 2px solid rgba(96, 165, 250, 0.5) !important; color: #fff !important; font-size: 14px !important;" />
+            </div>
             <div id="species-filter-container" class="filter-controls">
-                <label for="species-filter">Locations:</label>
+                <label for="species-filter">Filter:</label>
                 <select id="species-filter" class="banner-select">
                     <option value="pandora">NASA Pandora</option>
                     <option value="dos_missions" selected>DoS Missions</option>
@@ -25,9 +28,6 @@
                     <option value="aeronet">AERONET</option>
                     <option value="openaq">OpenAQ</option>
                 </select>
-            </div>
-            <div id="location-search-container" class="search-controls">
-                <input type="text" id="location-search-input" class="banner-search" placeholder="Search locations..." />
             </div>
         </div>
     </div>
@@ -43,6 +43,14 @@
 <script>
     // Add home-page class to body for black background styling
     document.body.classList.add('home-page');
+    
+    // Ensure map is visible and resized when returning to home page
+    setTimeout(function() {
+        if (window.currentMap && typeof window.currentMap.resize === 'function') {
+            window.currentMap.resize();
+        }
+    }, 100);
+    
     $(document).on('click', '.btn-close', function(e) {
         $('.forecasts_container').css('display', 'none');
     });
@@ -135,7 +143,6 @@ $(document).ready(function () {
             
             // If URL changed from last check and it's different from dropdown
             if (currentUrlFilter !== lastKnownFilter && currentUrlFilter !== currentDropdownFilter) {
-                console.log('URL filter changed to:', currentUrlFilter);
                 lastKnownFilter = currentUrlFilter;
                 
                 // Update dropdown and load new filter
@@ -148,23 +155,31 @@ $(document).ready(function () {
             }
         }, 300);
 
-        // Location search functionality
-        $('#location-search-input').on('keyup', function() {
+        // Location search functionality - filter cards on keyup
+        $(document).on('keyup', '#location-search-input', function() {
             const searchText = $(this).val().toLowerCase().trim();
+            const $allCards = $('.pollutant-banner-o .col-3');
+            
             if (searchText === '') {
-                // Show all locations
-                $('.pollutant-banner').show();
+                $allCards.attr('style', '');
             } else {
-                // Filter locations by name - search in location-name element
-                $('.pollutant-banner').each(function() {
-                    const locationName = $(this).find('.location-name').text().toLowerCase();
+                $allCards.each(function() {
+                    const $card = $(this);
+                    const locationName = $card.find('h5.location-name').text().toLowerCase();
+                    
                     if (locationName.includes(searchText)) {
-                        $(this).show();
+                        $card.attr('style', 'display: block !important;');
                     } else {
-                        $(this).hide();
+                        $card.attr('style', 'display: none !important;');
                     }
                 });
             }
+        });
+        
+        // Clear search when changing filters
+        $(document).on('change', '#species-filter', function() {
+            $('#location-search-input').val('');
+            $('.pollutant-banner-o .col-3').attr('style', '');
         });
     });
 

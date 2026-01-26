@@ -16,6 +16,13 @@ $(document).ready(function() {
                 $('.main_wave_js').load(pageToLoad, function() {
                     $('.main_wave_js').fadeIn(200);
                     $(window).scrollTop(0);
+                    
+                    // Manage body class based on page
+                    if (pageToLoad.includes('home.html')) {
+                        $('body').addClass('home-page');
+                    } else {
+                        $('body').removeClass('home-page');
+                    }
                 });
             });
         }
@@ -84,6 +91,14 @@ function loadHashContent() {
             $('.main_wave_js').load(pageToLoad, function() {
                 $('.main_wave_js').fadeIn(200);
                 $(window).scrollTop(0);
+                
+                // Manage body class based on page
+                if (pageToLoad.includes('home.html')) {
+                    $('body').addClass('home-page');
+                } else {
+                    $('body').removeClass('home-page');
+                }
+                
                 // Clean the URL: remove query parameters but keep hash if present
                 if (hasParams) {
                     var cleanUrl = window.location.origin + window.location.pathname + (window.location.hash || "");

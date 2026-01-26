@@ -363,9 +363,24 @@ function create_map(sites, param) {
 
     // Only recreate map on first load, not on every filter change
     let map = window.currentMap;
-    if (!map || !map.isStyleLoaded()) {
+    
+    // Check if map container exists in DOM
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer) {
+        console.warn('Map container not found in DOM - page might not be loaded yet');
+        return null;
+    }
+    
+    // Check if we need to recreate the map
+    const needsRecreation = !map || !map.isStyleLoaded() || !map.getContainer() || map.getContainer().parentNode === null;
+    
+    if (needsRecreation) {
         if (window.currentMap && window.currentMap.remove) {
-            window.currentMap.remove();
+            try {
+                window.currentMap.remove();
+            } catch(e) {
+                console.warn('Error removing old map:', e);
+            }
             window.currentMap = null;
         }
         $('#map').html('');
@@ -456,9 +471,15 @@ function create_map(sites, param) {
                     ['get', 'aqi_color'],
                     '#9e9e9e'
                 ],
-                'circle-radius': 18,
-                'circle-stroke-width': 0.4,
-                'circle-stroke-color': '#ffffff'
+                'circle-radius': 16,
+                'circle-stroke-width': 0,
+                'circle-stroke-color': '#ffffff',
+                'circle-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    1,
+                    0.7
+                ]
             }
         });
         
@@ -475,7 +496,7 @@ function create_map(sites, param) {
                     ['to-string', ['get', 'aqi_value']]
                 ],
                 'text-font': ['Open Sans Bold'],
-                'text-size': 12,
+                'text-size': 11,
                 'text-offset': [0, 0],
                 'text-anchor': 'center'
             },
@@ -484,10 +505,16 @@ function create_map(sites, param) {
                     'case',
                     ['==', ['get', 'aqi_value'], 'N/A'],
                     '#ffffff',
-                    '#222'
+                    '#ffffff'
                 ],
-                'text-halo-color': '#fff',
-                'text-halo-width': 1.5
+                'text-halo-color': 'rgba(0,0,0,0.3)',
+                'text-halo-width': 0.5,
+                'text-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    1,
+                    0.7
+                ]
             }
         });
 
@@ -538,6 +565,7 @@ function create_map(sites, param) {
 
 
    const hoverDiv = document.getElementById('map-hover-info');
+   let hoveredFeatureId = null;
 
         map.on('mouseenter', 'unclustered-point', (e) => {
         map.getCanvas().style.cursor = 'pointer';
@@ -546,6 +574,18 @@ function create_map(sites, param) {
         const aqiValue = feature.properties.aqi_value || 'N/A';
         const param = feature.properties.parameter || 'no2';
     
+        if (hoveredFeatureId !== null) {
+            map.setFeatureState(
+                { source: 'locations_dst', id: hoveredFeatureId },
+                { hover: false }
+            );
+        }
+        
+        hoveredFeatureId = feature.id;
+        map.setFeatureState(
+            { source: 'locations_dst', id: hoveredFeatureId },
+            { hover: true }
+        );
      
         hoverDiv.innerHTML = `
             <div style="font-weight:bold; margin-bottom:4px;">${locationName}</div>
@@ -564,6 +604,14 @@ function create_map(sites, param) {
             map.getCanvas().style.cursor = '';
             hoverDiv.style.display = 'none';
             map.off('mousemove', onMove);
+            
+            if (hoveredFeatureId !== null) {
+                map.setFeatureState(
+                    { source: 'locations_dst', id: hoveredFeatureId },
+                    { hover: false }
+                );
+                hoveredFeatureId = null;
+            }
         });
         
     });
@@ -656,11 +704,9 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
     return {
         type: "FeatureCollection",
         features: sites
-            .map(site => {
-                // Site data already filtered and has current_forecast from loadSiteData
+            .map((site, index) => {
                 const matchingForecast = site.current_forecast || {};
 
-                // Determine pollutant to display
                 const selected = (site.species || "no2").toLowerCase();
                 const isPm25 = selected === "pm25" || selected === "pm2.5";
 
@@ -679,7 +725,6 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
                         : "N/A";
                 }
                 
-                // Get AQI level - use black color for N/A values
                 const aqiLevel = aqi === "N/A" 
                     ? { color: '#000000', level: 'No Data' }
                     : getAqiLevel(aqi, selected);
@@ -688,6 +733,7 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
 
                 return {
                     type: "Feature",
+                    id: index,
                     properties: {
                         location_id: site.location_id || "unknown_id",
                         location_name: site.location_name || "Unknown Location",
@@ -1712,51 +1758,64 @@ function readApiBaker(options = {}) {
                     masterData.master_datetime.push(forecast.local_time);
                 }
                 // Concentrations
-                if (forecast.no2 !== undefined) {
+                if (forecast.no2 !== undefined && forecast.no2 !== null) {
                     masterData.master_no2.push(forecast.no2);
                 }
-                if (forecast.o3 !== undefined) {
+                if (forecast.o3 !== undefined && forecast.o3 !== null) {
                     masterData.master_o3.push(forecast.o3);
                 }
-                if (forecast.pm25 !== undefined) {
+                
+                // PM2.5 handling - check for pm25_conc_cnn field from your JSON
+                if (forecast.pm25_conc_cnn !== undefined && forecast.pm25_conc_cnn !== null) {
+                    masterData.master_pm25.push(forecast.pm25_conc_cnn);
+                    masterData.master_pm25_conc_cnn.push(forecast.pm25_conc_cnn);
+                } else if (forecast.pm25 !== undefined && forecast.pm25 !== null) {
                     masterData.master_pm25.push(forecast.pm25);
-                    if (forecast.pm25_aqi !== undefined && forecast.pm25_aqi !== null) {
-                        masterData.master_pm25_aqi.push(forecast.pm25_aqi);
-                    } else if (forecast.pm25 !== undefined && forecast.pm25 !== null) {
-                        masterData.master_pm25_aqi.push(calculateAqiForPm25(forecast.pm25));
-                    } else {
-                        masterData.master_pm25_aqi.push('N/A');
-                    }
-                    if (forecast.pm25_conc_cnn !== undefined && forecast.pm25_conc_cnn !== null) {
-                        masterData.master_pm25_conc_cnn.push(forecast.pm25_conc_cnn);
-                    } else if (forecast.pm25 !== undefined && forecast.pm25 !== null) {
-                        masterData.master_pm25_conc_cnn.push(forecast.pm25);
-                    } else {
-                        masterData.master_pm25_conc_cnn.push('N/A');
-                    }
-                }
-
-                if (forecast.corrected !== undefined) {
-                    masterData.master_predicted.push(forecast.corrected);
-                }
-                if (forecast.pandora !== undefined) {
-                    masterData.master_observation.push(forecast.pandora);
-                }
-                // AQI values
-                if (forecast.no2_aqi !== undefined) {
-                    masterData.master_no2_aqi.push(forecast.no2_aqi);
-                }
-                if (forecast.o3_aqi !== undefined) {
-                    masterData.master_o3_aqi.push(forecast.o3_aqi);
+                    masterData.master_pm25_conc_cnn.push(forecast.pm25);
                 }
                 
-                // For corrected, calculate AQI if not present
-                if (forecast.corrected !== undefined) {
-                    let aqi = forecast.no2_aqi;
-                    if (aqi === undefined && forecast.no2 !== undefined) {
+                // PM2.5 AQI - use pm25_aqi from your JSON
+                if (forecast.pm25_aqi !== undefined && forecast.pm25_aqi !== null) {
+                    masterData.master_pm25_aqi.push(forecast.pm25_aqi);
+                } else if (forecast.PM25_NowCast_AQI !== undefined && forecast.PM25_NowCast_AQI !== null) {
+                    masterData.master_pm25_aqi.push(forecast.PM25_NowCast_AQI);
+                } else if (forecast.pm25_conc_cnn !== undefined && forecast.pm25_conc_cnn !== null) {
+                    masterData.master_pm25_aqi.push(calculateAqiForPm25(forecast.pm25_conc_cnn));
+                }
+
+                if (forecast.corrected !== undefined && forecast.corrected !== null) {
+                    masterData.master_predicted.push(forecast.corrected);
+                }
+                if (forecast.pandora !== undefined && forecast.pandora !== null) {
+                    masterData.master_observation.push(forecast.pandora);
+                }
+                
+                // AQI values - support both lowercase and uppercase field names
+                if (forecast.NO2_AQI !== undefined && forecast.NO2_AQI !== null) {
+                    masterData.master_no2_aqi.push(forecast.NO2_AQI);
+                } else if (forecast.no2_aqi !== undefined && forecast.no2_aqi !== null) {
+                    masterData.master_no2_aqi.push(forecast.no2_aqi);
+                } else if (forecast.no2 !== undefined && forecast.no2 !== null) {
+                    masterData.master_no2_aqi.push(calculateAqiForNo2(forecast.no2));
+                }
+                
+                if (forecast.O3_AQI !== undefined && forecast.O3_AQI !== null) {
+                    masterData.master_o3_aqi.push(forecast.O3_AQI);
+                } else if (forecast.o3_aqi !== undefined && forecast.o3_aqi !== null) {
+                    masterData.master_o3_aqi.push(forecast.o3_aqi);
+                } else if (forecast.o3 !== undefined && forecast.o3 !== null) {
+                    masterData.master_o3_aqi.push(calculateAqiForO3(forecast.o3));
+                }
+                
+                // For corrected NO2, calculate AQI if not present
+                if (forecast.corrected !== undefined && forecast.corrected !== null) {
+                    let aqi = forecast.NO2_AQI || forecast.no2_aqi;
+                    if (aqi === undefined && forecast.no2 !== undefined && forecast.no2 !== null) {
                         aqi = calculateAqiForNo2(forecast.no2);
                     }
-                    masterData.master_predicted_aqi.push(aqi);
+                    if (aqi !== undefined) {
+                        masterData.master_predicted_aqi.push(aqi);
+                    }
                 }
             });
             
