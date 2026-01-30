@@ -1,4 +1,3 @@
-
 // LF V1.0
 $(document).ready(function() {
     $('body').on('click', '.nl_wave_routing', function(e) {
@@ -395,12 +394,13 @@ function create_map(sites, param) {
             container: 'map',
             minZoom: 1,
             maxZoom: 10
-           
         });
         // Store reference for future updates
         window.currentMap = map;
     }
-    map.setRenderWorldCopies(false);
+    if (typeof map.setRenderWorldCopies === 'function') {
+        map.setRenderWorldCopies(false);
+    }
     const bounds = [
     [-180, -85], 
     [180, 85]    
@@ -556,10 +556,6 @@ function create_map(sites, param) {
               'text-color': '#ffffff'
             }
           });
-    
-
-        
-            
     });
 
 
@@ -724,6 +720,13 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
                         ? matchingForecast.o3_aqi 
                         : "N/A";
                 }
+
+                const isCurrentHour = (site.timezone && matchingForecast && matchingForecast.local_time)
+                    ? isForecastForCurrentHour(matchingForecast, site.timezone)
+                    : false;
+                if (!isCurrentHour) {
+                    aqi = "N/A";
+                }
                 
                 const aqiLevel = aqi === "N/A" 
                     ? { color: '#000000', level: 'No Data' }
@@ -738,7 +741,7 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
                         location_id: site.location_id || "unknown_id",
                         location_name: site.location_name || "Unknown Location",
                         time_zone: site.timezone,
-                        forecasted_value: aqi,
+                        forecasted_value: isCurrentHour ? aqi : '--',
                         aqi_value: aqi === "N/A" ? "N/A" : parseInt(aqi),
                         aqi_color: aqiLevel.color,
                         status: "active",
@@ -829,6 +832,30 @@ async function loadSiteForecasts(locationName, filename) {
         console.error(`Error loading ${filename}:`, error);
         return null;
     }
+}
+
+function isForecastForCurrentHour(forecast, timezone) {
+    if (!forecast || !forecast.local_time) return false;
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        hour12: false
+    });
+    const parts = formatter.formatToParts(now);
+    const partMap = {};
+    parts.forEach(p => {
+        partMap[p.type] = p.value;
+    });
+
+    const currentLocalHourStr = `${partMap.year}-${partMap.month}-${partMap.day} ${String(partMap.hour).padStart(2, '0')}:00:00`;
+    const forecastHourStr = forecast.local_time.length >= 13
+        ? forecast.local_time.substring(0, 13) + ':00:00'
+        : forecast.local_time;
+    return forecastHourStr === currentLocalHourStr;
 }
 
 /**
@@ -1274,22 +1301,23 @@ function processHourlySnapshot(hourlySnapshot, filteredIndices) {
             }
             
             if (forecasted_value !== "N/A") {
-                const obsOptions = {
-                    no2: { unit: "μg/m³", value: snapshotData.no2 || "N/A" },
-                    no2_aqi: { unit: "AQI", value: snapshotData.no2_aqi || "N/A" },
-                    o3: { unit: "μg/m³", value: snapshotData.o3 || "N/A" },
-                    o3_aqi: { unit: "AQI", value: snapshotData.o3_aqi || "N/A" },
-                    pm25: { unit: "μg/m³", value: snapshotData.pm25 || "N/A" },
-                    pm25_aqi: { unit: "AQI", value: snapshotData.pm25_aqi || "N/A" },
-                    t10m: { unit: "K", value: snapshotData.t10m || "N/A" },
-                    rh: { unit: "%", value: snapshotData.rh || "N/A" },
-                    wind_speed: { unit: "m/s", value: snapshotData.wind_speed || "N/A" }
-                };
+                const obsOptions = {};
+                Object.keys(snapshotData).forEach(key => {
+                    if (key !== "time") {
+                        obsOptions[key] = {
+                            unit: getUnitForParameter(key),
+                            value: snapshotData[key] || "N/A"
+                        };
+                    }
+                });
 
+                const isCurrentHour = isForecastForCurrentHour(snapshotData, snapshotData.timezone);
+                const displayValue = isCurrentHour ? parseInt(forecasted_value) : '--';
+                
                 const siteDisplayData = {
                     location_name: indexEntry.location_name,
                     observation_source: snapshotData.observation_source || "NASA",
-                    forecasted_value: parseInt(forecasted_value),
+                    forecasted_value: displayValue,
                     status: "active",
                     latitude: indexEntry.lat,
                     longitude: indexEntry.lon,
@@ -1368,10 +1396,13 @@ function loadIndividualSites(filteredIndices) {
                                 }
                             });
 
+                            const isCurrentHour = isForecastForCurrentHour(matchingForecast, fileTimezone);
+                            const displayValue = isCurrentHour ? parseInt(forecasted_value) : '--';
+                            
                             const siteDisplayData = {
                                 location_name: indexEntry.location_name,
                                 observation_source: indexEntry.observation_source || "NASA",
-                                forecasted_value: parseInt(forecasted_value),
+                                forecasted_value: displayValue,
                                 status: "active",
                                 latitude: indexEntry.lat,
                                 longitude: indexEntry.lon,
@@ -1507,8 +1538,8 @@ function add_the_banner(site, param) {
     const obs_options = $.parseJSON(site.obs_options);
 
     if (site.observation_source) {
-        const temperature = precomputed_forecasts?.[0]?.t10m ? (precomputed_forecasts[0].t10m - 273.15).toFixed(1) : "N/A";
-        const humidity = precomputed_forecasts?.[0]?.rh ? (precomputed_forecasts[0].rh * 100).toFixed(0) : "N/A";
+        const temperature = precomputed_forecasts?.[0]?.t10m ? (precomputed_forecasts[0].t10m - 273.15).toFixed(1) : "--";
+        const humidity = precomputed_forecasts?.[0]?.rh ? (precomputed_forecasts[0].rh * 100).toFixed(0) : "--";
         const windSpeed = precomputed_forecasts?.[0]?.wind_speed || "--";
         const local_time = precomputed_forecasts?.[0]?.local_time || "--";
         const no2 = precomputed_forecasts?.[0]?.no2 || "--";
@@ -1518,22 +1549,50 @@ function add_the_banner(site, param) {
         const pm25 = precomputed_forecasts?.[0]?.pm25 || "--";
         const pm25_aqi = precomputed_forecasts?.[0]?.pm25_aqi || calculateAqiForPm25(pm25) || "--";
 
+        let isCurrentHour = false;
+        if (precomputed_forecasts?.[0]?.local_time && site.timezone) {
+            isCurrentHour = isForecastForCurrentHour(precomputed_forecasts[0], site.timezone);
+        }
 
-        let aqiValue = 'N/A';
-        if (param === "no2") {
-            aqiValue = parseInt(no2_aqi);
-            source = "NASA GEOS CF, NASA Pandora";
-        } else if (param === "pm25" || param === "pm2.5") {
-            aqiValue = parseInt(pm25_aqi);
-            source = precomputed_forecasts?.[0]?.pm25_aqi 
-                ? "NASA GEOS-FP, AirNow"
-                : "NASA GEOS-FP, AirNow";
-        } else if (param === "o3") {
-            aqiValue = parseInt(o3_aqi)
-            source = "NASA GEOS CF, NASA Pandora";
+        let aqiValue = '--';
+        if (isCurrentHour) {
+            if (param === "no2") {
+                aqiValue = parseInt(no2_aqi);
+                source = "NASA GEOS CF, NASA Pandora";
+            } else if (param === "pm25" || param === "pm2.5") {
+                aqiValue = parseInt(pm25_aqi);
+                source = precomputed_forecasts?.[0]?.pm25_aqi 
+                    ? "NASA GEOS-FP, AirNow"
+                    : "NASA GEOS-FP, AirNow";
+            } else if (param === "o3") {
+                aqiValue = parseInt(o3_aqi)
+                source = "NASA GEOS CF, NASA Pandora";
+            }
+        } else {
+            aqiValue = '--';
+            if (param === "no2") source = "NASA GEOS CF, NASA Pandora";
+            else if (param === "pm25" || param === "pm2.5") source = "NASA GEOS-FP, AirNow";
+            else if (param === "o3") source = "NASA GEOS CF, NASA Pandora";
         }
 
         const aqiLevel = getAqiLevel(aqiValue, param);
+        
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: site.timezone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+        const parts = formatter.formatToParts(now);
+        const partMap = {};
+        parts.forEach(p => {
+            partMap[p.type] = p.value;
+        });
+        const localDateTimeStr = `${partMap.month}/${partMap.day} ${partMap.hour}:${partMap.minute}`;
 
         const html = `
             <div class="col-3 single-pollutant-card">
@@ -1562,7 +1621,7 @@ function add_the_banner(site, param) {
                                 : site.location_name.replace(/_/g, ' ').replace(/\./g, ' ')
                             }</h5>
                             <p class="source">Sources: ${source}</p>
-                            <p class="source"></p>
+                            <p class="source">${localDateTimeStr}</p>
                             <p class="timezone_text">${local_time ? local_time.slice(11, 16) : "--"}  (${site.timezone})</p>
                         </div>
                         <div class="aqi-info">
@@ -1986,8 +2045,8 @@ function readApiBaker(options = {}) {
                 const localDate = pad(siteLocalNow.getDate());
                 const currentHour = siteLocalNow.getHours();
                 const nextHour = (currentHour + 1) % 24;
-                const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(currentHour)}`;
-                const nextLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(nextHour)}`;
+                const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(currentHour)}:00:00`;
+                const nextLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(nextHour)}:00:00`;
                 
 
                 let currentValue = 'N/A';
@@ -2119,88 +2178,50 @@ function readApiBaker(options = {}) {
                         $plotContainer.before(aqiHtml);
                     }
                 }
-            if (plot.displayMetrics) {
-            const columnKey = plot.columns[0].column;
-            const values = masterData[columnKey] || [];
-            const datetimes = masterData.master_datetime || [];
-            const siteTimeZone = timezone || "UTC";
-            const now = new Date();
-            const pad = n => n.toString().padStart(2, '0');
-            const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
-
-            const todayStr = siteLocalNow.toISOString().slice(0, 10);
-            const tomorrowDate = new Date(siteLocalNow.getTime() + 24 * 60 * 60 * 1000);
-            const tomorrowStr = tomorrowDate.toISOString().slice(0, 10);
-            const prevDate = new Date(siteLocalNow.getTime() - 24 * 60 * 60 * 1000);
-            const prevStr = prevDate.toISOString().slice(0, 10);
-
-            const prevVals = datetimes
-            .map((dt, i) => ({ dt, val: values[i] }))
-            .filter(({ dt }) => dt && dt.startsWith(prevStr))
-            .map(({ val }) => typeof val === "number" ? val : parseFloat(val))
-            .filter(val => !isNaN(val));
-            const todayVals = datetimes
-            .map((dt, i) => ({ dt, val: values[i] }))
-            .filter(({ dt }) => dt && dt.startsWith(todayStr))
-            .map(({ val }) => typeof val === "number" ? val : parseFloat(val))
-            .filter(val => !isNaN(val));
-            const tomorrowVals = datetimes
-            .map((dt, i) => ({ dt, val: values[i] }))
-            .filter(({ dt }) => dt && dt.startsWith(tomorrowStr))
-            .map(({ val }) => typeof val === "number" ? val : parseFloat(val))
-            .filter(val => !isNaN(val));
-
-            const prevAvg = prevVals.length ? prevVals.reduce((a, b) => a + b, 0) / prevVals.length : 'N/A';
-            const todayAvg = todayVals.length ? todayVals.reduce((a, b) => a + b, 0) / todayVals.length : 'N/A';
-            const tomorrowAvg = tomorrowVals.length ? tomorrowVals.reduce((a, b) => a + b, 0) / tomorrowVals.length : 'N/A';
-
-            // Calculate change rates
-            function getChangeRate(newVal, oldVal) {
-            if (typeof newVal === "number" && typeof oldVal === "number" && oldVal !== 0) {
-            const diff = newVal - oldVal;
-            const pct = ((newVal - oldVal) / oldVal) * 100;
-            return {
-            diff: diff.toFixed(2),
-            pct: pct.toFixed(2),
-            sign: pct > 0 ? "+" : "",
-            class: pct > 0 ? "red" : pct < 0 ? "green" : "",
-            arrow: pct > 0 ? "▲" : pct < 0 ? "▼" : ""
-            };
-            }
-            return { diff: "N/A", pct: "N/A", sign: "", class: "", arrow: "" };
-            }
-
-            const changeTodayVsPrev = getChangeRate(todayAvg, prevAvg);
-            const changeTomorrowVsToday = getChangeRate(tomorrowAvg, todayAvg);
-
-            // Generate metrics HTML: 2 boxes, each with average and change rate below
-            const metricsHtml = `
-            <div class="xvg_aqi-container">
-            <div class="d-xvg" style="flex:1;">
-            <div class="xvg_aqi me-3" style="font-size:2em;">${todayAvg !== 'N/A' ? todayAvg.toFixed(2) : '--'}</div>
-            <div class="xvg_aqi-change">Today Avg</div>
-            <div class="xvg_aqi-change ${changeTodayVsPrev.class}" style="margin-top:8px;">
-            ${changeTodayVsPrev.arrow} ${changeTodayVsPrev.sign}${changeTodayVsPrev.diff} (${changeTodayVsPrev.sign}${changeTodayVsPrev.pct !== "N/A" ? changeTodayVsPrev.pct + "%" : "--"})
-            </div>
-            <div class="xvg_timestamp" style="font-size:12px;">vs Previous Day</div>
-            </div>
-            <div class="d-xvg" style="flex:1;">
-            <div class="xvg_aqi me-3" style="font-size:2em;">${tomorrowAvg !== 'N/A' ? tomorrowAvg.toFixed(2) : '--'}</div>
-            <div class="xvg_aqi-change">Tomorrow Avg</div>
-            <div class="xvg_aqi-change ${changeTomorrowVsToday.class}" style="margin-top:8px;">
-            ${changeTomorrowVsToday.arrow} ${changeTomorrowVsToday.sign}${changeTomorrowVsToday.diff} (${changeTomorrowVsToday.sign}${changeTomorrowVsToday.pct !== "N/A" ? changeTomorrowVsToday.pct + "%" : "--"})
-            </div>
-            <div class="xvg_timestamp" style="font-size:12px;">vs Today</div>
-            </div>
-            </div>
-            `;
-
-            const $plotContainer = $(`#${plot.id}`);
-            if ($plotContainer.length > 0) {
-            $plotContainer.before(metricsHtml);
-            }
-            }
             });
+
+            tabsList.append(`
+    <li class="nav-item model_infos" role="presentation">
+        <a class="nav-link" id="tab-info" data-bs-toggle="pill" href="#info_tab" role="tab" aria-controls="info_tab" aria-selected="false">
+            Air Quality Information
+        </a>
+    </li>
+`);
+tabsContainer.append(`
+    <div class="tab-pane fade" id="info_tab" role="tabpanel" aria-labelledby="tab-info">
+        <div class="info-tab-content" style="padding: 1.5em;">
+            <h4>Model Sources</h4>
+            <ul>
+                <li><b>NO<sub>2</sub>:</b> NASA GEOS-CF bias corrected using NASA Pandora and machine learning models</li>
+                <li><b>PM<sub>2.5</sub>:</b> NASA GEOS-FP bias corrected using AirNow observations and machine learning</li>
+                <li><b>O<sub>3</sub>:</b> NASA GEOS-CF</li>
+            </ul>
+            <h4 style="margin-top:1em;">AQI Scale (US EPA)</h4>
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr>
+                        <th>AQI</th>
+                        <th>Level</th>
+                        <th>Color</th>
+                        <th>Health Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>0-50</td><td>Good</td><td style="background:#4CAF50;"></td><td>Air quality is satisfactory.</td></tr>
+                    <tr><td>51-100</td><td>Moderate</td><td style="background:#FFEB3B;"></td><td>Acceptable; some pollutants may be a concern for a small number of sensitive people.</td></tr>
+                    <tr><td>101-150</td><td>Unhealthy for Sensitive Groups</td><td style="background:#FF9800;"></td><td>Sensitive groups may experience health effects.</td></tr>
+                    <tr><td>151-200</td><td>Unhealthy</td><td style="background:#F44336;"></td><td>Everyone may begin to experience health effects.</td></tr>
+                    <tr><td>201-300</td><td>Very Unhealthy</td><td style="background:#9C27B0;"></td><td>Health alert: everyone may experience more serious health effects.</td></tr>
+                    <tr><td>301-500</td><td>Hazardous</td><td style="background:#7E0023;"></td><td>Health warnings of emergency conditions.</td></tr>
+                </tbody>
+            </table>
+            <p style="font-size:13px;margin-top:1em;">
+                <b>Note:</b> AQI is calculated per US EPA standards. For more details, see <a href="https://www.airnow.gov/aqi/aqi-basics/" target="_blank">AirNow AQI Basics</a>.
+            </p>
+        </div>
+    </div>
+`);
+
 
             $(".nav-link").on("click", function () {
                 const targetTabId = $(this).attr("href").replace("#", "");
@@ -2486,8 +2507,8 @@ function generateAverageChangeElement(dataset, pollutant, userTimeZone, currentH
 
     const trendClass = isAboveAverage ? 'negative' : 'positive'; 
     const trendIcon = isAboveAverage
-        ? '<svg style="color: rgb(237, 13, 13);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 1 1 0v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 .708-.708L8.5 10.293V4.5z"/> </svg>'
-        : '<svg style="color: rgb(48, 169, 4);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 7.854a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z"/> </svg>';
+        ? '<svg style="color: rgb(237, 13, 13);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0zM8.5 4.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V4.5z" fill="#d60b15"></path> </svg>'
+        : '<svg style="color: rgb(48, 169, 4);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 7.854a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z" fill="#30a904"></path> </svg>';
 
  
     return `
@@ -2771,20 +2792,14 @@ function readAirNow(options = {}) {
                 const datetime = new Date(masterData.master_datetime[i]);
                 const dateString = datetime.toISOString().split('T')[0];
                 const hour = datetime.getHours();
-            
 
-                if (dateString === currentDateString && hour <= currentHour && currentHour < hour + 3) {
+                if (dateString === currentDateString && hour === currentHour) {
                     currentValue = masterData.master_observation[i];
-                }
-            
-
-                if (dateString === currentDateString && hour <= currentHour + 3 && currentHour + 3 < hour + 3) {
-                    nextValue = masterData.master_observation[i];
+                    break;
                 }
             }
 
             const currentAqi = param === "no2" ? calculateAqiForNo2(currentValue) : calculateAqiForPm25(currentValue);
-            const nextAqi = param === "no2" ? calculateAqiForNo2(nextValue) : calculateAqiForPm25(nextValue);
 
             let aqiElement = `<div class="prediction-container">`;
             
@@ -2792,9 +2807,6 @@ function readAirNow(options = {}) {
                 aqiElement += generateAqiElement(currentAqi, param, userTimeZone, currentHour);
             }
             
-            if (nextAqi !== 'N/A') {
-                aqiElement += generateAqiElement(nextAqi, param, userTimeZone, nexttHour);
-            }
             aqiElement += `</div>`;
 
             const averageDailyChangeElement = generateAverageChangeElement(masterData.master_observation, param, userTimeZone, currentHour, "daily");
@@ -2862,8 +2874,8 @@ function updateUIWithDifferences(differenceLastYear, lastYearForecast, label) {
     if (rewrite_number(lastYearForecast) !== 'N/A') {
         const trendClass = differenceLastYear[0] > 0 ? 'trend-up' : 'trend-down';
         const trendIcon = differenceLastYear[0] > 0 
-            ? '<svg style="color: rgb(246, 70, 93);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z" fill="#d60b15"></path> </svg>'
-            : '<svg style="color: rgb(48, 169, 4);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 a=0-1-1v5.793L5.3546a=.5=.5=1-1-.708-.708l3-3a=.5=.5=0l3-3a=.5=.5=1-.708-.708L8.5=10.293V4.5z" fill="#30a904"></path> </svg>';
+            ? '<svg style="color: rgb(246, 70, 93);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0zM8.5 4.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V4.5z" fill="#d60b15"></path> </svg>'
+            : '<svg style="color: rgb(48, 169, 4);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 7.854a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z" fill="#30a904"></path> </svg>';
 
         $('.local_forecats_window').prepend(`
             <div class="col-md-4">
@@ -3636,7 +3648,7 @@ function get_plot(location_name, param, unit, forecasts_div, forecasts_resample_
                         }],
                         legend: {
                             orientation: 'h',
-                            y: 1.2
+                            y:  1.2
                         }
                     };
 
@@ -3696,7 +3708,7 @@ function get_plot(location_name, param, unit, forecasts_div, forecasts_resample_
                     });
                     $('.resample').text(resample_window+"H Rolling Averages");
                     
-                    $('.modebar').prepend('<div class="modebar-group"><a rel="tooltip" class="modebar-btn change_plot" data-title="'+historical+ ' '+resample_window+'H Rolling Average" change_to ="main_plot_'+historical+'"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16"> <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17l-1 .025zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155l-.964-.267c.046-.165.086-.332.12-.501zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038l-.845-.535zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432l-.707-.707z"/> <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/> <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/> </svg></div>');
+                    $('.modebar').prepend('<div class="modebar-group"><a rel="tooltip" class="modebar-btn change_plot" data-title="'+historical+ ' '+resample_window+'H Rolling Average" change_to ="main_plot_'+historical+'"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0zM8.5 4.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V4.5z" fill="#d60b15"></path> </svg></div>');
 
                     if(historical){
                         var label_text = "historical simulation";
