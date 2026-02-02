@@ -7,6 +7,8 @@ body {
     font-weight: 100;
     overflow-x: hidden !important;
     padding-bottom: 0 !important;
+    height: 100vh !important;
+    overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
     background: white !important;
@@ -15,8 +17,6 @@ body {
 /* Home page specific styling */
 body.home-page {
     background: black !important;
-    height: 100vh !important;
-    overflow: hidden !important;
 }
 
 .bg-forecasts {
@@ -240,14 +240,290 @@ mark {
 }
 
 
+/* Ensure map hover info appears above map */
+#map-hover-info {
+    z-index: 999 !important;
+}
 
-.mapboxgl-marker {
-    position: absolute !important;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    border: 1px solid gray;
-    background-color: lightblue;
+/* Leaflet marker styling */
+.custom-marker-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.custom-cluster-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.marker-container {
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+}
+
+.marker-container:hover {
+    opacity: 1 !important;
+}
+
+/* Ensure map container is properly sized */
+.leaflet-container {
+    width: 100%;
+    height: 100%;
+    background: #000 !important;
+}
+
+/* Map Controls Overlay Panel */
+.map-controls-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 320px;
+    max-height: calc(100vh - 160px);
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    overflow: hidden;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.map-controls-panel.collapsed {
+    transform: translateX(calc(100% + 20px));
+    opacity: 0;
+    pointer-events: none;
+}
+
+.controls-header {
+    background: rgba(20, 20, 20, 0.9);
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.controls-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.controls-header h3 i {
+    font-size: 18px;
+    color: #3b82f6;
+}
+
+.btn-controls-toggle {
+    background: transparent;
+    border: none;
+    color: #fff !important;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.btn-controls-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.controls-body {
+    padding: 15px;
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.controls-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.controls-body::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.controls-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.controls-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.control-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.control-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.control-section h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff !important;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-section h4 i {
+    color: #3b82f6;
+    font-size: 16px;
+}
+
+.control-group {
+    margin-bottom: 12px;
+}
+
+.control-group:last-child {
+    margin-bottom: 0;
+}
+
+.control-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #d1d5db;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 8px 0;
+    user-select: none;
+    transition: color 0.2s ease;
+}
+
+.control-label:hover {
+    color: #fff;
+}
+
+.control-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #3b82f6;
+}
+
+.control-select {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 6px;
+}
+
+.control-select:hover {
+    border-color: #3b82f6;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.control-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.control-range {
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
+.range-value {
+    display: inline-block;
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.control-btn {
+    width: 100%;
+    padding: 10px 15px;
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.control-btn:last-child {
+    margin-bottom: 0;
+}
+
+.control-btn:hover {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.6);
+    transform: translateY(-1px);
+}
+
+.control-btn:active {
+    transform: translateY(0);
+}
+
+.control-btn i {
+    font-size: 14px;
+}
+
+/* Toggle button for collapsed state */
+#map-controls-toggle-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+}
+
+#map-controls-toggle-btn:hover {
+    background: rgba(40, 40, 40, 0.95);
+    transform: scale(1.05);
+}
+
+.map-controls-panel.collapsed ~ #map-controls-toggle-btn {
+    display: flex;
 }
 
 
@@ -307,7 +583,8 @@ span.source {
 .forecasts_container {
     position: absolute;
     width: 100%;
-    z-index: 10;
+    z-index: 1000 !important;
+    background: white;
 }
 
 .lf_full_plot {
@@ -315,7 +592,8 @@ span.source {
 }
 
 header.wrapper.bg-soft-primary {
-    z-index: 1;
+    z-index: 500 !important;
+    position: relative;
 }
 
 
@@ -971,7 +1249,7 @@ input#filter-input {
     position: absolute !important;
     top: 0;
     left: 0;
-    z-index: 1;
+    z-index: 0 !important;
     transition: filter 0.3s;
   }
  
@@ -1006,6 +1284,7 @@ section.wrapper.image-wrapper.bg-image.bg-overlay.bg-overlay-300 {
     display: flex !important;
     min-height: 0 !important;
     position: relative !important;
+    z-index: 1 !important;
 }
 
 div#species-filter-container {
@@ -2454,6 +2733,7 @@ html, body {
 .banner-controls {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 8px 16px;
     background: rgba(15, 23, 42, 0.8);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -2465,7 +2745,13 @@ html, body {
     display: flex;
     align-items: center;
     gap: 12px;
-    width: 100%;
+    flex: 1;
+}
+
+.controls-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* Toggle button - SNWG style */
@@ -2490,9 +2776,39 @@ html, body {
     border-radius: 4px;
 }
 
+
+.btn-banner-hide {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.btn-banner-hide:hover {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.6);
+    color: #fef2f2;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.btn-banner-hide i {
+    font-size: 14px;
+}
+
 /* Filter controls */
 .filter-controls {
-    display: flex;
+       display: flex;
     align-items: center;
     gap: 8px;
     color: #e0e7ff;
@@ -2938,8 +3254,9 @@ ease;
 /* These rules ensure SNWG banner takes precedence over all old styles */
 
 .locations-container.snwg-banner {
-    position: fixed !important;
-    bottom: -20px !important;
+    position: relative;
+    left: 0 !important;
+    bottom: 36% !important;
     left: 0 !important;
     right: 0 !important;
     top: unset !important;
@@ -2949,10 +3266,10 @@ ease;
     background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%) !important;
     border-top: 2px solid #1e3a8a !important;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
-    z-index: 12 !important;
+    z-index: 100 !important;
     display: flex !important;
     flex-direction: column !important;
-    max-height: 180px !important;
+    max-height: 200px !important;
     overflow: hidden !important;
     transition: max-height 0.3s ease-in-out, bottom 0.3s ease-in-out !important;
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
@@ -2961,10 +3278,14 @@ ease;
     margin-top: 0 !important;
 }
 
+.locations-container.snwg-banner.hidden {
+    display: none !important;
+}
+
 .locations-container.snwg-banner.expanded {
     max-height: 90vh !important;
     overflow-y: auto !important;
-    bottom: 109px !important;
+    bottom: 0 !important;
 }
 
 .locations-container.snwg-banner .locations-box {

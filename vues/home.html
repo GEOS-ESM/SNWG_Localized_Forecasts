@@ -1,6 +1,105 @@
 <section class="wrapper image-wrapper bg-image bg-overlay bg-overlay-300">
     <div id='map'></div>
     <div id="map-hover-info" style="display:none; position:absolute; z-index:99999; pointer-events:none; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2); padding:8px; font-size:14px; min-width:120px;"></div>
+    
+    <div id="map-controls-overlay" class="map-controls-panel collapsed">
+        <div class="controls-header">
+            <h3><i class="bi bi-gear-fill"></i> Map Controls</h3>
+            <button id="toggle-map-controls" class="btn-controls-toggle" title="Toggle Controls">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        </div>
+        
+        <div class="controls-body">
+            <div class="control-section">
+                <h4><i class="bi bi-eye"></i> Display Options</h4>
+                <div class="control-group">
+                    <label class="control-label">
+                        <input type="checkbox" id="show-markers" checked>
+                        <span>Show Markers</span>
+                    </label>
+                    <label class="control-label">
+                        <input type="checkbox" id="show-labels" checked>
+                        <span>Show Labels</span>
+                    </label>
+                    <label class="control-label">
+                        <input type="checkbox" id="show-clusters">
+                        <span>Enable Clustering</span>
+                    </label>
+                    <label class="control-label">
+                        <input type="checkbox" id="show-banners">
+                        <span>Show Location Banners</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h4><i class="bi bi-map"></i> Map Style</h4>
+                <div class="control-group">
+                    <label for="map-style">Base Map:</label>
+                    <select id="map-style" class="control-select">
+                        <option value="dark">Dark Matter</option>
+                        <option value="light">Light</option>
+                        <option value="voyager" selected>Voyager</option>
+                        <option value="osm">OpenStreetMap</option>
+                        <option value="satellite">Satellite (ESRI)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h4><i class="bi bi-collection"></i> Marker Grouping</h4>
+                <div class="control-group">
+                    <label for="cluster-radius">Cluster Radius:</label>
+                    <input type="range" id="cluster-radius" min="20" max="150" value="100" class="control-range">
+                    <span id="cluster-radius-value" class="range-value">100px</span>
+                </div>
+                <div class="control-group">
+                    <label for="marker-size">Marker Size:</label>
+                    <input type="range" id="marker-size" min="16" max="48" value="32" class="control-range">
+                    <span id="marker-size-value" class="range-value">32px</span>
+                </div>
+                <div class="control-group">
+                    <label for="marker-opacity">Marker Opacity:</label>
+                    <input type="range" id="marker-opacity" min="0.3" max="1" step="0.1" value="0.7" class="control-range">
+                    <span id="marker-opacity-value" class="range-value">0.7</span>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h4><i class="bi bi-zoom-in"></i> View Controls</h4>
+                <div class="control-group">
+                    <button id="reset-view" class="control-btn">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset View
+                    </button>
+                    <button id="fit-bounds" class="control-btn">
+                        <i class="bi bi-aspect-ratio"></i> Fit All Markers
+                    </button>
+                </div>
+            </div>
+            
+            <div id="geotiff-controls-container"></div>
+        </div>
+    </div>
+
+    <button id="map-controls-toggle-btn" title="Show Map Controls">
+        <i class="bi bi-gear-fill"></i>
+    </button>
+    
+    <div id="utc-date-box" class="info-box utc-date-box" style="
+    background: #33333329;
+    z-index: 1000;
+    position: fixed;
+    /* top: 56px; */
+    color: white;
+    font-weight: 800;
+    left: 61px;
+">
+        <div class="info-content">
+            <span id="utc-date" class="utc-display">02/02/2026</span>
+        </div>
+    </div>
+    
     <div id='replay-animation'>
         <img src="geos-cf.gif"/>
     </div>
@@ -10,12 +109,9 @@
 
 <div class="forecasts_container"></div>
 
-<div class="locations-container snwg-banner">
+<div class="locations-container snwg-banner hidden">
     <div class="banner-controls">
         <div class="controls-left">
-            <button id="toggle-locations-box" class="btn-banner-toggle" title="Show/Hide filters">
-                <i class="bi bi-chevron-up" id="toggle-locations-icon"></i>
-            </button>
             <div id="location-search-container" class="search-controls" style="order: -1; margin-right: 15px;">
                 <input type="text" id="location-search-input" class="banner-search" placeholder=" Search locations..." style="min-width: 250px; background: rgba(59, 130, 246, 0.2) !important; border: 2px solid rgba(96, 165, 250, 0.5) !important; color: #fff !important; font-size: 14px !important;" />
             </div>
@@ -40,17 +136,14 @@
 <script src="local_forecasts.js?v=1.4.0"></script>
 <script src="local_forecasts_assets.js?v=1.4.0"></script>
 
+<script src="https://unpkg.com/proj4"></script>
+<script src="https://unpkg.com/georaster"></script>
+<script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
+
+<script src="geotiff_manager.js?v=1.0.1"></script>
+
 <script>
-    // Add home-page class to body for black background styling
     document.body.classList.add('home-page');
-    
-    // Ensure map is visible and resized when returning to home page
-    setTimeout(function() {
-        if (window.currentMap && typeof window.currentMap.resize === 'function') {
-            window.currentMap.resize();
-        }
-    }, 100);
-    
     $(document).on('click', '.btn-close', function(e) {
         $('.forecasts_container').css('display', 'none');
     });
@@ -59,20 +152,19 @@ $(document).on('change', '#species-filter', function() {
     cleanupBanners();
     const selectedSpecies = $(this).val();
     
-    // Update URL with new filter
+
     const url = new URL(window.location);
     url.searchParams.set('filter', selectedSpecies);
     window.history.pushState({ filter: selectedSpecies }, '', url);
     
-    // Use optimized filter update that keeps map without reloading
+
     readCompressedJsonAndAddBannersOptimized("precomputed/combined_forecasts.json.gz", selectedSpecies);
 });
 $(document).ready(function () {
-    // Load filter from URL parameter if available
+
     const urlFilter = getUrlParam('filter');
     const defaultFilter = urlFilter || 'dos_missions';
     
-    // Set the default filter in URL if not already present
     if (!urlFilter) {
         const url = new URL(window.location);
         url.searchParams.set('filter', defaultFilter);
@@ -82,11 +174,33 @@ $(document).ready(function () {
     $('#species-filter').val(defaultFilter);
     
     readCompressedJsonAndAddBanners("precomputed/combined_forecasts.json.gz", defaultFilter);
-    $('#toggle-locations-box-header').show();
+    
+    const initGeoTIFFManager = function() {
+        if (typeof GeoTIFFManager === 'undefined') {
+            console.warn('GeoTIFFManager not yet loaded, retrying...');
+            setTimeout(initGeoTIFFManager, 500);
+            return;
+        }
+        
+        if (!window.currentMap) {
+            console.log('Map not ready yet, retrying GeoTIFF Manager init...');
+            setTimeout(initGeoTIFFManager, 500);
+            return;
+        }
+        
+        console.log('Initializing GeoTIFF Manager...');
+        GeoTIFFManager.init({
+            autoCreateControls: true
+        }).then(function(result) {
+            console.log('GeoTIFF Manager initialized successfully');
+        }).catch(function(err) {
+            console.error('GeoTIFF Manager initialization error:', err);
+        });
+    };
+    
+
+    setTimeout(initGeoTIFFManager, 2000);
 });
-
-
-
 
     function getUrlParam(name) {
         const url = new URL(window.location.href);
@@ -97,37 +211,16 @@ $(document).ready(function () {
         const viewParam = getUrlParam('view');
         if (viewParam === 'list') {
             $('.locations-container').show();
-            $('#toggle-locations-box').find('span').text('Hide Filters');
         } else if (viewParam === 'globe') {
             $('.locations-container').hide();
         }
-        
-        // Banner expanded by default
-        let isExpanded = true;
-        const $banner = $('.locations-container.snwg-banner');
-        const $icon = $('#toggle-locations-icon');
-        $banner.addClass('expanded');
-        $icon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
-        
-        $('#toggle-locations-box').on('click', function() {
-            if (isExpanded) {
-                // Collapse
-                $banner.removeClass('expanded');
-                $icon.removeClass('bi-chevron-down').addClass('bi-chevron-up');
-            } else {
-                // Expand
-                $banner.addClass('expanded');
-                $icon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
-            }
-            isExpanded = !isExpanded;
-        });
 
-        // Listen for URL changes (browser back/forward buttons)
+
         window.addEventListener('popstate', function(event) {
             const urlFilter = getUrlParam('filter') || 'dos_missions';
             const currentFilter = $('#species-filter').val();
             
-            // Only update if filter in URL is different from current
+
             if (urlFilter !== currentFilter) {
                 $('#species-filter').val(urlFilter);
                 cleanupBanners();
@@ -135,27 +228,24 @@ $(document).ready(function () {
             }
         });
 
-        // Monitor URL changes (including direct manual edits in address bar)
+
         let lastKnownFilter = getUrlParam('filter') || 'dos_missions';
         setInterval(function() {
             const currentUrlFilter = getUrlParam('filter') || 'dos_missions';
             const currentDropdownFilter = $('#species-filter').val();
             
-            // If URL changed from last check and it's different from dropdown
+
             if (currentUrlFilter !== lastKnownFilter && currentUrlFilter !== currentDropdownFilter) {
                 lastKnownFilter = currentUrlFilter;
-                
-                // Update dropdown and load new filter
+
                 $('#species-filter').val(currentUrlFilter);
                 cleanupBanners();
                 readCompressedJsonAndAddBannersOptimized("precomputed/combined_forecasts.json.gz", currentUrlFilter);
             } else {
-                // Just track the latest URL filter even if we don't update
                 lastKnownFilter = currentUrlFilter;
             }
         }, 300);
 
-        // Location search functionality - filter cards on keyup
         $(document).on('keyup', '#location-search-input', function() {
             const searchText = $(this).val().toLowerCase().trim();
             const $allCards = $('.pollutant-banner-o .col-3');
@@ -176,11 +266,253 @@ $(document).ready(function () {
             }
         });
         
-        // Clear search when changing filters
         $(document).on('change', '#species-filter', function() {
             $('#location-search-input').val('');
             $('.pollutant-banner-o .col-3').attr('style', '');
         });
+        
+
+        $('#toggle-map-controls, #map-controls-toggle-btn').on('click', function() {
+            $('#map-controls-overlay').toggleClass('collapsed');
+        });
+        
+
+        $('#show-markers').on('change', function() {
+            if (window.currentMarkers) {
+                if ($(this).is(':checked')) {
+                    if (window.currentMap && !window.currentMap.hasLayer(window.currentMarkers)) {
+                        window.currentMap.addLayer(window.currentMarkers);
+                    }
+                } else {
+                    if (window.currentMap && window.currentMap.hasLayer(window.currentMarkers)) {
+                        window.currentMap.removeLayer(window.currentMarkers);
+                    }
+                }
+            }
+        });
+        
+        $('#show-labels').on('change', function() {
+            const showLabels = $(this).is(':checked');
+            $('.marker-container').each(function() {
+                if (showLabels) {
+                    $(this).css('font-size', '11px');
+                } else {
+                    $(this).css('font-size', '0');
+                }
+            });
+        });
+        
+        $('#show-banners').on('change', function() {
+            console.log('Show banners checkbox changed:', $(this).is(':checked'));
+            const showBanners = $(this).is(':checked');
+            const $banner = $('.locations-container.snwg-banner');
+            
+            console.log('Banner element found:', $banner.length);
+            
+            if (showBanners) {
+                console.log('Showing banner...');
+                $banner.removeClass('hidden');
+            } else {
+                console.log('Hiding banner...');
+                $banner.addClass('hidden');
+            }
+        });
+        
+        $('#show-clusters').on('change', function() {
+            const enableClustering = $(this).is(':checked');
+            if (window.currentForecastData) {
+                const geojson = sitesArrayToGeoJSON(window.currentForecastData);
+
+                window.mapSettings = window.mapSettings || {};
+                window.mapSettings.clusteringEnabled = enableClustering;
+                
+                if (window.currentMap && window.currentMarkers) {
+                    window.currentMap.removeLayer(window.currentMarkers);
+                    
+                    if (enableClustering) {
+                        const clusterRadius = parseInt($('#cluster-radius').val()) || 100;
+                        window.currentMarkers = L.markerClusterGroup({
+                            maxClusterRadius: clusterRadius,
+                            spiderfyOnMaxZoom: true,
+                            showCoverageOnHover: false,
+                            zoomToBoundsOnClick: true,
+                            iconCreateFunction: function(cluster) {
+                                var count = cluster.getChildCount();
+                                var size = count > 100 ? 40 : (count > 10 ? 30 : 20);
+                                return L.divIcon({
+                                    html: '<div style="background:#1da1f2;color:#fff;border-radius:50%;width:' + size + 'px;height:' + size + 'px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;">' + count + '</div>',
+                                    className: 'custom-cluster-icon',
+                                    iconSize: L.point(size, size)
+                                });
+                            }
+                        });
+                    } else {
+                        window.currentMarkers = L.layerGroup();
+                    }
+                    
+                    window.currentMap.addLayer(window.currentMarkers);
+                    updateLeafletMarkers(window.currentMap, geojson);
+                }
+            }
+        });
+        
+
+        $('#map-style').on('change', function() {
+            const style = $(this).val();
+            if (window.currentMap && window.currentTileLayer) {
+                window.currentMap.removeLayer(window.currentTileLayer);
+            }
+            
+            let tileUrl, attribution;
+            
+            switch(style) {
+                case 'dark':
+                    tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+                    attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+                    break;
+                case 'light':
+                    tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+                    attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+                    break;
+                case 'voyager':
+                    tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+                    attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+                    break;
+                case 'osm':
+                    tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                    attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+                    break;
+                case 'satellite':
+                    tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+                    attribution = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
+                    break;
+            }
+            
+            if (window.currentMap) {
+                window.currentTileLayer = L.tileLayer(tileUrl, {
+                    attribution: attribution,
+                    subdomains: 'abcd',
+                    maxZoom: 20,
+                    noWrap: true
+                }).addTo(window.currentMap);
+            }
+        });
+        
+        // Cluster Radius Change
+        $('#cluster-radius').on('input', function() {
+            const value = $(this).val();
+            $('#cluster-radius-value').text(value + 'px');
+            
+            // Update cluster settings if clustering is enabled
+            if ($('#show-clusters').is(':checked') && window.currentForecastData) {
+                const geojson = sitesArrayToGeoJSON(window.currentForecastData);
+                
+                if (window.currentMap && window.currentMarkers) {
+                    window.currentMap.removeLayer(window.currentMarkers);
+                    
+                    window.currentMarkers = L.markerClusterGroup({
+                        maxClusterRadius: parseInt(value),
+                        spiderfyOnMaxZoom: true,
+                        showCoverageOnHover: false,
+                        zoomToBoundsOnClick: true,
+                        iconCreateFunction: function(cluster) {
+                            var count = cluster.getChildCount();
+                            var size = count > 100 ? 40 : (count > 10 ? 30 : 20);
+                            return L.divIcon({
+                                html: '<div style="background:#1da1f2;color:#fff;border-radius:50%;width:' + size + 'px;height:' + size + 'px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;">' + count + '</div>',
+                                className: 'custom-cluster-icon',
+                                iconSize: L.point(size, size)
+                            });
+                        }
+                    });
+                    
+                    window.currentMap.addLayer(window.currentMarkers);
+                    updateLeafletMarkers(window.currentMap, geojson);
+                }
+            }
+        });
+        
+        // Marker Size Change
+        $('#marker-size').on('input', function() {
+            const value = $(this).val();
+            $('#marker-size-value').text(value + 'px');
+            
+            // Update all marker sizes
+            $('.marker-container > div').css({
+                'width': value + 'px',
+                'height': value + 'px',
+                'font-size': Math.max(10, parseInt(value) * 0.34) + 'px'
+            });
+        });
+        
+        // Marker Opacity Change
+        $('#marker-opacity').on('input', function() {
+            const value = $(this).val();
+            $('#marker-opacity-value').text(value);
+            
+            // Update all marker opacities
+            $('.marker-container').css('opacity', value);
+        });
+        
+        // Reset View
+        $('#reset-view').on('click', function() {
+            if (window.currentMap) {
+                window.currentMap.setView([-1.9297706, 30.1272444], 2);
+            }
+        });
+        
+        // Fit Bounds to All Markers
+        $('#fit-bounds').on('click', function() {
+            if (window.currentMap && window.currentMarkers) {
+                const bounds = window.currentMarkers.getBounds();
+                if (bounds.isValid()) {
+                    window.currentMap.fitBounds(bounds, { padding: [50, 50] });
+                }
+            }
+        });
+        
+
+        function updateUTCDateTime() {
+            const now = new Date();
+            
+            const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(now.getUTCDate()).padStart(2, '0');
+            const year = now.getUTCFullYear();
+            const dateString = month + '/' + day + '/' + year;
+            
+            $('#utc-date').text(dateString);
+        }
+        
+        updateUTCDateTime();
+        setInterval(updateUTCDateTime, 1000);
+        
+        function updateMapScale() {
+            if (window.currentMap) {
+                const zoom = window.currentMap.getZoom();
+                const center = window.currentMap.getCenter();
+                
+                const lat = center.lat.toFixed(4);
+                const lng = center.lng.toFixed(4);
+                
+                $('#current-zoom').text(zoom);
+                $('#current-center').text(lat + '°, ' + lng + '°');
+            }
+        }
+        
+        if (window.currentMap) {
+            window.currentMap.on('moveend', updateMapScale);
+            window.currentMap.on('zoomend', updateMapScale);
+            updateMapScale();
+        } else {
+
+            setTimeout(function() {
+                if (window.currentMap) {
+                    window.currentMap.on('moveend', updateMapScale);
+                    window.currentMap.on('zoomend', updateMapScale);
+                    updateMapScale();
+                }
+            }, 1500);
+        }
     });
 
 </script>

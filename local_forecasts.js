@@ -1,3 +1,4 @@
+
 // LF V1.0
 $(document).ready(function() {
     $('body').on('click', '.nl_wave_routing', function(e) {
@@ -14,6 +15,26 @@ $(document).ready(function() {
             $forecastsContainer.fadeOut(10, function() {
                 $(this).fadeIn(10).addClass("noussair_animations zoom_in");
             });
+            
+            if (page === 'home.html') {
+                $('body, html').css({
+                    'overflow': 'hidden',
+                    'height': '100vh'
+                });
+                
+                setTimeout(() => {
+                    if (window.currentMap) {
+                        // Leaflet's method to resize the map
+                        window.currentMap.invalidateSize();
+                    }
+                }, 100);
+            } else if (page === 'about.html') {
+                $('body, html').css({
+                    'overflow': 'auto',
+                    'height': 'auto'
+                });
+            }
+            
             setTimeout(() => {
                 $loadingDiv.removeClass('show');
                 showToast('Page loaded successfully', 'success');
@@ -39,7 +60,7 @@ function showLoadingToast() {
 }
 
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibGF6cmFrbiIsImEiOiJjanZodzV3OXUwNmEwNDRxdnVsZGhnaml4In0.-ES_Lt127Id6DEf8H9E3rg';
+// Leaflet.js configuration 
 
 var deltaDegrees = 25;
 
@@ -233,55 +254,7 @@ function filter_data_set_by_date(master_data, start, end, enableFilter = false) 
 
 function add_marker(map, lat, long, open_aq_id, param, site) {
 
-    var station_id = document.createAttribute("station_id");
-    var parameter = document.createAttribute("parameter");
-    var location_name = document.createAttribute("location_name");
-    var observation_value = document.createAttribute("observation_value");
-    var current_observation_unit = document.createAttribute("current_observation_unit");
-    var status = document.createAttribute("status");
-    var timezone = document.createAttribute("timezone");
-
-    if(site.site_data.obs_source == 's3'){
-        location_name.value = site.site_data.location.replace(/[_\W]+/g, "-");
-        observation_value.value = 'PND';
-        current_observation_unit.value = site.obs_options.no2.unit;
-    }
-    else{
-        if ($.isArray(site.latest_measurments)){
-            $.each(site.latest_measurments, function(key, value) {
-                if (value.parameter == param) {
-                    location_name.value = site.site_data.location.replace(/[_\W]+/g, "-");
-                    location_name.status = site.site_data.location.status;
-                    observation_value.value = value.value;
-                    current_observation_unit.value = value.unit;
-                    timezone.value = value.timezone;
-                }
-        
-            });
-        }
-    }
-   
-    station_id.value = open_aq_id;
-    parameter.value = param;
-
-
-    var site = [lat, long];
-    var el_open_aq_id = document.createElement('div');
-
-    el_open_aq_id.id = 'marker_' + open_aq_id;
-    el_open_aq_id.className += " btn-floating pulse launch-local-forecasts";
-    el_open_aq_id.setAttributeNode(station_id);
-    el_open_aq_id.setAttributeNode(parameter);
-    el_open_aq_id.setAttributeNode(location_name);
-    el_open_aq_id.setAttributeNode(observation_value);
-    el_open_aq_id.setAttributeNode(current_observation_unit);
-    el_open_aq_id.setAttributeNode(source);
-    el_open_aq_id.setAttributeNode(timezone);
-    new mapboxgl.Marker(el_open_aq_id)
-        .setLngLat(site)
-        .addTo(map);
-
-    
+    console.warn('add_marker is deprecated, use Leaflet GeoJSON layers instead');
 }
 
 
@@ -362,373 +335,110 @@ function create_map(sites, param) {
 
     // Only recreate map on first load, not on every filter change
     let map = window.currentMap;
-    
-    // Check if map container exists in DOM
-    const mapContainer = document.getElementById('map');
-    if (!mapContainer) {
-        console.warn('Map container not found in DOM - page might not be loaded yet');
-        return null;
-    }
-    
-    // Check if we need to recreate the map
-    const needsRecreation = !map || !map.isStyleLoaded() || !map.getContainer() || map.getContainer().parentNode === null;
-    
-    if (needsRecreation) {
+    if (!map) {
         if (window.currentMap && window.currentMap.remove) {
-            try {
-                window.currentMap.remove();
-            } catch(e) {
-                console.warn('Error removing old map:', e);
-            }
+            window.currentMap.remove();
             window.currentMap = null;
         }
         $('#map').html('');
-        var deltaDistance = 100;
-        var center_point = [30.1272444, -1.9297706];
-        map = new mapboxgl.Map({
-            style: 'mapbox://styles/lazrakn/clhoolpb603b701pah3tpcs3a',
+        
+        var center_point = [-1.9297706, 30.1272444]; // [lat, lng] for Leaflet
+        
+        // Create Leaflet map with dark tiles
+        map = L.map('map', {
             center: center_point,
             zoom: 2,
-            pitch: 0,
-            bearing: 0,
-            container: 'map',
             minZoom: 1,
-            maxZoom: 10
+            maxZoom: 10,
+            worldCopyJump: false,
+            maxBounds: [[-85, -180], [85, 180]],
+            maxBoundsViscosity: 1.0
         });
+        
+        // Add CartoDB Voyager tiles as default (free, no API key needed)
+        window.currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20,
+            noWrap: true
+        }).addTo(map);
+        
         // Store reference for future updates
         window.currentMap = map;
+        // Start with a simple layer group (no clustering) - clustering disabled by default
+        window.currentMarkers = L.layerGroup();
+        map.addLayer(window.currentMarkers);
+        
+        // Store hover info div reference
+        window.hoverDiv = document.getElementById('map-hover-info');
     }
-    if (typeof map.setRenderWorldCopies === 'function') {
-        map.setRenderWorldCopies(false);
-    }
-    const bounds = [
-    [-180, -85], 
-    [180, 85]    
-    ];
-
-    map.setMaxBounds(bounds);
-    map.dragRotate.disable();
-    map.touchZoomRotate.disableRotation();
-
-
 
     var mapVisible = true;
 
     $(document).on('click', '#global-view', function() {
-    if (mapVisible) {
-        map.fitBounds([[-180, -90], [180, 90]], {
-            duration: 20, 
-            padding: 0, 
-            margin: 0
-          });
-
-        $('#replay-animation').css({
-            'opacity': 0.7
-          }).fadeIn('fast');
-    } else {
-        
-        $('#replay-animation').fadeOut('fast');
-    }
-    
-    mapVisible = !mapVisible;
-    });
-
-
-    
-    map.on('load', async () => {
-        map.resize(); // 
-        map.addSource('locations_dst', {
-            type: 'geojson',
-            data: sites, 
-            cluster: false,
-            clusterMaxZoom: 2, 
-            clusterRadius: 100 
-        });
-        map.on('click', 'clustered-point', function(e) {
-            var features = map.queryRenderedFeatures(e.point, { layers: ['clustered-point'] });
-
-            var clusterId = features[0].properties.cluster_id;
-        
-            map.getSource('locations_dst').getClusterExpansionZoom(clusterId, function(err, zoom) {
-              if (err) return;
-        
-              map.easeTo({
-                center: features[0].geometry.coordinates,
-                zoom: zoom
-              });
+        if (mapVisible) {
+            map.fitBounds([[-90, -180], [90, 180]], {
+                duration: 0.02,
+                padding: [0, 0]
             });
-          });
 
-        map.addLayer({
-            id: 'unclustered-point',
-            type: 'circle', 
-            source: 'locations_dst',
-            filter: ['!', ['has', 'point_count']],
-            paint: {
-                'circle-color': [
-                    'case',
-                    ['has', 'aqi_color'],
-                    ['get', 'aqi_color'],
-                    '#9e9e9e'
-                ],
-                'circle-radius': 16,
-                'circle-stroke-width': 0,
-                'circle-stroke-color': '#ffffff',
-                'circle-opacity': [
-                    'case',
-                    ['boolean', ['feature-state', 'hover'], false],
-                    1,
-                    0.7
-                ]
-            }
-        });
-        
-        map.addLayer({
-            id: 'pm25-value-label',
-            type: 'symbol',
-            source: 'locations_dst',
-            filter: ['!', ['has', 'point_count']],
-            layout: {
-                'text-field': [
-                    'case',
-                    ['==', ['get', 'aqi_value'], 'N/A'],
-                    '--',
-                    ['to-string', ['get', 'aqi_value']]
-                ],
-                'text-font': ['Open Sans Bold'],
-                'text-size': 11,
-                'text-offset': [0, 0],
-                'text-anchor': 'center'
-            },
-            paint: {
-                'text-color': [
-                    'case',
-                    ['==', ['get', 'aqi_value'], 'N/A'],
-                    '#ffffff',
-                    '#ffffff'
-                ],
-                'text-halo-color': 'rgba(0,0,0,0.3)',
-                'text-halo-width': 0.5,
-                'text-opacity': [
-                    'case',
-                    ['boolean', ['feature-state', 'hover'], false],
-                    1,
-                    0.7
-                ]
-            }
-        });
-
-    
-    map.addLayer({
-            id: 'clustered-point',
-            type: 'circle',
-            source: 'locations_dst',
-            filter: ['has', 'point_count'],
-            paint: {
-              'circle-color': [
-                'case',
-                ['>', ['get', 'point_count'], 10], '#1da1f2',
-                ['>', ['get', 'point_count'], 5], '#1da1f2',
-                '#1da1f2'
-              ],
-              'circle-radius': [
-                'step',
-                ['get', 'point_count'],
-                20, 10,
-                30, 100,
-                40
-              ]
-
-            }
-          });
-        
-          map.addLayer({
-            id: 'cluster-count',
-            type: 'symbol',
-            source: 'locations_dst',
-            filter: ['has', 'point_count'],
-            layout: {
-              'text-field': '{point_count_abbreviated}',
-              'text-font': ['Open Sans Bold'],
-              'text-size': 12
-            },
-            paint: {
-              'text-color': '#ffffff'
-            }
-          });
-    });
-
-
-
-   const hoverDiv = document.getElementById('map-hover-info');
-   let hoveredFeatureId = null;
-
-        map.on('mouseenter', 'unclustered-point', (e) => {
-        map.getCanvas().style.cursor = 'pointer';
-        const feature = e.features[0];
-        const locationName = feature.properties.location_name || "Unknown";
-        const aqiValue = feature.properties.aqi_value || 'N/A';
-        const param = feature.properties.parameter || 'no2';
-    
-        if (hoveredFeatureId !== null) {
-            map.setFeatureState(
-                { source: 'locations_dst', id: hoveredFeatureId },
-                { hover: false }
-            );
+            $('#replay-animation').css({
+                'opacity': 0.7
+            }).fadeIn('fast');
+        } else {
+            $('#replay-animation').fadeOut('fast');
         }
         
-        hoveredFeatureId = feature.id;
-        map.setFeatureState(
-            { source: 'locations_dst', id: hoveredFeatureId },
-            { hover: true }
-        );
-     
-        hoverDiv.innerHTML = `
-            <div style="font-weight:bold; margin-bottom:4px;">${locationName}</div>
-            ${generateSmallAqiBox(aqiValue, param)}
-        `;
-        hoverDiv.style.display = 'block';
-    
-     
-        map.on('mousemove', onMove);
-        function onMove(ev) {
-            hoverDiv.style.left = (ev.point.x + 15) + 'px';
-            hoverDiv.style.top = (ev.point.y + 15) + 'px';
-        }
-  
-        map.once('mouseleave', 'unclustered-point', () => {
-            map.getCanvas().style.cursor = '';
-            hoverDiv.style.display = 'none';
-            map.off('mousemove', onMove);
-            
-            if (hoveredFeatureId !== null) {
-                map.setFeatureState(
-                    { source: 'locations_dst', id: hoveredFeatureId },
-                    { hover: false }
-                );
-                hoveredFeatureId = null;
-            }
-        });
-        
+        mapVisible = !mapVisible;
     });
 
-    
-
-
-
-    var list_in = [];
-    map.on("sourcedata", function(e) {
-        if (map.getSource('locations_dst') && map.isSourceLoaded('locations_dst')) {
-            var features = map.querySourceFeatures('locations_dst');
-              
-            $.each(features, function(index, site) {
-                if(site.properties.location_id){
-                    var l_id =site.properties.location_id;
-                    if (!~$.inArray(l_id,list_in))  {
-                        list_in.push(l_id);
-                       
-                    }
-                }
-               
-            });  
-        }
-    });
-    
-    map.on('click', function(e) {
-        var lngLat = e.lngLat;
-        var longitude = lngLat.lng;
-        var latitude = lngLat.lat;
-    
-        console.log('Longitude: ' + longitude);
-        console.log('Latitude: ' + latitude);
-        
-    
-      });
-
-
-        map.on('click', 'unclustered-point', (e) => {
-        const coordinates = e.features[0].geometry.coordinates.slice();
-        const location_id = e.features[0].properties.location_id;
-        const location_name = e.features[0].properties.location_name.replace(/[^a-z0-9\s]/gi, '_').replace(/[_\s]/g, '_');
-        const observation_source = e.features[0].properties.observation_source;
-        const observation_value = e.features[0].properties.forecasted_value;
-        const precomputed_forecasts = e.features[0].properties.precomputed_forecasts ? $.parseJSON(e.features[0].properties.precomputed_forecasts) : [];
-        const obs_option = e.features[0].properties.obs_options ? $.parseJSON(e.features[0].properties.obs_options) : [];
-        const observation_unit = obs_option?.[0]?.no2?.unit || 'N/A'; 
-        const param = e.features[0].properties.parameter;
-        const timezone = e.features[0].properties.time_zone || "UTC";
-        const current_forecast_timestamp = precomputed_forecasts[0]?.local_time || null;
-    
-        const messages = [
-            "Connecting to OpenAQ", 
-            "Connecting to GMAO", 
-            "Fetching data from OpenAQ", 
-            "Fetching data from GMAO FTP", 
-            "Fetching observations", 
-            "Getting the forecasts", 
-            "Please wait...", 
-            "Connecting..."
-        ];
-    
-        openForecastsWindow({
-            messages: messages,
-            st_id: location_id,
-            param: param || 'no2',
-            location_name,
-            observation_value,
-            current_observation_unit: observation_unit,
-            obs_src: observation_source,
-            precomputed_forecasts,
-            isModal: true,
-            timezone,
-            current_forecast_timestamp
-        });
-    });
-
-    map.on('mouseenter', 'clusters', () => {
-        map.getCanvas().style.cursor = 'pointer';
-    });
-    map.on('mouseleave', 'clusters', () => {
-        map.getCanvas().style.cursor = '';
-    });
-
+    // Add markers from GeoJSON after map is ready
+    if (sites && sites.features && sites.features.length > 0) {
+        updateLeafletMarkers(map, sites);
+    }
 
     return map;
 }
-
 function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
     return {
         type: "FeatureCollection",
         features: sites
             .map((site, index) => {
                 const matchingForecast = site.current_forecast || {};
-
                 const selected = (site.species || "no2").toLowerCase();
                 const isPm25 = selected === "pm25" || selected === "pm2.5";
 
-                let aqi = "N/A";
-                if (selected === "no2") {
-                    aqi = matchingForecast.no2_aqi !== undefined && matchingForecast.no2_aqi !== null
-                        ? matchingForecast.no2_aqi
-                        : "N/A";
-                } else if (isPm25) {
-                    aqi = (matchingForecast.pm25_aqi !== undefined && matchingForecast.pm25_aqi !== null) 
-                        ? matchingForecast.pm25_aqi 
-                        : (calculateAqiForPm25(matchingForecast.pm25) ?? "N/A");
-                } else if (selected === "o3") {
-                    aqi = (matchingForecast.o3_aqi !== undefined && matchingForecast.o3_aqi !== null) 
-                        ? matchingForecast.o3_aqi 
-                        : "N/A";
+
+                let isCurrent = false;
+                if (matchingForecast && matchingForecast.forecast_datetime) {
+                    const now = new Date();
+                    const forecastDate = new Date(matchingForecast.forecast_datetime);
+                    isCurrent = (
+                        now.getUTCFullYear() === forecastDate.getUTCFullYear() &&
+                        now.getUTCMonth() === forecastDate.getUTCMonth() &&
+                        now.getUTCDate() === forecastDate.getUTCDate() &&
+                        now.getUTCHours() === forecastDate.getUTCHours()
+                    );
+                }
+               
+                let aqi = "--";
+                if (isCurrent && matchingForecast && typeof matchingForecast === "object") {
+                    if (selected === "no2") {
+                        aqi = matchingForecast.no2_aqi !== undefined && matchingForecast.no2_aqi !== null
+                            ? matchingForecast.no2_aqi
+                            : "--";
+                    } else if (isPm25) {
+                        aqi = (matchingForecast.pm25_aqi !== undefined && matchingForecast.pm25_aqi !== null) 
+                            ? matchingForecast.pm25_aqi 
+                            : (calculateAqiForPm25(matchingForecast.pm25) ?? "--");
+                    } else if (selected === "o3") {
+                        aqi = (matchingForecast.o3_aqi !== undefined && matchingForecast.o3_aqi !== null) 
+                            ? matchingForecast.o3_aqi 
+                            : "--";
+                    }
                 }
 
-                const isCurrentHour = (site.timezone && matchingForecast && matchingForecast.local_time)
-                    ? isForecastForCurrentHour(matchingForecast, site.timezone)
-                    : false;
-                if (!isCurrentHour) {
-                    aqi = "N/A";
-                }
-                
-                const aqiLevel = aqi === "N/A" 
+                const aqiLevel = aqi === "--" || aqi === "N/A"
                     ? { color: '#000000', level: 'No Data' }
                     : getAqiLevel(aqi, selected);
 
@@ -741,8 +451,8 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
                         location_id: site.location_id || "unknown_id",
                         location_name: site.location_name || "Unknown Location",
                         time_zone: site.timezone,
-                        forecasted_value: isCurrentHour ? aqi : '--',
-                        aqi_value: aqi === "N/A" ? "N/A" : parseInt(aqi),
+                        forecasted_value: aqi,
+                        aqi_value: (aqi === "--" || aqi === "N/A" || aqi === null || isNaN(aqi)) ? "--" : parseInt(aqi),
                         aqi_color: aqiLevel.color,
                         status: "active",
                         observation_source: site.observation_source || "NASA",
@@ -758,10 +468,9 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
             })
     };
 }
-
    
 function generateSmallAqiBox(aqiValue, pollutant) {
-    if (aqiValue === 'N/A' || aqiValue === undefined || aqiValue === null || isNaN(aqiValue)) return '';
+    if (aqiValue === 'N/A' || aqiValue === undefined || aqiValue === null || isNaN(aqiValue) || aqiValue === '--') return '';
 
     let aqi = 'N/A';
     if (pollutant === 'no2') {
@@ -832,30 +541,6 @@ async function loadSiteForecasts(locationName, filename) {
         console.error(`Error loading ${filename}:`, error);
         return null;
     }
-}
-
-function isForecastForCurrentHour(forecast, timezone) {
-    if (!forecast || !forecast.local_time) return false;
-    const now = new Date();
-    const formatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: timezone,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        hour12: false
-    });
-    const parts = formatter.formatToParts(now);
-    const partMap = {};
-    parts.forEach(p => {
-        partMap[p.type] = p.value;
-    });
-
-    const currentLocalHourStr = `${partMap.year}-${partMap.month}-${partMap.day} ${String(partMap.hour).padStart(2, '0')}:00:00`;
-    const forecastHourStr = forecast.local_time.length >= 13
-        ? forecast.local_time.substring(0, 13) + ':00:00'
-        : forecast.local_time;
-    return forecastHourStr === currentLocalHourStr;
 }
 
 /**
@@ -1301,23 +986,22 @@ function processHourlySnapshot(hourlySnapshot, filteredIndices) {
             }
             
             if (forecasted_value !== "N/A") {
-                const obsOptions = {};
-                Object.keys(snapshotData).forEach(key => {
-                    if (key !== "time") {
-                        obsOptions[key] = {
-                            unit: getUnitForParameter(key),
-                            value: snapshotData[key] || "N/A"
-                        };
-                    }
-                });
+                const obsOptions = {
+                    no2: { unit: "μg/m³", value: snapshotData.no2 || "N/A" },
+                    no2_aqi: { unit: "AQI", value: snapshotData.no2_aqi || "N/A" },
+                    o3: { unit: "μg/m³", value: snapshotData.o3 || "N/A" },
+                    o3_aqi: { unit: "AQI", value: snapshotData.o3_aqi || "N/A" },
+                    pm25: { unit: "μg/m³", value: snapshotData.pm25 || "N/A" },
+                    pm25_aqi: { unit: "AQI", value: snapshotData.pm25_aqi || "N/A" },
+                    t10m: { unit: "K", value: snapshotData.t10m || "N/A" },
+                    rh: { unit: "%", value: snapshotData.rh || "N/A" },
+                    wind_speed: { unit: "m/s", value: snapshotData.wind_speed || "N/A" }
+                };
 
-                const isCurrentHour = isForecastForCurrentHour(snapshotData, snapshotData.timezone);
-                const displayValue = isCurrentHour ? parseInt(forecasted_value) : '--';
-                
                 const siteDisplayData = {
                     location_name: indexEntry.location_name,
                     observation_source: snapshotData.observation_source || "NASA",
-                    forecasted_value: displayValue,
+                    forecasted_value: parseInt(forecasted_value),
                     status: "active",
                     latitude: indexEntry.lat,
                     longitude: indexEntry.lon,
@@ -1396,13 +1080,10 @@ function loadIndividualSites(filteredIndices) {
                                 }
                             });
 
-                            const isCurrentHour = isForecastForCurrentHour(matchingForecast, fileTimezone);
-                            const displayValue = isCurrentHour ? parseInt(forecasted_value) : '--';
-                            
                             const siteDisplayData = {
                                 location_name: indexEntry.location_name,
                                 observation_source: indexEntry.observation_source || "NASA",
-                                forecasted_value: displayValue,
+                                forecasted_value: parseInt(forecasted_value),
                                 status: "active",
                                 latitude: indexEntry.lat,
                                 longitude: indexEntry.lon,
@@ -1463,31 +1144,175 @@ function finalizeSitesLoading(filteredSites) {
 }
 
 
-function updateMapMarkers(geojson) {
-    const map = window.currentMap;
+function updateLeafletMarkers(map, geojson) {
+    const markerCluster = window.currentMarkers;
+    if (!markerCluster) {
+        console.error('Marker cluster not initialized');
+        return;
+    }
     
-    // loading effect to map
+    // Show loading effect
     if (map && map.getContainer()) {
         const container = map.getContainer();
         container.style.opacity = '0.6';
         container.style.pointerEvents = 'none';
     }
     
-    // Update the data source
-    const source = map.getSource('locations_dst');
-    if (source && typeof source.setData === 'function') {
-        source.setData(geojson);
-        console.log(`Updated ${geojson.features.length} map markers`);
+    // Clear existing markers
+    markerCluster.clearLayers();
+    
+    const hoverDiv = window.hoverDiv;
+    
+    // Add new markers from GeoJSON
+    geojson.features.forEach((feature, index) => {
+        const coords = feature.geometry.coordinates;
+        const props = feature.properties;
+        const latlng = [coords[1], coords[0]]; // Leaflet uses [lat, lng]
         
-        // Remove loading effect after a short delay
-        setTimeout(() => {
-            if (map && map.getContainer()) {
-                const container = map.getContainer();
-                container.style.opacity = '1';
-                container.style.pointerEvents = 'auto';
+        const aqiValue = props.aqi_value === 'N/A' || props.aqi_value === '--' ? '--' : props.aqi_value;
+
+        const aqiColor = props.aqi_color || '#9e9e9e';
+        
+        // Create custom div icon with AQI value
+        const icon = L.divIcon({
+            className: 'custom-marker-icon',
+            html: `
+                <div class="marker-container" data-marker-id="${index}" style="opacity:0.7;">
+                    <div style="
+                        width:32px;
+                        height:32px;
+                        border-radius:50%;
+                        background:${aqiColor};
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        color:#fff;
+                        font-weight:bold;
+                        font-size:11px;
+                        box-shadow:0 2px 8px rgba(0,0,0,0.3);
+                        transition:all 0.2s ease;
+                    ">${aqiValue}</div>
+                </div>
+            `,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+        });
+        
+        const marker = L.marker(latlng, { icon: icon });
+        
+        // Store properties on the marker for click handling
+        marker.featureProperties = props;
+        
+        // Add hover effects
+        marker.on('mouseover', function(e) {
+            const markerEl = e.target.getElement();
+            if (markerEl) {
+                const container = markerEl.querySelector('.marker-container');
+                if (container) container.style.opacity = '1';
             }
-        }, 300);
+            
+            const locationName = props.location_name || "Unknown";
+            const param = props.parameter || 'no2';
+            
+            if (hoverDiv) {
+                hoverDiv.innerHTML = `
+                    <div style="font-weight:bold; margin-bottom:4px;">${locationName}</div>
+                    ${generateSmallAqiBox(aqiValue, param)}
+                `;
+                hoverDiv.style.display = 'block';
+            }
+            
+            map.on('mousemove', onMove);
+            function onMove(ev) {
+                if (hoverDiv) {
+                    hoverDiv.style.left = (ev.containerPoint.x + 15) + 'px';
+                    hoverDiv.style.top = (ev.containerPoint.y + 15) + 'px';
+                }
+            }
+            marker._onMove = onMove;
+        });
+        
+        marker.on('mouseout', function(e) {
+            const markerEl = e.target.getElement();
+            if (markerEl) {
+                const container = markerEl.querySelector('.marker-container');
+                if (container) container.style.opacity = '0.7';
+            }
+            
+            if (hoverDiv) {
+                hoverDiv.style.display = 'none';
+            }
+            
+            if (marker._onMove) {
+                map.off('mousemove', marker._onMove);
+                marker._onMove = null;
+            }
+        });
+        
+        // Add click event
+        marker.on('click', function(e) {
+            const props = e.target.featureProperties;
+            const location_id = props.location_id;
+            const location_name = props.location_name.replace(/[^a-z0-9\s]/gi, '_').replace(/[_\s]/g, '_');
+            const observation_source = props.observation_source;
+            const observation_value = props.forecasted_value;
+            const precomputed_forecasts = props.precomputed_forecasts ? JSON.parse(props.precomputed_forecasts) : [];
+            const obs_option = props.obs_options ? JSON.parse(props.obs_options) : [];
+            const observation_unit = obs_option?.[0]?.no2?.unit || 'N/A';
+            const param = props.parameter;
+            const timezone = props.time_zone || "UTC";
+            const current_forecast_timestamp = precomputed_forecasts[0]?.local_time || null;
+            
+            const messages = [
+                "Connecting to OpenAQ", 
+                "Connecting to GMAO", 
+                "Fetching data from OpenAQ", 
+                "Fetching data from GMAO FTP", 
+                "Fetching observations", 
+                "Getting the forecasts", 
+                "Please wait...", 
+                "Connecting..."
+            ];
+            
+            openForecastsWindow({
+                messages: messages,
+                st_id: location_id,
+                param: param || 'no2',
+                location_name,
+                observation_value,
+                current_observation_unit: observation_unit,
+                obs_src: observation_source,
+                precomputed_forecasts,
+                isModal: true,
+                timezone,
+                current_forecast_timestamp
+            });
+        });
+        
+        markerCluster.addLayer(marker);
+    });
+    
+    console.log(`Updated ${geojson.features.length} Leaflet markers`);
+    
+    // Remove loading effect after a short delay
+    setTimeout(() => {
+        if (map && map.getContainer()) {
+            const container = map.getContainer();
+            container.style.opacity = '1';
+            container.style.pointerEvents = 'auto';
+        }
+    }, 300);
+}
+
+function updateMapMarkers(geojson) {
+    const map = window.currentMap;
+    
+    if (!map) {
+        console.error('Map not initialized');
+        return;
     }
+    
+    updateLeafletMarkers(map, geojson);
 }
 
 function showLoadingDiv() {
@@ -1538,8 +1363,8 @@ function add_the_banner(site, param) {
     const obs_options = $.parseJSON(site.obs_options);
 
     if (site.observation_source) {
-        const temperature = precomputed_forecasts?.[0]?.t10m ? (precomputed_forecasts[0].t10m - 273.15).toFixed(1) : "--";
-        const humidity = precomputed_forecasts?.[0]?.rh ? (precomputed_forecasts[0].rh * 100).toFixed(0) : "--";
+        const t10m = precomputed_forecasts?.[0]?.t10m;
+        const rh = precomputed_forecasts?.[0]?.rh;
         const windSpeed = precomputed_forecasts?.[0]?.wind_speed || "--";
         const local_time = precomputed_forecasts?.[0]?.local_time || "--";
         const no2 = precomputed_forecasts?.[0]?.no2 || "--";
@@ -1549,50 +1374,46 @@ function add_the_banner(site, param) {
         const pm25 = precomputed_forecasts?.[0]?.pm25 || "--";
         const pm25_aqi = precomputed_forecasts?.[0]?.pm25_aqi || calculateAqiForPm25(pm25) || "--";
 
-        let isCurrentHour = false;
-        if (precomputed_forecasts?.[0]?.local_time && site.timezone) {
-            isCurrentHour = isForecastForCurrentHour(precomputed_forecasts[0], site.timezone);
+        // Strict current hour check in site's local time
+        let isCurrent = false;
+        if (local_time && local_time.length >= 13) {
+            const now = new Date();
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: site.timezone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                hour12: false
+            });
+            const parts = formatter.formatToParts(now);
+            const partMap = {};
+            parts.forEach(p => { partMap[p.type] = p.value; });
+            const currentLocalHour = `${partMap.year}-${partMap.month}-${partMap.day} ${String(partMap.hour).padStart(2, '0')}:00:00`;
+            isCurrent = (local_time.substring(0, 13) + ':00:00' === currentLocalHour);
         }
 
         let aqiValue = '--';
-        if (isCurrentHour) {
+        let temperature = "--";
+        let humidity = "--";
+        let source = '';
+        if (isCurrent) {
+            temperature = (typeof t10m === "number" && !isNaN(t10m)) ? (t10m - 273.15).toFixed(1) : "--";
+            humidity = (typeof rh === "number" && !isNaN(rh)) ? (rh * 100).toFixed(0) : "--";
             if (param === "no2") {
-                aqiValue = parseInt(no2_aqi);
+                aqiValue = (no2_aqi === undefined || no2_aqi === null || no2_aqi === "N/A" || isNaN(no2_aqi)) ? '--' : parseInt(no2_aqi);
                 source = "NASA GEOS CF, NASA Pandora";
             } else if (param === "pm25" || param === "pm2.5") {
-                aqiValue = parseInt(pm25_aqi);
-                source = precomputed_forecasts?.[0]?.pm25_aqi 
-                    ? "NASA GEOS-FP, AirNow"
-                    : "NASA GEOS-FP, AirNow";
+                aqiValue = (pm25_aqi === undefined || pm25_aqi === null || pm25_aqi === "N/A" || isNaN(pm25_aqi)) ? '--' : parseInt(pm25_aqi);
+                source = "NASA GEOS-FP, AirNow";
             } else if (param === "o3") {
-                aqiValue = parseInt(o3_aqi)
+                aqiValue = (o3_aqi === undefined || o3_aqi === null || o3_aqi === "N/A" || isNaN(o3_aqi)) ? '--' : parseInt(o3_aqi);
                 source = "NASA GEOS CF, NASA Pandora";
             }
-        } else {
-            aqiValue = '--';
-            if (param === "no2") source = "NASA GEOS CF, NASA Pandora";
-            else if (param === "pm25" || param === "pm2.5") source = "NASA GEOS-FP, AirNow";
-            else if (param === "o3") source = "NASA GEOS CF, NASA Pandora";
         }
 
-        const aqiLevel = getAqiLevel(aqiValue, param);
         
-        const now = new Date();
-        const formatter = new Intl.DateTimeFormat('en-US', {
-            timeZone: site.timezone,
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        });
-        const parts = formatter.formatToParts(now);
-        const partMap = {};
-        parts.forEach(p => {
-            partMap[p.type] = p.value;
-        });
-        const localDateTimeStr = `${partMap.month}/${partMap.day} ${partMap.hour}:${partMap.minute}`;
+        const aqiLevel = getAqiLevel(aqiValue, param);
 
         const html = `
             <div class="col-3 single-pollutant-card">
@@ -1621,7 +1442,7 @@ function add_the_banner(site, param) {
                                 : site.location_name.replace(/_/g, ' ').replace(/\./g, ' ')
                             }</h5>
                             <p class="source">Sources: ${source}</p>
-                            <p class="source">${localDateTimeStr}</p>
+                            <p class="source"></p>
                             <p class="timezone_text">${local_time ? local_time.slice(11, 16) : "--"}  (${site.timezone})</p>
                         </div>
                         <div class="aqi-info">
@@ -1758,7 +1579,7 @@ function readApiBaker(options = {}) {
         current_forecast_timestamp = null
     } = options;
 
-    // Store the current forecast timestamp for scrolling/highlighting
+    // Store the current forecast timestamp 
     window.currentForecastTimestamp = current_forecast_timestamp;
     window.hasCustomTimestamp = !!current_forecast_timestamp;
 
@@ -2045,8 +1866,8 @@ function readApiBaker(options = {}) {
                 const localDate = pad(siteLocalNow.getDate());
                 const currentHour = siteLocalNow.getHours();
                 const nextHour = (currentHour + 1) % 24;
-                const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(currentHour)}:00:00`;
-                const nextLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(nextHour)}:00:00`;
+                const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(currentHour)}`;
+                const nextLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(nextHour)}`;
                 
 
                 let currentValue = 'N/A';
@@ -2178,50 +1999,88 @@ function readApiBaker(options = {}) {
                         $plotContainer.before(aqiHtml);
                     }
                 }
+            if (plot.displayMetrics) {
+            const columnKey = plot.columns[0].column;
+            const values = masterData[columnKey] || [];
+            const datetimes = masterData.master_datetime || [];
+            const siteTimeZone = timezone || "UTC";
+            const now = new Date();
+            const pad = n => n.toString().padStart(2, '0');
+            const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
+
+            const todayStr = siteLocalNow.toISOString().slice(0, 10);
+            const tomorrowDate = new Date(siteLocalNow.getTime() + 24 * 60 * 60 * 1000);
+            const tomorrowStr = tomorrowDate.toISOString().slice(0, 10);
+            const prevDate = new Date(siteLocalNow.getTime() - 24 * 60 * 60 * 1000);
+            const prevStr = prevDate.toISOString().slice(0, 10);
+
+            const prevVals = datetimes
+            .map((dt, i) => ({ dt, val: values[i] }))
+            .filter(({ dt }) => dt && dt.startsWith(prevStr))
+            .map(({ val }) => typeof val === "number" ? val : parseFloat(val))
+            .filter(val => !isNaN(val));
+            const todayVals = datetimes
+            .map((dt, i) => ({ dt, val: values[i] }))
+            .filter(({ dt }) => dt && dt.startsWith(todayStr))
+            .map(({ val }) => typeof val === "number" ? val : parseFloat(val))
+            .filter(val => !isNaN(val));
+            const tomorrowVals = datetimes
+            .map((dt, i) => ({ dt, val: values[i] }))
+            .filter(({ dt }) => dt && dt.startsWith(tomorrowStr))
+            .map(({ val }) => typeof val === "number" ? val : parseFloat(val))
+            .filter(val => !isNaN(val));
+
+            const prevAvg = prevVals.length ? prevVals.reduce((a, b) => a + b, 0) / prevVals.length : 'N/A';
+            const todayAvg = todayVals.length ? todayVals.reduce((a, b) => a + b, 0) / todayVals.length : 'N/A';
+            const tomorrowAvg = tomorrowVals.length ? tomorrowVals.reduce((a, b) => a + b, 0) / tomorrowVals.length : 'N/A';
+
+            // Calculate change rates
+            function getChangeRate(newVal, oldVal) {
+            if (typeof newVal === "number" && typeof oldVal === "number" && oldVal !== 0) {
+            const diff = newVal - oldVal;
+            const pct = ((newVal - oldVal) / oldVal) * 100;
+            return {
+            diff: diff.toFixed(2),
+            pct: pct.toFixed(2),
+            sign: pct > 0 ? "+" : "",
+            class: pct > 0 ? "red" : pct < 0 ? "green" : "",
+            arrow: pct > 0 ? "▲" : pct < 0 ? "▼" : ""
+            };
+            }
+            return { diff: "N/A", pct: "N/A", sign: "", class: "", arrow: "" };
+            }
+
+            const changeTodayVsPrev = getChangeRate(todayAvg, prevAvg);
+            const changeTomorrowVsToday = getChangeRate(tomorrowAvg, todayAvg);
+
+            // Generate metrics HTML: 2 boxes, each with average and change rate below
+            const metricsHtml = `
+            <div class="xvg_aqi-container">
+            <div class="d-xvg" style="flex:1;">
+            <div class="xvg_aqi me-3" style="font-size:2em;">${todayAvg !== 'N/A' ? todayAvg.toFixed(2) : '--'}</div>
+            <div class="xvg_aqi-change">Today Avg</div>
+            <div class="xvg_aqi-change ${changeTodayVsPrev.class}" style="margin-top:8px;">
+            ${changeTodayVsPrev.arrow} ${changeTodayVsPrev.sign}${changeTodayVsPrev.diff} (${changeTodayVsPrev.sign}${changeTodayVsPrev.pct !== "N/A" ? changeTodayVsPrev.pct + "%" : "--"})
+            </div>
+            <div class="xvg_timestamp" style="font-size:12px;">vs Previous Day</div>
+            </div>
+            <div class="d-xvg" style="flex:1;">
+            <div class="xvg_aqi me-3" style="font-size:2em;">${tomorrowAvg !== 'N/A' ? tomorrowAvg.toFixed(2) : '--'}</div>
+            <div class="xvg_aqi-change">Tomorrow Avg</div>
+            <div class="xvg_aqi-change ${changeTomorrowVsToday.class}" style="margin-top:8px;">
+            ${changeTomorrowVsToday.arrow} ${changeTomorrowVsToday.sign}${changeTomorrowVsToday.diff} (${changeTomorrowVsToday.sign}${changeTomorrowVsToday.pct !== "N/A" ? changeTomorrowVsToday.pct + "%" : "--"})
+            </div>
+            <div class="xvg_timestamp" style="font-size:12px;">vs Today</div>
+            </div>
+            </div>
+            `;
+
+            const $plotContainer = $(`#${plot.id}`);
+            if ($plotContainer.length > 0) {
+            $plotContainer.before(metricsHtml);
+            }
+            }
             });
-
-            tabsList.append(`
-    <li class="nav-item model_infos" role="presentation">
-        <a class="nav-link" id="tab-info" data-bs-toggle="pill" href="#info_tab" role="tab" aria-controls="info_tab" aria-selected="false">
-            Air Quality Information
-        </a>
-    </li>
-`);
-tabsContainer.append(`
-    <div class="tab-pane fade" id="info_tab" role="tabpanel" aria-labelledby="tab-info">
-        <div class="info-tab-content" style="padding: 1.5em;">
-            <h4>Model Sources</h4>
-            <ul>
-                <li><b>NO<sub>2</sub>:</b> NASA GEOS-CF bias corrected using NASA Pandora and machine learning models</li>
-                <li><b>PM<sub>2.5</sub>:</b> NASA GEOS-FP bias corrected using AirNow observations and machine learning</li>
-                <li><b>O<sub>3</sub>:</b> NASA GEOS-CF</li>
-            </ul>
-            <h4 style="margin-top:1em;">AQI Scale (US EPA)</h4>
-            <table class="table table-sm table-bordered">
-                <thead>
-                    <tr>
-                        <th>AQI</th>
-                        <th>Level</th>
-                        <th>Color</th>
-                        <th>Health Message</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>0-50</td><td>Good</td><td style="background:#4CAF50;"></td><td>Air quality is satisfactory.</td></tr>
-                    <tr><td>51-100</td><td>Moderate</td><td style="background:#FFEB3B;"></td><td>Acceptable; some pollutants may be a concern for a small number of sensitive people.</td></tr>
-                    <tr><td>101-150</td><td>Unhealthy for Sensitive Groups</td><td style="background:#FF9800;"></td><td>Sensitive groups may experience health effects.</td></tr>
-                    <tr><td>151-200</td><td>Unhealthy</td><td style="background:#F44336;"></td><td>Everyone may begin to experience health effects.</td></tr>
-                    <tr><td>201-300</td><td>Very Unhealthy</td><td style="background:#9C27B0;"></td><td>Health alert: everyone may experience more serious health effects.</td></tr>
-                    <tr><td>301-500</td><td>Hazardous</td><td style="background:#7E0023;"></td><td>Health warnings of emergency conditions.</td></tr>
-                </tbody>
-            </table>
-            <p style="font-size:13px;margin-top:1em;">
-                <b>Note:</b> AQI is calculated per US EPA standards. For more details, see <a href="https://www.airnow.gov/aqi/aqi-basics/" target="_blank">AirNow AQI Basics</a>.
-            </p>
-        </div>
-    </div>
-`);
-
 
             $(".nav-link").on("click", function () {
                 const targetTabId = $(this).attr("href").replace("#", "");
@@ -2507,8 +2366,8 @@ function generateAverageChangeElement(dataset, pollutant, userTimeZone, currentH
 
     const trendClass = isAboveAverage ? 'negative' : 'positive'; 
     const trendIcon = isAboveAverage
-        ? '<svg style="color: rgb(237, 13, 13);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0zM8.5 4.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V4.5z" fill="#d60b15"></path> </svg>'
-        : '<svg style="color: rgb(48, 169, 4);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 7.854a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z" fill="#30a904"></path> </svg>';
+        ? '<svg style="color: rgb(237, 13, 13);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 1 1 0v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 .708-.708L8.5 10.293V4.5z"/> </svg>'
+        : '<svg style="color: rgb(48, 169, 4);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 7.854a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z"/> </svg>';
 
  
     return `
@@ -2792,14 +2651,20 @@ function readAirNow(options = {}) {
                 const datetime = new Date(masterData.master_datetime[i]);
                 const dateString = datetime.toISOString().split('T')[0];
                 const hour = datetime.getHours();
+            
 
-                if (dateString === currentDateString && hour === currentHour) {
+                if (dateString === currentDateString && hour <= currentHour && currentHour < hour + 3) {
                     currentValue = masterData.master_observation[i];
-                    break;
+                }
+            
+
+                if (dateString === currentDateString && hour <= currentHour + 3 && currentHour + 3 < hour + 3) {
+                    nextValue = masterData.master_observation[i];
                 }
             }
 
             const currentAqi = param === "no2" ? calculateAqiForNo2(currentValue) : calculateAqiForPm25(currentValue);
+            const nextAqi = param === "no2" ? calculateAqiForNo2(nextValue) : calculateAqiForPm25(nextValue);
 
             let aqiElement = `<div class="prediction-container">`;
             
@@ -2807,6 +2672,9 @@ function readAirNow(options = {}) {
                 aqiElement += generateAqiElement(currentAqi, param, userTimeZone, currentHour);
             }
             
+            if (nextAqi !== 'N/A') {
+                aqiElement += generateAqiElement(nextAqi, param, userTimeZone, nexttHour);
+            }
             aqiElement += `</div>`;
 
             const averageDailyChangeElement = generateAverageChangeElement(masterData.master_observation, param, userTimeZone, currentHour, "daily");
@@ -2874,8 +2742,8 @@ function updateUIWithDifferences(differenceLastYear, lastYearForecast, label) {
     if (rewrite_number(lastYearForecast) !== 'N/A') {
         const trendClass = differenceLastYear[0] > 0 ? 'trend-up' : 'trend-down';
         const trendIcon = differenceLastYear[0] > 0 
-            ? '<svg style="color: rgb(246, 70, 93);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0zM8.5 4.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V4.5z" fill="#d60b15"></path> </svg>'
-            : '<svg style="color: rgb(48, 169, 4);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 7.854a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z" fill="#30a904"></path> </svg>';
+            ? '<svg style="color: rgb(246, 70, 93);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z" fill="#d60b15"></path> </svg>'
+            : '<svg style="color: rgb(48, 169, 4);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 a=0-1-1v5.793L5.3546a=.5=.5=1-1-.708-.708l3-3a=.5=.5=0l3-3a=.5=.5=1-.708-.708L8.5=10.293V4.5z" fill="#30a904"></path> </svg>';
 
         $('.local_forecats_window').prepend(`
             <div class="col-md-4">
@@ -3648,7 +3516,7 @@ function get_plot(location_name, param, unit, forecasts_div, forecasts_resample_
                         }],
                         legend: {
                             orientation: 'h',
-                            y:  1.2
+                            y: 1.2
                         }
                     };
 
@@ -3708,7 +3576,7 @@ function get_plot(location_name, param, unit, forecasts_div, forecasts_resample_
                     });
                     $('.resample').text(resample_window+"H Rolling Averages");
                     
-                    $('.modebar').prepend('<div class="modebar-group"><a rel="tooltip" class="modebar-btn change_plot" data-title="'+historical+ ' '+resample_window+'H Rolling Average" change_to ="main_plot_'+historical+'"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16"> <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0zM8.5 4.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V4.5z" fill="#d60b15"></path> </svg></div>');
+                    $('.modebar').prepend('<div class="modebar-group"><a rel="tooltip" class="modebar-btn change_plot" data-title="'+historical+ ' '+resample_window+'H Rolling Average" change_to ="main_plot_'+historical+'"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16"> <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17l-1 .025zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155l-.964-.267c.046-.165.086-.332.12-.501zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038l-.845-.535zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432l-.707-.707z"/> <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/> <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/> </svg></div>');
 
                     if(historical){
                         var label_text = "historical simulation";
