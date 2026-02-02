@@ -16,6 +16,15 @@ $(document).ready(function() {
                 $('.main_wave_js').load(pageToLoad, function() {
                     $('.main_wave_js').fadeIn(200);
                     $(window).scrollTop(0);
+                    
+                    // Set body class based on loaded page for scroll control
+                    if (pageToLoad.includes('home.html')) {
+                        $('body').removeClass('about-page').addClass('home-page');
+                        $('body, html').css({ 'overflow': 'hidden', 'height': '100vh' });
+                    } else {
+                        $('body').removeClass('home-page').addClass('about-page');
+                        $('body, html').css({ 'overflow': 'auto', 'height': 'auto' });
+                    }
                 });
             });
         }
@@ -88,6 +97,15 @@ function loadHashContent() {
                 if (hasParams) {
                     var cleanUrl = window.location.origin + window.location.pathname + (window.location.hash || "");
                     window.history.replaceState({}, document.title, cleanUrl);
+                }
+                
+                // Set body class based on loaded page for scroll control
+                if (pageToLoad.includes('home.html')) {
+                    $('body').removeClass('about-page').addClass('home-page');
+                    $('body, html').css({ 'overflow': 'hidden', 'height': '100vh' });
+                } else {
+                    $('body').removeClass('home-page').addClass('about-page');
+                    $('body, html').css({ 'overflow': 'auto', 'height': 'auto' });
                 }
             });
         });

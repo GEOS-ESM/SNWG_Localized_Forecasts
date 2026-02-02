@@ -70,47 +70,51 @@
         defaultResolution: 256,
         
         // Color scales for different pollutants
-        // Using standard AQI color scales
+        // Values are in ppbv (or ppm for CO, μg/m³ for PM2.5)
         colorScales: {
             no2: [
-                { value: 0, color: [0, 228, 0, 180] },      // Good - Green
-                { value: 50, color: [255, 255, 0, 180] },   // Moderate - Yellow
-                { value: 100, color: [255, 126, 0, 180] },  // Unhealthy Sensitive - Orange
-                { value: 150, color: [255, 0, 0, 180] },    // Unhealthy - Red
-                { value: 200, color: [143, 63, 151, 180] }, // Very Unhealthy - Purple
-                { value: 300, color: [126, 0, 35, 180] }    // Hazardous - Maroon
+                // Viridis colormap - purple (low) to green/yellow (high)
+                { value: 0, color: [68, 1, 84, 180] },      // 0 ppbv - Dark purple
+                { value: 50, color: [59, 82, 139, 180] },   // 50 ppbv - Blue-purple
+                { value: 100, color: [33, 145, 140, 180] }, // 100 ppbv - Teal
+                { value: 150, color: [94, 201, 98, 180] },  // 150 ppbv - Green
+                { value: 200, color: [253, 231, 37, 180] }, // 200 ppbv - Yellow
+                { value: 300, color: [253, 231, 37, 180] }  // 300 ppbv - Yellow (max)
             ],
             pm25: [
-                { value: 0, color: [0, 228, 0, 180] },
-                { value: 12, color: [255, 255, 0, 180] },
-                { value: 35.4, color: [255, 126, 0, 180] },
-                { value: 55.4, color: [255, 0, 0, 180] },
-                { value: 150.4, color: [143, 63, 151, 180] },
-                { value: 250.4, color: [126, 0, 35, 180] }
+                { value: 0, color: [0, 228, 0, 180] },      // 0 μg/m³
+                { value: 12, color: [255, 255, 0, 180] },   // 12 μg/m³
+                { value: 35.4, color: [255, 126, 0, 180] }, // 35.4 μg/m³
+                { value: 55.4, color: [255, 0, 0, 180] },   // 55.4 μg/m³
+                { value: 150.4, color: [143, 63, 151, 180] }, // 150.4 μg/m³
+                { value: 250.4, color: [126, 0, 35, 180] }  // 250.4 μg/m³
             ],
             o3: [
-                { value: 0, color: [0, 228, 0, 180] },
-                { value: 54, color: [255, 255, 0, 180] },
-                { value: 70, color: [255, 126, 0, 180] },
-                { value: 85, color: [255, 0, 0, 180] },
-                { value: 105, color: [143, 63, 151, 180] },
-                { value: 200, color: [126, 0, 35, 180] }
+                // Viridis colormap for O3 as well
+                { value: 0, color: [68, 1, 84, 180] },      // 0 ppbv - Dark purple
+                { value: 40, color: [59, 82, 139, 180] },   // 40 ppbv - Blue-purple
+                { value: 70, color: [33, 145, 140, 180] },  // 70 ppbv - Teal
+                { value: 100, color: [94, 201, 98, 180] },  // 100 ppbv - Green
+                { value: 150, color: [253, 231, 37, 180] }, // 150 ppbv - Yellow
+                { value: 200, color: [253, 231, 37, 180] }  // 200 ppbv - Yellow (max)
             ],
             co: [
-                { value: 0, color: [0, 228, 0, 180] },
-                { value: 2, color: [255, 255, 0, 180] },
-                { value: 4, color: [255, 126, 0, 180] },
-                { value: 6, color: [255, 0, 0, 180] },
-                { value: 10, color: [143, 63, 151, 180] },
-                { value: 30, color: [126, 0, 35, 180] }
+                // Viridis colormap for CO
+                { value: 0, color: [68, 1, 84, 180] },      // 0 ppm - Dark purple
+                { value: 2, color: [59, 82, 139, 180] },    // 2 ppm - Blue-purple
+                { value: 4, color: [33, 145, 140, 180] },   // 4 ppm - Teal
+                { value: 6, color: [94, 201, 98, 180] },    // 6 ppm - Green
+                { value: 10, color: [253, 231, 37, 180] },  // 10 ppm - Yellow
+                { value: 30, color: [253, 231, 37, 180] }   // 30 ppm - Yellow (max)
             ],
             so2: [
-                { value: 0, color: [0, 228, 0, 180] },
-                { value: 40, color: [255, 255, 0, 180] },
-                { value: 100, color: [255, 126, 0, 180] },
-                { value: 350, color: [255, 0, 0, 180] },
-                { value: 500, color: [143, 63, 151, 180] },
-                { value: 1000, color: [126, 0, 35, 180] }
+                // Viridis colormap for SO2
+                { value: 0, color: [68, 1, 84, 180] },      // 0 ppbv - Dark purple
+                { value: 40, color: [59, 82, 139, 180] },   // 40 ppbv - Blue-purple
+                { value: 100, color: [33, 145, 140, 180] }, // 100 ppbv - Teal
+                { value: 350, color: [94, 201, 98, 180] },  // 350 ppbv - Green
+                { value: 500, color: [253, 231, 37, 180] }, // 500 ppbv - Yellow
+                { value: 1000, color: [253, 231, 37, 180] } // 1000 ppbv - Yellow (max)
             ],
             default: [
                 { value: 0, color: [68, 1, 84, 180] },      // Viridis colormap
@@ -118,7 +122,7 @@
                 { value: 0.4, color: [33, 145, 140, 180] },
                 { value: 0.6, color: [94, 201, 98, 180] },
                 { value: 0.8, color: [253, 231, 37, 180] },
-                { value: 1.0, color: [255, 255, 255, 180] }
+                { value: 1.0, color: [253, 231, 37, 180] }
             ]
         },
         
@@ -136,15 +140,15 @@
         isVisible: true,
         legendVisible: true,
         availableLayers: [],
-        loadedLayers: {}
+
+        allAddedLayers: []
     };
 
-    // Interpolate color based on value and color scale
+
     function interpolateColor(value, colorScale, minValue, maxValue) {
-        // Normalize value to 0-1 range if needed
+        // Normalize value to 0-1
         const normalizedValue = (value - minValue) / (maxValue - minValue);
         
-        // Find the two colors to interpolate between
         let lowerColor = colorScale[0];
         let upperColor = colorScale[colorScale.length - 1];
         
@@ -214,7 +218,6 @@
         }
     }
 
-    // Pollutant units (GEOS-CF standard)
     const POLLUTANT_UNITS = {
         no2: 'ppb',
         o3: 'ppb',
@@ -224,11 +227,11 @@
         default: 'ppb'
     };
 
-    // Scan for available GeoTIFF and PMTiles files
+
     async function discoverAvailableLayers() {
         const layers = [];
 
-        // Available files
+
         const knownFiles = [
             { name: '8bit GeoTIFF', file: '8bit_updated.tiff', type: 'geotiff', pollutant: 'no2', date: null, unit: 'ppb' },
             { name: 'GEOS-CF NO₂ 2026-02-01', file: 'geos_cf_NO2_20260201_09z.tif', type: 'geotiff', pollutant: 'no2', date: '2026-02-01', unit: 'ppb' },
@@ -261,7 +264,7 @@
         return layers;
     }
 
-    // Load a GeoTIFF file
+
     async function loadGeoTIFF(filePath, options = {}) {
         const map = window.currentMap;
         if (!map) {
@@ -269,7 +272,7 @@
             return null;
         }
 
-        // Check if georaster library
+
         if (typeof parseGeoraster === 'undefined') {
             console.error('georaster library not loaded. Please include georaster.min.js');
             showNotification('GeoTIFF library not loaded', 'error');
@@ -285,17 +288,21 @@
             unit = null
         } = options;
 
-        // Check cache first
-        const cacheKey = filePath;
-        if (state.loadedLayers[cacheKey]) {
-            console.log(`Using cached layer: ${filePath}`);
-            if (addToMap) {
-                removeCurrentLayer();
-                state.currentLayer = state.loadedLayers[cacheKey];
-                state.currentLayerName = name || filePath;
-                map.addLayer(state.currentLayer);
-            }
-            return state.loadedLayers[cacheKey];
+
+        removeCurrentLayer();
+        
+
+        if (state.allAddedLayers && state.allAddedLayers.length > 0) {
+            state.allAddedLayers.forEach(layer => {
+                try {
+                    if (map.hasLayer(layer)) {
+                        map.removeLayer(layer);
+                    }
+                    if (layer._container) layer._container.remove();
+                    if (layer._image) layer._image.remove();
+                } catch (e) {}
+            });
+            state.allAddedLayers = [];
         }
 
         showLoading('Loading GeoTIFF...');
@@ -322,13 +329,13 @@
                 projection: georaster.projection
             });
             
-            // Register the GeoTIFF's projection
+
             if (typeof proj4 !== 'undefined') {
                 try {
                     const projectionRaw = georaster.projection;
                     console.log('GeoTIFF projection value:', projectionRaw, 'type:', typeof projectionRaw);
                     
-                    // Convert to string
+
                     const projectionStr = projectionRaw !== null && projectionRaw !== undefined 
                         ? String(projectionRaw) 
                         : null;
@@ -365,7 +372,7 @@
                             }
                         }
                         
-                        // Check for common WKT strings
+
                         if (!epsgCode) {
                             if (projectionStr.includes('WGS 84') || projectionStr.includes('WGS84') || projectionStr.includes('WGS_1984')) {
                                 epsgCode = 'EPSG:4326';
@@ -375,7 +382,7 @@
                         }
                     }
                     
-                    // Fallback: check bounds
+
                     if (!epsgCode) {
                         console.log('GeoTIFF bounds:', {
                             xmin: georaster.xmin,
@@ -434,28 +441,26 @@
                 opacity: opacity,
                 resolution: resolution,
                 pixelValuesToColorFn: function(values) {
-                    // For GeoTIFFs with embedded color (RGB/RGBA), use native colors
-                    // Check if this is a multi-band raster (RGB/RGBA)
+
                     if (values.length >= 3) {
-                        // RGB or RGBA bands - use original colors
+
                         const r = values[0];
                         const g = values[1];
                         const b = values[2];
                         const a = values.length >= 4 ? values[3] / 255 : 1;
                         
-                        // Handle nodata values (usually 0,0,0 or null)
                         if ((r === null || r === undefined) || (g === null || g === undefined) || (b === null || b === undefined)) {
-                            return null; // Transparent
+                            return null; 
                         }
                         
                         return `rgba(${r}, ${g}, ${b}, ${a})`;
                     } else {
-                        // Single-band raster - apply color scale
+
                         const value = values[0];
                         
-                        // Handle nodata values
+
                         if (value === null || value === undefined || isNaN(value) || value === georaster.noDataValue) {
-                            return null; // Transparent
+                            return null; 
                         }
                         
                         const color = interpolateColor(value, colorScale, minValue, maxValue);
@@ -474,18 +479,30 @@
             
             const layer = new GeoRasterLayer(layerOptions);
 
-            // Cache the layer
-            state.loadedLayers[cacheKey] = layer;
-
             if (addToMap) {
-                removeCurrentLayer();
                 state.currentLayer = layer;
                 state.currentLayerName = name || filePath;
+                
+                // Track this layer so we can remove it later
+                state.allAddedLayers.push(layer);
+                
                 layer.addTo(map);
                 
+                // Invalidate map renderer cache to ensure fresh rendering
+                if (typeof map.invalidateSize === 'function') {
+                    map.invalidateSize();
+                }
+                
                 // Bring markers to front
-                if (window.currentMarkers) {
+                if (window.currentMarkers && typeof window.currentMarkers.bringToFront === 'function') {
                     window.currentMarkers.bringToFront();
+                } else if (window.currentMarkers && typeof window.currentMarkers.eachLayer === 'function') {
+                    // For LayerGroup, bring each child layer to front
+                    window.currentMarkers.eachLayer(function(layer) {
+                        if (typeof layer.bringToFront === 'function') {
+                            layer.bringToFront();
+                        }
+                    });
                 }
             }
 
@@ -537,11 +554,21 @@
             removeCurrentLayer();
             state.currentLayer = layer;
             state.currentLayerName = name || filePath;
+            
+
+            state.allAddedLayers.push(layer);
+            
             layer.addTo(map);
 
-            // Bring markers to front
-            if (window.currentMarkers) {
+            if (window.currentMarkers && typeof window.currentMarkers.bringToFront === 'function') {
                 window.currentMarkers.bringToFront();
+            } else if (window.currentMarkers && typeof window.currentMarkers.eachLayer === 'function') {
+
+                window.currentMarkers.eachLayer(function(layer) {
+                    if (typeof layer.bringToFront === 'function') {
+                        layer.bringToFront();
+                    }
+                });
             }
 
             hideLoading();
@@ -559,14 +586,68 @@
 
     // Remove current raster layer from map
     function removeCurrentLayer() {
-        if (state.currentLayer && window.currentMap) {
-            window.currentMap.removeLayer(state.currentLayer);
-            state.currentLayer = null;
-            state.currentLayerName = null;
+        const map = window.currentMap;
+        if (!map) return;
+
+        if (state.allAddedLayers && state.allAddedLayers.length > 0) {
+            state.allAddedLayers.forEach(layer => {
+                try {
+                    if (map.hasLayer(layer)) {
+                        map.removeLayer(layer);
+                    }
+                    // Also clear the layer's container if it exists
+                    if (layer._container) {
+                        layer._container.remove();
+                    }
+                    if (layer._image) {
+                        layer._image.remove();
+                    }
+                } catch (e) {
+                    console.warn('Error removing layer:', e);
+                }
+            });
+            // Clear the array
+            state.allAddedLayers = [];
         }
+        
+        // Also remove the current layer explicitly
+        if (state.currentLayer) {
+            try {
+                if (map.hasLayer(state.currentLayer)) {
+                    map.removeLayer(state.currentLayer);
+                }
+                if (state.currentLayer._container) {
+                    state.currentLayer._container.remove();
+                }
+                if (state.currentLayer._image) {
+                    state.currentLayer._image.remove();
+                }
+            } catch (e) {
+                console.warn('Error removing current layer:', e);
+            }
+        }
+        
+ 
+        map.eachLayer(function(layer) {
+            if (layer.options && layer.options.georaster) {
+                try {
+                    map.removeLayer(layer);
+                    if (layer._container) layer._container.remove();
+                } catch (e) {}
+            }
+        });
+        
+        // Force the map to redraw
+        if (typeof map.invalidateSize === 'function') {
+            map.invalidateSize();
+        }
+        
+        state.currentLayer = null;
+        state.currentLayerName = null;
+        state.georaster = null;
     }
 
-    // Toggle layer visibility
+
     function toggleLayerVisibility() {
         if (!state.currentLayer) return;
         
@@ -585,7 +666,7 @@
         return state.isVisible;
     }
 
-    // Set layer opacity
+
     function setLayerOpacity(opacity) {
         state.layerOpacity = Math.max(0, Math.min(1, opacity));
         
@@ -596,7 +677,6 @@
         return state.layerOpacity;
     }
 
-    // Get current layer info
     function getCurrentLayerInfo() {
         return {
             name: state.currentLayerName,
@@ -625,10 +705,9 @@
 
         const colorScale = getColorScale(pollutant);
         
-        // Automatically determine unit if not provided
+
         const displayUnit = unit || POLLUTANT_UNITS[pollutant] || POLLUTANT_UNITS.default;
         
-        // Build pollutant labels with automatic unit display
         const pollutantLabels = {
             no2: `NO₂ (${displayUnit})`,
             pm25: `PM2.5 (${displayUnit})`,
@@ -637,44 +716,16 @@
             so2: `SO₂ (${displayUnit})`,
             default: `Value (${displayUnit})`
         };
-        
-        // Enhanced NO₂ range labels
-        const no2RangeLabels = [
-            { value: 0, label: 'Good', color: '#009934' },
-            { value: 40, label: 'Fair', color: '#00cc66' },
-            { value: 90, label: 'Moderate', color: '#ffff00' },
-            { value: 120, label: 'Unhealthy (S)', color: '#ffa500' },
-            { value: 230, label: 'Unhealthy', color: '#ff0000' },
-            { value: 340, label: 'Very Bad', color: '#8b0000' }
-        ];
 
         const gradientStops = colorScale.map((stop, index) => {
             const percent = (index / (colorScale.length - 1)) * 100;
             return `rgba(${stop.color[0]}, ${stop.color[1]}, ${stop.color[2]}, ${stop.color[3] / 255}) ${percent}%`;
         }).join(', ');
         
-        // Determine legend labels based on pollutant type
+        // Use actual numeric values from the data for legend labels
         let legendMin = minValue?.toFixed(1) || '0';
         let legendMid = ((maxValue + minValue) / 2)?.toFixed(1) || '50';
         let legendMax = maxValue?.toFixed(1) || '100';
-        
-        let legendMinLabel = 'Low';
-        let legendMidLabel = 'Medium';
-        let legendMaxLabel = 'High';
-        
-        if (pollutant === 'no2') {
-            legendMinLabel = 'Good';
-            legendMidLabel = 'Moderate';
-            legendMaxLabel = 'Unhealthy';
-        } else if (pollutant === 'pm25') {
-            legendMinLabel = 'Good';
-            legendMidLabel = 'Moderate';
-            legendMaxLabel = 'Hazardous';
-        } else if (pollutant === 'o3') {
-            legendMinLabel = 'Good';
-            legendMidLabel = 'Moderate';
-            legendMaxLabel = 'Unhealthy';
-        }
 
         legend.innerHTML = `
             <div class="legend-header">
@@ -683,9 +734,9 @@
             </div>
             <div class="legend-gradient" style="background: linear-gradient(to right, ${gradientStops});"></div>
             <div class="legend-labels">
-                <span title="${legendMin}">${legendMinLabel}</span>
-                <span title="${legendMid}">${legendMidLabel}</span>
-                <span title="${legendMax}">${legendMaxLabel}</span>
+                <span>${legendMin}</span>
+                <span>${legendMid}</span>
+                <span>${legendMax}</span>
             </div>
         `;
 
@@ -711,17 +762,15 @@
         }
     }
 
-    // Create the GeoTIFF control panel UI
     function createControlPanel(containerId = 'geotiff-controls-container') {
         console.log('Creating GeoTIFF control panel...');
         
         let container = document.getElementById(containerId);
         
-        // If no container specified, try multiple fallback locations
+
         if (!container) {
             console.log('Container not found by ID, trying fallbacks...');
             
-            // Try finding the controls-body inside map-controls-overlay
             const mapControls = document.querySelector('#map-controls-overlay .controls-body');
             if (mapControls) {
                 container = document.createElement('div');
@@ -736,9 +785,18 @@
         
         console.log('GeoTIFF controls container found:', container);
 
+        // Get current UTC date formatted
+        const now = new Date();
+        const utcDateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+        const utcTimeStr = now.toISOString().split('T')[1].substring(0, 5); // HH:MM format
+
         container.innerHTML = `
             <div class="control-section geotiff-control-section">
                 <h4><i class="bi bi-layers"></i> Raster Layers</h4>
+                <div class="geotiff-meta-info">
+                    <span><i class="bi bi-calendar3"></i> ${utcDateStr} ${utcTimeStr} UTC</span>
+                    <span><i class="bi bi-database"></i> Source: NASA GMAO</span>
+                </div>
                 
                 <div class="control-group">
                     <label for="geotiff-layer-select">Layer:</label>
@@ -821,7 +879,6 @@
         console.log(`Added ${state.availableLayers.length} layers to dropdown`);
     }
 
-    // Bind events to control panel elements
     function bindControlEvents() {
         // Layer selection
         const layerSelect = document.getElementById('geotiff-layer-select');
@@ -909,6 +966,15 @@
 
         console.log('Initializing GeoTIFF Manager...');
         
+        // Reset state to handle reinitialization after navigation
+        state.currentLayer = null;
+        state.currentLayerName = null;
+        state.georaster = null;
+        state.isLoading = false;
+        state.isVisible = true;
+        state.legendVisible = true;
+        state.allAddedLayers = [];
+        
         // Register projections first
         registerProjections();
 
@@ -916,9 +982,8 @@
         await discoverAvailableLayers();
         console.log(`Found ${state.availableLayers.length} available layers`);
 
-        // Create control panel if requested
         if (autoCreateControls) {
-            // Wait for DOM to be ready
+
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', () => {
                     createControlPanel(controlsContainer);
@@ -933,15 +998,14 @@
             }
         }
 
-        // Add CSS styles
+
         injectStyles();
         
-        // Create floating quick-access button for raster layers
+
         createFloatingButton();
 
         console.log('GeoTIFF Manager initialized');
-        
-        // Load default layer if configured
+
         if (CONFIG.loadDefaultOnInit && window.currentMap) {
             console.log('Loading default GeoTIFF layer...');
             setTimeout(() => {
@@ -949,7 +1013,7 @@
                     pollutant: 'no2',
                     name: CONFIG.defaultLayerName
                 }).then(() => {
-                    // Update dropdown to reflect loaded layer
+
                     const select = document.getElementById('geotiff-layer-select');
                     if (select) {
                         for (let i = 0; i < select.options.length; i++) {
@@ -1228,6 +1292,30 @@
                 margin-right: 8px;
                 font-size: 16px;
                 opacity: 0.9;
+            }
+            
+            /* Meta info (date and source) */
+            .geotiff-meta-info {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                margin-bottom: 14px;
+                padding: 8px 10px;
+                background: rgba(0, 0, 0, 0.2);
+                border-radius: 6px;
+                font-size: 11px;
+                color: rgba(255, 255, 255, 0.7);
+            }
+            
+            .geotiff-meta-info span {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            
+            .geotiff-meta-info i {
+                font-size: 12px;
+                opacity: 0.8;
             }
             
             /* Ensure select and inputs are styled properly */

@@ -302,3 +302,16 @@
 		font-weight: 600;
 	}
 
+/* Override for scrollable pages (about, etc.) */
+body.about-page,
+body.about-page .main_wave_js,
+body.about-page .wavejs {
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: auto !important;
+}
+
+html:has(body.about-page) {
+    overflow-y: auto !important;
+    height: auto !important;
+}

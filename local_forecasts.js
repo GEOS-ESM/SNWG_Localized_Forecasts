@@ -17,6 +17,8 @@ $(document).ready(function() {
             });
             
             if (page === 'home.html') {
+                // Add home-page class for map view (no scrolling)
+                $('body').removeClass('about-page').addClass('home-page');
                 $('body, html').css({
                     'overflow': 'hidden',
                     'height': '100vh'
@@ -29,6 +31,15 @@ $(document).ready(function() {
                     }
                 }, 100);
             } else if (page === 'about.html') {
+                // Add about-page class for scrollable content
+                $('body').removeClass('home-page').addClass('about-page');
+                $('body, html').css({
+                    'overflow': 'auto',
+                    'height': 'auto'
+                });
+            } else {
+                // Default for other pages - allow scrolling
+                $('body').removeClass('home-page').addClass('about-page');
                 $('body, html').css({
                     'overflow': 'auto',
                     'height': 'auto'
@@ -333,13 +344,30 @@ function get_open_aq_observations(site_id, param) {
 
 function create_map(sites, param) {
 
-    // Only recreate map on first load, not on every filter change
+    // Check if map exists AND its container is still in the DOM
+    // When navigating away and back, the DOM element is recreated but window.currentMap points to old instance
     let map = window.currentMap;
-    if (!map) {
-        if (window.currentMap && window.currentMap.remove) {
-            window.currentMap.remove();
+    const mapContainer = document.getElementById('map');
+    
+    // If map exists but container is different or doesn't exist, we need to recreate
+    const needsRecreate = !map || !mapContainer || (map._container !== mapContainer);
+    
+    if (needsRecreate) {
+        // Clean up old map if it exists
+        if (window.currentMap) {
+            try {
+                window.currentMap.remove();
+            } catch (e) {
+                console.warn('Error removing old map:', e);
+            }
             window.currentMap = null;
         }
+        
+        // Clean up old markers
+        if (window.currentMarkers) {
+            window.currentMarkers = null;
+        }
+        
         $('#map').html('');
         
         var center_point = [-1.9297706, 30.1272444]; // [lat, lng] for Leaflet
@@ -360,7 +388,7 @@ function create_map(sites, param) {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             subdomains: 'abcd',
             maxZoom: 20,
-            noWrap: true
+            noWrap: false  // Allow tile wrapping to fill the entire map area
         }).addTo(map);
         
         // Store reference for future updates
@@ -371,6 +399,11 @@ function create_map(sites, param) {
         
         // Store hover info div reference
         window.hoverDiv = document.getElementById('map-hover-info');
+        
+        console.log('Map created/recreated successfully');
+    } else {
+        // Map exists and container is valid, just invalidate size
+        map.invalidateSize();
     }
 
     var mapVisible = true;

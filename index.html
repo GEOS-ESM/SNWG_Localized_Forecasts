@@ -307,7 +307,8 @@ header .nav-link.active,
 
         <div class="d-flex align-items-center gap-3">
             <p class="mb-0">© 2025 SNWG Localized Forecasts.</p>
-            <p class="mb-0">Version: 1.2</p>
+            <p class="mb-0">Version: 2 (beta)</p>
+            <p class="mb-0" id="last-updated">Updated on <span id="last-commit-date">--/--/----</span></p>
         </div>
 
 
@@ -330,7 +331,43 @@ header .nav-link.active,
     <script src='parametres/plotly-2.12.1.min.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
 
-    
+
+    <script>
+    (function() {
+        const owner = 'GEOS-ESM';
+        const repo = 'SNWG_Localized_Forecasts';
+        const branch = 'pandora';
+        
+        fetch(`https://api.github.com/repos/${owner}/${repo}/commits/${branch}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.commit && data.commit.committer && data.commit.committer.date) {
+                    const date = new Date(data.commit.committer.date);
+                    const formatted = date.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                    });
+                    const dateEl = document.getElementById('last-commit-date');
+                    if (dateEl) {
+                        dateEl.textContent = formatted;
+                    }
+                }
+            })
+            .catch(err => {
+                console.warn('Could not fetch last commit date:', err);
+                // Fallback to current date
+                const dateEl = document.getElementById('last-commit-date');
+                if (dateEl) {
+                    dateEl.textContent = new Date().toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                    });
+                }
+            });
+    })();
+    </script>
 
     <script src="parametres/wavejs.js?v=1.0"></script>
 
