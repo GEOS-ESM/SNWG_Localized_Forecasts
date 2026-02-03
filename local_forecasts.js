@@ -696,19 +696,19 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
 
             console.log(`Found ${filteredIndices.length} sites for source: ${selectedSource}`);
             
-            $(".pollutant-banner-o").empty();
+            // Clear existing ticker cards and show loading
+            $(".ticker-track").empty();
             
-            // Show  loaders
+            // Show ticker loading skeletons
             const skeletonCount = Math.min(12, filteredIndices.length);
             for (let i = 0; i < skeletonCount; i++) {
                 const skeleton = `
-                    <div class="col-3 skeleton-card">
-                        <div class="skeleton-title skeleton-shimmer"></div>
-                        <div class="skeleton-text skeleton-shimmer"></div>
-                        <div class="skeleton-value skeleton-shimmer"></div>
+                    <div class="ticker-card ticker-loading">
+                        <div class="skeleton-shimmer" style="width: 80px; height: 14px; margin-bottom: 8px;"></div>
+                        <div class="skeleton-shimmer" style="width: 60px; height: 24px;"></div>
                     </div>
                 `;
-                $(".pollutant-banner-o").append(skeleton);
+                $(".ticker-track").append(skeleton);
             }
 
             const now = new Date();
@@ -777,19 +777,19 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
 
             console.log(`Found ${filteredIndices.length} sites for source: ${selectedSource}`);
             
-            $(".pollutant-banner-o").empty();
+            // Clear existing ticker cards and show loading
+            $(".ticker-track").empty();
             
-            // Show  loaders
+            // Show ticker loading skeletons
             const skeletonCount = Math.min(12, filteredIndices.length);
             for (let i = 0; i < skeletonCount; i++) {
                 const skeleton = `
-                    <div class="col-3 skeleton-card">
-                        <div class="skeleton-title skeleton-shimmer"></div>
-                        <div class="skeleton-text skeleton-shimmer"></div>
-                        <div class="skeleton-value skeleton-shimmer"></div>
+                    <div class="ticker-card ticker-loading">
+                        <div class="skeleton-shimmer" style="width: 80px; height: 14px; margin-bottom: 8px;"></div>
+                        <div class="skeleton-shimmer" style="width: 60px; height: 24px;"></div>
                     </div>
                 `;
-                $(".pollutant-banner-o").append(skeleton);
+                $(".ticker-track").append(skeleton);
             }
 
             // Always load individual sites to get correct local time forecasts
@@ -860,7 +860,7 @@ function processHourlySnapshotOptimized(hourlySnapshot, filteredIndices) {
                 add_the_banner(siteDisplayData, selected);
                 
                 if (skeletonsRemoved < 12) {
-                    $(".pollutant-banner-o .skeleton-card").eq(skeletonsRemoved).remove();
+                    $(".ticker-track .ticker-loading").eq(0).remove();
                     skeletonsRemoved++;
                 }
                 
@@ -954,7 +954,7 @@ function loadIndividualSitesOptimized(filteredIndices) {
                         add_the_banner(siteDisplayData, selected);
                         
                         if (skeletonsRemoved < 12) {
-                            $(".pollutant-banner-o .skeleton-card").eq(skeletonsRemoved).remove();
+                            $(".ticker-track .ticker-loading").eq(0).remove();
                             skeletonsRemoved++;
                         }
                         
@@ -1046,7 +1046,7 @@ function processHourlySnapshot(hourlySnapshot, filteredIndices) {
                 add_the_banner(siteDisplayData, selected);
                 
                 if (skeletonsRemoved < 12) {
-                    $(".pollutant-banner-o .skeleton-card").eq(skeletonsRemoved).remove();
+                    $(".ticker-track .ticker-loading").eq(0).remove();
                     skeletonsRemoved++;
                 }
                 
@@ -1128,7 +1128,7 @@ function loadIndividualSites(filteredIndices) {
                             add_the_banner(siteDisplayData, selected);
                             
                             if (skeletonsRemoved < 12) {
-                                $(".pollutant-banner-o .skeleton-card").eq(skeletonsRemoved).remove();
+                                $(".ticker-track .ticker-loading").eq(0).remove();
                                 skeletonsRemoved++;
                             }
                             
@@ -1447,89 +1447,69 @@ function add_the_banner(site, param) {
 
         
         const aqiLevel = getAqiLevel(aqiValue, param);
+        
+        const aqiClass = aqiValue === '--' ? 'na' : 
+            aqiValue <= 50 ? 'good' :
+            aqiValue <= 100 ? 'moderate' :
+            aqiValue <= 150 ? 'unhealthy-sensitive' :
+            aqiValue <= 200 ? 'unhealthy' :
+            aqiValue <= 300 ? 'very-unhealthy' : 'hazardous';
+        
+        const regionParts = site.timezone ? site.timezone.split('/') : ['--'];
+        const region = regionParts.length > 1 ? regionParts[1].replace(/_/g, ' ') : regionParts[0];
 
         const html = `
-            <div class="col-3 single-pollutant-card">
-                <div class="pollutant-banner launch-local-forecasts"
-                    style="cursor: pointer;"
-                    obs_src="${site.observation_source}"
-                    parameter="${param}"
-                    station_id="${site.location_id}"
-                    location_name="${site.location_name.replace(/ /g, "-")}"
-                    observation_value="${site.forecasted_value}"
-                    status="${site.status}"
-                    current_observation_unit="${obs_options?.[param]?.unit || 'N/A'}"
-                    latitude="${site.latitude}"
-                    longitude="${site.longitude}"
-                    lastUpdated="--"
-                    precomputed_forecasts='${JSON.stringify(precomputed_forecasts)}'
-                    timezone="${site.timezone}"
-                    tabindex="0"
-                    role="button"
-                >
-                    <div class="banner-header">
-                        <div class="location-info">
-                            <h5 class="location-name">${
-                              site.location_name.length > 10
-                                ? site.location_name.replace(/_/g, ' ').replace(/\./g, ' ').slice(0, 10) + '...'
-                                : site.location_name.replace(/_/g, ' ').replace(/\./g, ' ')
-                            }</h5>
-                            <p class="source">Sources: ${source}</p>
-                            <p class="source"></p>
-                            <p class="timezone_text">${local_time ? local_time.slice(11, 16) : "--"}  (${site.timezone})</p>
-                        </div>
-                        <div class="aqi-info">
-                            <div class="aqi-circle" style="background-color: ${aqiLevel.color};">
-                                <span class="aqi-value">${aqiValue}</span>
-                            </div>
-                            <span class="aqi-level">${aqiLevel.level}</span>
-                        </div>
-                    </div>
-                    <div class="banner-body compact">
-                        <div class="weather-info">
-                            <div class="info-item">
-                                <!-- Temperature Icon -->
-                                <span class="info-icon">
-                                    <i class="bi bi-thermometer-half"></i>
-                                </span>
-                                <span class="info-value">${temperature}°C</span>
-                            </div>
-                            <div class="info-item">
-                                <!-- Humidity Icon -->
-                                <span class="info-icon">
-                                    <i class="bi bi-droplet-half"></i>
-                                </span>
-                                <span class="info-value">${humidity}%</span>
-                            </div>
-                        </div>
+            <div class="ticker-card launch-local-forecasts"
+                obs_src="${site.observation_source}"
+                parameter="${param}"
+                station_id="${site.location_id}"
+                location_name="${site.location_name.replace(/ /g, "-")}"
+                observation_value="${site.forecasted_value}"
+                status="${site.status}"
+                current_observation_unit="${obs_options?.[param]?.unit || 'N/A'}"
+                latitude="${site.latitude}"
+                longitude="${site.longitude}"
+                lastUpdated="--"
+                precomputed_forecasts='${JSON.stringify(precomputed_forecasts)}'
+                timezone="${site.timezone}"
+                tabindex="0"
+                role="button"
+            >
+                <div class="ticker-card-aqi ${aqiClass}">${aqiValue}</div>
+                <div class="ticker-card-info">
+                    <div class="ticker-card-name">${
+                        site.location_name.length > 12
+                            ? site.location_name.replace(/_/g, ' ').replace(/\./g, ' ').slice(0, 12) + '...'
+                            : site.location_name.replace(/_/g, ' ').replace(/\./g, ' ')
+                    }</div>
+                    <div class="ticker-card-meta">
+                        <span><i class="fas fa-thermometer-half"></i> ${temperature}°C</span>
+                        <span><i class="fas fa-tint"></i> ${humidity}%</span>
                     </div>
                 </div>
             </div>
         `;
 
-        // Replace first skeleton or append
-        const skeletons = $(".pollutant-banner-o .skeleton-card");
+        const skeletons = $(".ticker-track .ticker-loading");
         if (skeletons.length > 0) {
             skeletons.first().replaceWith(html);
         } else {
-            $(".pollutant-banner-o").append(html);
+            $(".ticker-track").append(html);
         }
     }
 }
 
 function cleanupBanners() {
-    const cards = $('.pollutant-banner-o .pollutant-banner');
+    const cards = $('.ticker-track .ticker-card');
     
-    // Animate exit for each card with stagger
     cards.each(function(index) {
         setTimeout(() => {
-            $(this).addClass('exit');
-            setTimeout(() => $(this).remove(), 400);
-        }, index * 50);
+            $(this).css('opacity', '0');
+            setTimeout(() => $(this).remove(), 200);
+        }, index * 30);
     });
     
-    // Clean loaders
-    $('.pollutant-banner-o .skeleton-card').remove();
+    $('.ticker-track .ticker-loading').remove();
     
     if (window.currentForecastData) {
         window.currentForecastData = null;
@@ -1731,6 +1711,9 @@ function readApiBaker(options = {}) {
                     }
                 }
             });
+            
+            // Generate CNN Markets-style hero section
+            generateForecastHeroSection(masterData, location, timezone, options.param);
             
             const tabsNav = $("#pills-tabContent").prev();
             const tabsContainer = $(".tab-content");
@@ -2294,6 +2277,203 @@ function calculateAqiForPm25(concentration) {
     return 'N/A';
 }
 
+function generateForecastHeroSection(masterData, locationName, timezone, requestedParam) {
+    const $heroSection = $('#forecast-hero-section');
+    if (!$heroSection.length) return;
+    
+    const siteTimeZone = timezone || "UTC";
+    const now = new Date();
+    const pad = n => n.toString().padStart(2, '0');
+    const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
+    const currentHour = siteLocalNow.getHours();
+    const localYear = siteLocalNow.getFullYear();
+    const localMonth = pad(siteLocalNow.getMonth() + 1);
+    const localDate = pad(siteLocalNow.getDate());
+    
+    let aqiData = [];
+    let pollutantLabel = 'NO₂';
+    let pollutantKey = 'no2';
+    
+    if (requestedParam && requestedParam.toLowerCase().includes('pm25')) {
+        aqiData = masterData.master_pm25_aqi || [];
+        pollutantLabel = 'PM2.5';
+        pollutantKey = 'pm25';
+    } else {
+        aqiData = masterData.master_predicted_aqi || masterData.master_no2_aqi || [];
+        pollutantLabel = 'NO₂';
+        pollutantKey = 'no2';
+    }
+    
+    const datetimes = masterData.master_datetime || [];
+    
+    let currentAqi = '--';
+    let prevAqi = '--';
+    const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(currentHour)}`;
+    const prevHour = (currentHour - 1 + 24) % 24;
+    const prevLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(prevHour)}`;
+    
+    for (let i = 0; i < datetimes.length; i++) {
+        const dtStr = datetimes[i];
+        if (!dtStr) continue;
+        const forecastHourStr = dtStr.slice(0, 13);
+        if (forecastHourStr === currentLocalStr && aqiData[i] !== undefined) {
+            currentAqi = Math.round(aqiData[i]);
+        }
+        if (forecastHourStr === prevLocalStr && aqiData[i] !== undefined) {
+            prevAqi = Math.round(aqiData[i]);
+        }
+    }
+    
+    if (currentAqi === '--' && pollutantKey === 'pm25') {
+        for (let i = 0; i < datetimes.length; i++) {
+            const dtStr = datetimes[i];
+            if (!dtStr) continue;
+            const forecastStart = new Date(dtStr.replace(' ', 'T'));
+            const forecastEnd = new Date(forecastStart.getTime() + 3 * 60 * 60 * 1000);
+            if (siteLocalNow >= forecastStart && siteLocalNow < forecastEnd && aqiData[i] !== undefined) {
+                currentAqi = Math.round(aqiData[i]);
+                break;
+            }
+        }
+    }
+    
+    let changeValue = '--';
+    let changeClass = '';
+    let changeArrow = '';
+    if (typeof currentAqi === 'number' && typeof prevAqi === 'number') {
+        const diff = currentAqi - prevAqi;
+        changeValue = Math.abs(diff);
+        changeClass = diff > 0 ? 'positive' : diff < 0 ? 'negative' : '';
+        changeArrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '';
+    }
+    
+    const aqiLevel = getAqiLevel(currentAqi);
+    
+    const todayStr = siteLocalNow.toISOString().slice(0, 10);
+    const tomorrowDate = new Date(siteLocalNow.getTime() + 24 * 60 * 60 * 1000);
+    const tomorrowStr = tomorrowDate.toISOString().slice(0, 10);
+    const yesterdayDate = new Date(siteLocalNow.getTime() - 24 * 60 * 60 * 1000);
+    const yesterdayStr = yesterdayDate.toISOString().slice(0, 10);
+    
+    const todayVals = datetimes
+        .map((dt, i) => ({ dt, val: aqiData[i] }))
+        .filter(({ dt, val }) => dt && dt.startsWith(todayStr) && typeof val === 'number')
+        .map(({ val }) => val);
+    const tomorrowVals = datetimes
+        .map((dt, i) => ({ dt, val: aqiData[i] }))
+        .filter(({ dt, val }) => dt && dt.startsWith(tomorrowStr) && typeof val === 'number')
+        .map(({ val }) => val);
+    const yesterdayVals = datetimes
+        .map((dt, i) => ({ dt, val: aqiData[i] }))
+        .filter(({ dt, val }) => dt && dt.startsWith(yesterdayStr) && typeof val === 'number')
+        .map(({ val }) => val);
+    
+    const todayAvg = todayVals.length ? Math.round(todayVals.reduce((a, b) => a + b, 0) / todayVals.length) : '--';
+    const tomorrowAvg = tomorrowVals.length ? Math.round(tomorrowVals.reduce((a, b) => a + b, 0) / tomorrowVals.length) : '--';
+    const yesterdayAvg = yesterdayVals.length ? Math.round(yesterdayVals.reduce((a, b) => a + b, 0) / yesterdayVals.length) : '--';
+    
+    let dailyChange = '--';
+    let dailyChangeClass = '';
+    let dailyArrow = '';
+    if (typeof todayAvg === 'number' && typeof yesterdayAvg === 'number') {
+        const diff = todayAvg - yesterdayAvg;
+        const pct = yesterdayAvg !== 0 ? ((diff / yesterdayAvg) * 100).toFixed(1) : 0;
+        dailyChange = `${diff > 0 ? '+' : ''}${diff} (${pct}%)`;
+        dailyChangeClass = diff > 0 ? 'up' : diff < 0 ? 'down' : '';
+        dailyArrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '';
+    }
+    
+    const getAqiForHour = (hourOffset) => {
+        const targetHour = (currentHour + hourOffset) % 24;
+        const targetStr = `${localYear}-${localMonth}-${localDate} ${pad(targetHour)}`;
+        for (let i = 0; i < datetimes.length; i++) {
+            if (datetimes[i] && datetimes[i].slice(0, 13) === targetStr && aqiData[i] !== undefined) {
+                return { aqi: Math.round(aqiData[i]), hour: targetHour };
+            }
+        }
+        return { aqi: '--', hour: targetHour };
+    };
+    
+    const forecast1 = getAqiForHour(3);
+    const forecast2 = getAqiForHour(6);
+    const forecast3 = getAqiForHour(9);
+    const forecast4 = getAqiForHour(12);
+    
+    const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+    const formattedDate = siteLocalNow.toLocaleDateString('en-US', dateOptions);
+    const formattedTime = `${pad(currentHour)}:${pad(siteLocalNow.getMinutes())}`;
+    
+    const cleanLocation = locationName.replace(/[_-]/g, ' ').replace(/\s+/g, ' ').trim();
+    
+    const heroHtml = `
+        <div class="forecast-header">
+            <h1 class="location-name">${cleanLocation}</h1>
+            <div class="forecast-meta">US AQI · ${formattedTime} ${siteTimeZone} · ${formattedDate}</div>
+            
+            <div class="aqi-hero">
+                <span class="aqi-value-main">${currentAqi}</span>
+                ${changeValue !== '--' ? `<span class="aqi-change ${changeClass}">${changeArrow} ${changeValue}</span>` : ''}
+                <span class="aqi-level-badge" style="background-color: ${aqiLevel.color};">${aqiLevel.level}</span>
+            </div>
+            <div class="aqi-subtitle">Air Quality Index (${pollutantLabel})</div>
+        </div>
+        
+        <div class="forecast-periods">
+            <button class="period-btn active" data-period="3h">3h</button>
+            <button class="period-btn" data-period="6h">6h</button>
+            <button class="period-btn" data-period="12h">12h</button>
+            <button class="period-btn" data-period="24h">24h</button>
+        </div>
+        
+        <div class="forecast-grid">
+            <div class="forecast-card">
+                <div class="card-time">+3h</div>
+                <div class="card-aqi" style="color: ${getAqiLevel(forecast1.aqi).color};">${forecast1.aqi}</div>
+                <div class="card-level">${pad(forecast1.hour)}:00</div>
+            </div>
+            <div class="forecast-card">
+                <div class="card-time">+6h</div>
+                <div class="card-aqi" style="color: ${getAqiLevel(forecast2.aqi).color};">${forecast2.aqi}</div>
+                <div class="card-level">${pad(forecast2.hour)}:00</div>
+            </div>
+            <div class="forecast-card">
+                <div class="card-time">+9h</div>
+                <div class="card-aqi" style="color: ${getAqiLevel(forecast3.aqi).color};">${forecast3.aqi}</div>
+                <div class="card-level">${pad(forecast3.hour)}:00</div>
+            </div>
+            <div class="forecast-card">
+                <div class="card-time">+12h</div>
+                <div class="card-aqi" style="color: ${getAqiLevel(forecast4.aqi).color};">${forecast4.aqi}</div>
+                <div class="card-level">${pad(forecast4.hour)}:00</div>
+            </div>
+        </div>
+        
+        <div class="daily-summary">
+            <h6>Daily Outlook</h6>
+            <div class="daily-row">
+                <div class="daily-item">
+                    <div class="day-label">Today</div>
+                    <div class="day-aqi" style="color: ${getAqiLevel(todayAvg).color};">${todayAvg}</div>
+                    <div class="day-change ${dailyChangeClass}">${dailyArrow} ${dailyChange !== '--' ? dailyChange : 'vs yesterday'}</div>
+                </div>
+                <div class="daily-item">
+                    <div class="day-label">Tomorrow</div>
+                    <div class="day-aqi" style="color: ${getAqiLevel(tomorrowAvg).color};">${tomorrowAvg}</div>
+                    <div class="day-change">${typeof tomorrowAvg === 'number' && typeof todayAvg === 'number' ? 
+                        (tomorrowAvg > todayAvg ? '▲' : tomorrowAvg < todayAvg ? '▼' : '') + ' vs today' : ''}</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $heroSection.html(heroHtml);
+    
+    $heroSection.find('.period-btn').on('click', function() {
+        $heroSection.find('.period-btn').removeClass('active');
+        $(this).addClass('active');
+    });
+}
+
 function getAqiLevel(aqi, species = "no2") {
     if (aqi === null || aqi === undefined || isNaN(aqi)) {
         return { level: "N/A", color: "#808080", message: "No AQI data available." };
@@ -2321,7 +2501,7 @@ function getAqiLevel(aqi, species = "no2") {
 
 function generateAqiElement(aqiValue, pollutant, userTimeZone, currentHour) {
     const hourStr = typeof currentHour === "number"
-        ? currentHour.toString().padStart(2, '0')+":00 ("+userTimeZone+")" 
+        ? currentHour.toString().padStart(2, '0')+":00" 
         : currentHour;
     if (aqiValue === 'N/A' || aqiValue === null) {
         return `<div class="prediction-box" style="background: #80808017;">
@@ -3775,6 +3955,53 @@ function openForecastsWindow(options = {}) {
 }
 
 
+function zoomToLocation(lat, lon, zoomLevel = 10) {
+    if (!window.currentMap) {
+        console.warn('Map not available for zoom');
+        return;
+    }
+    
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lon);
+    
+    if (isNaN(latitude) || isNaN(longitude)) {
+        console.warn('Invalid coordinates for zoom:', lat, lon);
+        return;
+    }
+    
+    const mapContainer = window.currentMap.getContainer();
+    const mapWidth = mapContainer.offsetWidth;
+    
+    const isMobile = window.innerWidth <= 768;
+    const offsetX = isMobile ? 0 : mapWidth * 0.25;
+    
+    const targetPoint = window.currentMap.project([latitude, longitude], zoomLevel);
+    targetPoint.x += offsetX;
+    const offsetCenter = window.currentMap.unproject(targetPoint, zoomLevel);
+    
+    window.currentMap.once('moveend', function() {
+        if (typeof window.currentMap.invalidateSize === 'function') {
+            window.currentMap.invalidateSize();
+        }
+        if (window.GeoTIFFManager && window.GeoTIFFManager.getState) {
+            const geoState = window.GeoTIFFManager.getState();
+            if (geoState.currentLayer && typeof geoState.currentLayer.redraw === 'function') {
+                geoState.currentLayer.redraw();
+            }
+        }
+    });
+    
+    window.currentMap.flyTo([offsetCenter.lat, offsetCenter.lng], zoomLevel, {
+        duration: 1.5,
+        easeLinearity: 0.25
+    });
+    
+    console.log(`Zooming to location: ${latitude}, ${longitude} (offset center: ${offsetCenter.lat}, ${offsetCenter.lng}) at zoom level ${zoomLevel}`);
+}
+
+// Make zoomToLocation available globally
+window.zoomToLocation = zoomToLocation;
+
 $(document).on("click", ".launch-local-forecasts", function() {
     const messages = [
         "Connecting to OpenAQ", 
@@ -3796,7 +4023,12 @@ $(document).on("click", ".launch-local-forecasts", function() {
     const current_observation_unit = $(this).attr("current_observation_unit");
     const obs_src = $(this).attr("obs_src");
     const timezone = $(this).attr("timezone");
-
+    
+    const latitude = $(this).attr("latitude");
+    const longitude = $(this).attr("longitude");
+    
+    // Zoom to the location on the map
+    zoomToLocation(latitude, longitude, 12);
 
     openForecastsWindow({
         messages: ["Loading", "Please hold"],

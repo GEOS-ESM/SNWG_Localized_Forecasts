@@ -86,20 +86,7 @@
         <i class="bi bi-gear-fill"></i>
     </button>
     
-    <div id="utc-date-box" class="info-box utc-date-box" style="
-    background: #33333329;
-    z-index: 1000;
-    position: fixed;
-    /* top: 56px; */
-    color: white;
-    font-weight: 800;
-    left: 61px;
-">
-        <div class="info-content">
-            <span id="utc-date" class="utc-display">02/02/2026</span>
-        </div>
-    </div>
-    
+
     <div id='replay-animation'>
         <img src="geos-cf.gif"/>
     </div>
@@ -109,15 +96,16 @@
 
 <div class="forecasts_container"></div>
 
-<div class="locations-container snwg-banner hidden">
-    <div class="banner-controls">
-        <div class="controls-left">
-            <div id="location-search-container" class="search-controls" style="order: -1; margin-right: 15px;">
-                <input type="text" id="location-search-input" class="banner-search" placeholder=" Search locations..." style="min-width: 250px; background: rgba(59, 130, 246, 0.2) !important; border: 2px solid rgba(96, 165, 250, 0.5) !important; color: #fff !important; font-size: 14px !important;" />
-            </div>
-            <div id="species-filter-container" class="filter-controls">
-                <label for="species-filter">Filter:</label>
-                <select id="species-filter" class="banner-select">
+<div class="locations-ticker-banner" id="locations-banner">
+    <div class="ticker-controls">
+        <div class="ticker-nav-left">
+            <button class="ticker-scroll-btn" id="ticker-scroll-left" aria-label="Scroll left">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <div class="ticker-search-filter">
+            <div class="ticker-dropdown">
+                <select id="species-filter" class="ticker-select">
                     <option value="pandora">NASA Pandora</option>
                     <option value="dos_missions" selected>DoS Missions</option>
                     <option value="remaaq">REMAAQ</option>
@@ -125,14 +113,395 @@
                     <option value="openaq">OpenAQ</option>
                 </select>
             </div>
+            <div class="ticker-search">
+                <i class="fas fa-search ticker-search-icon"></i>
+                <input type="text" id="location-search-input" class="ticker-search-input" placeholder="Search..." />
+            </div>
+        </div>
+        <div class="ticker-nav-right">
+            <button class="ticker-scroll-btn" id="ticker-scroll-right" aria-label="Scroll right">
+                <i class="fas fa-chevron-right"></i>
+            </button>
         </div>
     </div>
-    <div class="locations-box" data-margin="0" data-dots="false" data-items-md="5" data-items-xs="1">
-        <div class="pollutants-banner-container">
-            <div class="pollutant-banner-o swiper-desactivated"></div>
+    
+    <div class="ticker-track-wrapper">
+        <div class="ticker-track pollutant-banner-o swiper-desactivated">
+            <div class="ticker-loading">
+                <i class="fas fa-circle-notch fa-spin"></i> Loading...
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+.locations-ticker-banner {
+    position: fixed;
+    bottom: 6%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ticker-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    background: #242424;
+    border-bottom: 1px solid #333;
+    height: 36px;
+}
+
+.ticker-nav-left,
+.ticker-nav-right {
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.ticker-scroll-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ticker-scroll-btn:hover {
+    color: #fff;
+}
+
+.ticker-search-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: flex-start;
+    padding: 0 8px;
+}
+
+.ticker-dropdown {
+    position: relative;
+}
+
+.ticker-select {
+    appearance: none;
+    background: #333;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 6px 28px 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    min-width: 120px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+}
+
+.ticker-select:hover {
+    border-color: #555;
+}
+
+.ticker-select:focus {
+    outline: none;
+    border-color: #666;
+}
+
+.ticker-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.ticker-search-icon {
+    position: absolute;
+    left: 10px;
+    color: #666;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.ticker-search-input {
+    background: #333;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 6px 10px 6px 30px;
+    border-radius: 4px;
+    font-size: 12px;
+    width: 140px;
+    transition: all 0.2s;
+}
+
+.ticker-search-input:focus {
+    outline: none;
+    border-color: #666;
+    width: 180px;
+}
+
+.ticker-search-input::placeholder {
+    color: #666;
+}
+
+.ticker-track-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+}
+
+.ticker-track-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.ticker-track {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    min-width: max-content;
+}
+
+.ticker-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 200px;
+    padding: 12px 20px;
+    color: #666;
+    font-size: 13px;
+    gap: 8px;
+}
+
+.ticker-card {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-right: 1px solid #333;
+    cursor: pointer;
+    transition: background 0.15s;
+    gap: 12px;
+    min-width: 180px;
+    max-width: 220px;
+}
+
+.ticker-card:hover {
+    background: #2a2a2a;
+}
+
+.ticker-card:last-child {
+    border-right: none;
+}
+
+.ticker-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.ticker-card-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.ticker-card-region {
+    font-size: 10px;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ticker-card-data {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ticker-card-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.ticker-card-change {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.ticker-card-change.up {
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.ticker-card-change.down {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.ticker-card-change.neutral {
+    color: #888;
+    background: rgba(136, 136, 136, 0.1);
+}
+
+.ticker-card-aqi {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.ticker-card-aqi.good { background: #22c55e; }
+.ticker-card-aqi.moderate { background: #eab308; color: #000; }
+.ticker-card-aqi.unhealthy-sensitive { background: #f97316; }
+.ticker-card-aqi.unhealthy { background: #ef4444; }
+.ticker-card-aqi.very-unhealthy { background: #a855f7; }
+.ticker-card-aqi.hazardous { background: #7f1d1d; }
+.ticker-card-aqi.na { background: #444; color: #888; }
+
+.ticker-card-meta {
+    display: flex;
+    gap: 8px;
+    font-size: 10px;
+    color: #666;
+}
+
+.ticker-card-meta span {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+@media (max-width: 768px) {
+    .locations-ticker-banner {
+        bottom: 60px;
+    }
+    
+    .ticker-controls {
+        height: 32px;
+    }
+    
+    .ticker-search-input {
+        width: 100px;
+    }
+    
+    .ticker-search-input:focus {
+        width: 120px;
+    }
+    
+    .ticker-select {
+        min-width: 100px;
+        font-size: 11px;
+        padding: 5px 24px 5px 8px;
+    }
+    
+    .ticker-card {
+        padding: 6px 12px;
+        min-width: 150px;
+        max-width: 180px;
+        gap: 8px;
+    }
+    
+    .ticker-card-name {
+        font-size: 11px;
+    }
+    
+    .ticker-card-aqi {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .locations-ticker-banner {
+        bottom: 55px;
+    }
+    
+    .ticker-search {
+        display: none;
+    }
+    
+    .ticker-select {
+        min-width: 90px;
+    }
+    
+    .ticker-card {
+        padding: 5px 10px;
+        min-width: 130px;
+        max-width: 150px;
+    }
+    
+    .ticker-card-aqi {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+    }
+    
+    .ticker-card-name {
+        font-size: 10px;
+    }
+    
+    .ticker-card-region {
+        display: none;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const scrollLeft = document.getElementById('ticker-scroll-left');
+    const scrollRight = document.getElementById('ticker-scroll-right');
+    const track = document.querySelector('.ticker-track-wrapper');
+    
+    if (scrollLeft && track) {
+        scrollLeft.addEventListener('click', function() {
+            track.scrollBy({ left: -300, behavior: 'smooth' });
+        });
+    }
+    
+    if (scrollRight && track) {
+        scrollRight.addEventListener('click', function() {
+            track.scrollBy({ left: 300, behavior: 'smooth' });
+        });
+    }
+});
+</script>
+
 <script src="local_forecasts.js?v=1.4.0"></script>
 <script src="local_forecasts_assets.js?v=1.4.0"></script>
 
@@ -145,7 +514,7 @@
 <script>
     document.body.classList.add('home-page');
     $(document).on('click', '.btn-close', function(e) {
-        $('.forecasts_container').css('display', 'none');
+        $('.forecasts_container').empty();
     });
 
 $(document).on('change', '#species-filter', function() {
@@ -398,12 +767,10 @@ $(document).ready(function () {
             }
         });
         
-        // Cluster Radius Change
         $('#cluster-radius').on('input', function() {
             const value = $(this).val();
             $('#cluster-radius-value').text(value + 'px');
             
-            // Update cluster settings if clustering is enabled
             if ($('#show-clusters').is(':checked') && window.currentForecastData) {
                 const geojson = sitesArrayToGeoJSON(window.currentForecastData);
                 
@@ -432,12 +799,10 @@ $(document).ready(function () {
             }
         });
         
-        // Marker Size Change
         $('#marker-size').on('input', function() {
             const value = $(this).val();
             $('#marker-size-value').text(value + 'px');
             
-            // Update all marker sizes
             $('.marker-container > div').css({
                 'width': value + 'px',
                 'height': value + 'px',
@@ -445,23 +810,19 @@ $(document).ready(function () {
             });
         });
         
-        // Marker Opacity Change
         $('#marker-opacity').on('input', function() {
             const value = $(this).val();
             $('#marker-opacity-value').text(value);
             
-            // Update all marker opacities
             $('.marker-container').css('opacity', value);
         });
         
-        // Reset View
         $('#reset-view').on('click', function() {
             if (window.currentMap) {
                 window.currentMap.setView([-1.9297706, 30.1272444], 2);
             }
         });
         
-        // Fit Bounds to All Markers
         $('#fit-bounds').on('click', function() {
             if (window.currentMap && window.currentMarkers) {
                 const bounds = window.currentMarkers.getBounds();

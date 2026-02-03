@@ -434,12 +434,20 @@
             const colorScale = getColorScale(pollutant);
             const minValue = georaster.mins[0];
             const maxValue = georaster.maxs[0];
+            
+            if (!map.getPane('geotiffPane')) {
+                map.createPane('geotiffPane');
+                map.getPane('geotiffPane').style.zIndex = 450;
+                map.getPane('geotiffPane').style.pointerEvents = 'none';
+            }
 
             // Create the layer using GeoRasterLayer with proj4 support
             const layerOptions = {
                 georaster: georaster,
                 opacity: opacity,
-                resolution: resolution,
+                resolution: 256,
+                pane: 'geotiffPane',
+                debugLevel: 0,
                 pixelValuesToColorFn: function(values) {
 
                     if (values.length >= 3) {
@@ -981,6 +989,27 @@
         // Discover available layers
         await discoverAvailableLayers();
         console.log(`Found ${state.availableLayers.length} available layers`);
+        
+        if (window.currentMap) {
+            let redrawTimeout = null;
+            const debouncedRedraw = function() {
+                if (redrawTimeout) clearTimeout(redrawTimeout);
+                redrawTimeout = setTimeout(function() {
+                    if (state.currentLayer) {
+                        if (typeof state.currentLayer.redraw === 'function') {
+                            state.currentLayer.redraw();
+                        }
+                        if (window.currentMap && typeof window.currentMap.invalidateSize === 'function') {
+                            window.currentMap.invalidateSize({ pan: false });
+                        }
+                    }
+                }, 100);
+            };
+            
+            window.currentMap.on('moveend', debouncedRedraw);
+            window.currentMap.on('zoomend', debouncedRedraw);
+            window.currentMap.on('resize', debouncedRedraw);
+        }
 
         if (autoCreateControls) {
 
@@ -1449,7 +1478,7 @@
             /* Floating Quick Access Button */
             .geotiff-quick-btn {
                 position: absolute;
-                bottom: 120px;
+                top: 180px;
                 left: 10px;
                 width: 40px;
                 height: 40px;
@@ -1475,7 +1504,7 @@
             /* Floating Panel */
             .geotiff-floating-panel {
                 position: absolute;
-                bottom: 170px;
+                top: 230px;
                 left: 10px;
                 width: 280px;
                 background: rgba(26, 26, 46, 0.95);
