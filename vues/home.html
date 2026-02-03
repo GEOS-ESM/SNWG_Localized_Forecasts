@@ -617,19 +617,19 @@ $(document).ready(function () {
 
         $(document).on('keyup', '#location-search-input', function() {
             const searchText = $(this).val().toLowerCase().trim();
-            const $allCards = $('.pollutant-banner-o .col-3');
+            const $allCards = $('.ticker-track .ticker-card');
             
             if (searchText === '') {
-                $allCards.attr('style', '');
+                $allCards.css('display', '');
             } else {
                 $allCards.each(function() {
                     const $card = $(this);
-                    const locationName = $card.find('h5.location-name').text().toLowerCase();
+                    const locationName = $card.find('.ticker-card-name').text().toLowerCase();
                     
                     if (locationName.includes(searchText)) {
-                        $card.attr('style', 'display: block !important;');
+                        $card.css('display', 'flex');
                     } else {
-                        $card.attr('style', 'display: none !important;');
+                        $card.css('display', 'none');
                     }
                 });
             }
@@ -637,7 +637,7 @@ $(document).ready(function () {
         
         $(document).on('change', '#species-filter', function() {
             $('#location-search-input').val('');
-            $('.pollutant-banner-o .col-3').attr('style', '');
+            $('.ticker-track .ticker-card').css('display', '');
         });
         
 
