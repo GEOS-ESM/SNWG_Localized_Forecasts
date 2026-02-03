@@ -1,9 +1,51 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@100;300;400;600;700&display=swap');
+@font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 100 700;
+    font-display: swap;
+    src: url('https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggexSg.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+.noussair_animations,
+.marker-container,
+.ticker-card,
+.modal,
+.loading_div {
+    will-change: transform, opacity;
+}
+
+.forecasts_container,
+.modal-content {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px;
+}
+
+.ticker-track {
+    contain: layout style;
+}
+
+#map,
+.leaflet-container {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.ticker-track-wrapper,
+.controls-body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.ticker-card,
+.marker-container > div {
+    contain: layout style paint;
+}
 
 html,
 body {
     font-weight: bold;
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 100;
     overflow-x: hidden !important;
     padding-bottom: 0 !important;
@@ -88,11 +130,8 @@ h1.observation_value {
     padding: .8em 1em;
 }
 
-
-
 .local-forecasts-map-text {
-
-    /*pointer-events: none;*/
+    display: block;
 }
 
 
@@ -247,6 +286,7 @@ mark {
 
 .swiper-container {
     -webkit-user-select: none;
+    user-select: none;
     z-index: 10 !important;
     position: absolute;
     bottom: 29px;

@@ -6,12 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="This tool focuses on generating localized forecasts for select locations based on NASA GMAO's GEOS Composition Forecasting (GEOS-CF). Some of the location data are provided by OpenAQ. Using this library, you can train and load models based on your location data online and measure the uncertainty of the forecast based on the data provided.">
     <meta name="keywords" content="HAQAST, NASA, GEOS-CF, OpenAQ, Air Quality, Forecasts">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
     <title>SNWG Localized Forecasts</title>
 
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://code.jquery.com" crossorigin>
+    <link rel="preconnect" href="https://d3js.org" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://api.github.com">
+    <link rel="dns-prefetch" href="https://basemaps.cartocdn.com">
 
     <link rel="apple-touch-icon" sizes="180x180" href="./parametres/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="./parametres/favicon-32x32.png">
@@ -19,22 +25,48 @@
     <link rel="mask-icon" href="parametres/safari-pinned-tab.svg" color="#5bbad5">
     <link rel="shortcut icon" href="parametres/favicon-32x32.png">
     <meta name="msapplication-TileColor" content="#da532c">
-    <meta name="theme-color" content="#ffffff">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="preload" href="./parametres/lf-style.css?v=1.0.0" as="style" onload="this.rel='stylesheet'">
-    <link rel="preload" href="./parametres/wave.css?v=1.0.0" as="style" onload="this.rel='stylesheet'">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link rel="preload" href="./parametres/lf-style.css?v=1.0.1" as="style">>
+    <link rel="stylesheet" href="./parametres/lf-style.css?v=1.0.1">
+    <link rel="preload" href="./parametres/wave.css?v=1.0.1" as="style">
+    <link rel="stylesheet" href="./parametres/wave.css?v=1.0.1">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" media="print" onload="this.media='all'">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    </noscript>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
+    <script src="https://d3js.org/d3.v7.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js" defer></script>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-    <script type="text/javascript" src="https://d3js.org/d3.v7.min.js?v=2.2.3"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js?v=1.2.2"></script>
+<style>
+    *,*::before,*::after{box-sizing:border-box}
+    body{margin:0;font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fff;min-height:100vh;display:flex;flex-direction:column}
+    header{color:#fff;animation:fadeIn ease-in .6s;position:relative;z-index:500}
+    @keyframes fadeIn{0%{opacity:0;transform:translateY(-10px)}100%{opacity:1;transform:translateY(0)}}
+    .navbar{background-color:#fff;box-shadow:0 1px 0 rgba(0,0,0,.1);display:flex;align-items:center;padding:.5rem 1rem}
+    .navbar-brand{font-size:1.5rem;font-weight:500;color:#5f6368;text-decoration:none;display:flex;align-items:center}
+    .navbar-brand img{height:40px;margin-right:.5rem}
+    .nav-link{font-size:.95rem;color:#5f6368;text-decoration:none;padding:.25rem 0}
+    #map{min-height:90vh!important;height:90vh!important;width:100%;background:#e8e8e8}
+    .snwg-footer{background:#f8f9fa;border-top:1px solid #e9ecef}
+    .w_loader{position:absolute;width:100%;background:#1d4ecce3;z-index:100;height:100vh;display:none;color:#fff;text-align:center;padding-top:17%;padding-left:50%}
+    .loading_div{display:none}
+    .loading_div.show{display:block}
+    @keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
+    .skeleton-shimmer{background:linear-gradient(90deg,#333 25%,#444 50%,#333 75%);background-size:200px 100%;animation:shimmer 1.5s infinite}
+</style>
 
 <style>
 
@@ -48,11 +80,6 @@
       animation: fadeIn ease-in 0.6s;
       position: relative;
       z-index: 500 !important; 
-    }
-
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(-10px); }
-      100% { opacity: 1; transform: translateY(0); }
     }
 
 
@@ -262,6 +289,138 @@ header .nav-link.active,
 </head>
 
 <body>
+
+<div id="cache-consent-banner" class="cache-consent-banner">
+    <div class="cache-consent-content">
+        <span class="cache-consent-text">
+            This platfrom uses caching to improve performance on future visits.
+        </span>
+        <div class="cache-consent-buttons">
+            <button id="cache-accept" class="cache-btn cache-btn-accept">Accept</button>
+            <button id="cache-decline" class="cache-btn cache-btn-decline">Decline</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.cache-consent-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    padding: 12px 20px;
+    z-index: 10000;
+    display: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    animation: slideDown 0.3s ease-out;
+}
+@keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.cache-consent-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.cache-consent-text {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.cache-consent-text i {
+    color: #ffc107;
+    font-size: 16px;
+}
+.cache-consent-buttons {
+    display: flex;
+    gap: 10px;
+}
+.cache-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.cache-btn-accept {
+    background: #28a745;
+    color: #fff;
+}
+.cache-btn-accept:hover {
+    background: #218838;
+}
+.cache-btn-decline {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+.cache-btn-decline:hover {
+    background: rgba(255,255,255,0.1);
+}
+@media (max-width: 576px) {
+    .cache-consent-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    .cache-consent-text {
+        font-size: 13px;
+    }
+    .cache-btn {
+        padding: 6px 16px;
+        font-size: 12px;
+    }
+}
+</style>
+
+<script>
+(function() {
+    const banner = document.getElementById('cache-consent-banner');
+    const acceptBtn = document.getElementById('cache-accept');
+    const declineBtn = document.getElementById('cache-decline');
+    
+    if (!localStorage.getItem('cacheConsent')) {
+        banner.style.display = 'block';
+    }
+    
+    acceptBtn.addEventListener('click', function() {
+        localStorage.setItem('cacheConsent', 'accepted');
+        banner.style.display = 'none';
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                console.log('ServiceWorker registration failed:', err);
+            });
+        }
+    });
+    
+    declineBtn.addEventListener('click', function() {
+        localStorage.setItem('cacheConsent', 'declined');
+        banner.style.display = 'none';
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                registrations.forEach(function(registration) {
+                    registration.unregister();
+                });
+            });
+            caches.keys().then(function(names) {
+                names.forEach(function(name) {
+                    caches.delete(name);
+                });
+            });
+        }
+    });
+})();
+</script>
+
 <div style="background-color: #dc3545; color: white; padding: 15px; text-align: center; font-weight: 600; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
     Website Under Ongoing Updates - Forecasts will be available soon
 </div>
@@ -314,10 +473,10 @@ header .nav-link.active,
 
         <div class="d-flex align-items-center gap-3">
             <a href="https://gmao.gsfc.nasa.gov/" target="_blank" rel="noopener">
-                <img src="parametres/ESD-logo.png" alt="NASA Logo" style="height: 35px;">
+                <img src="parametres/ESD-logo.png" alt="NASA Logo" style="height: 35px;" loading="lazy" decoding="async">
             </a>
             <a href="https://marroninstitute.nyu.edu/" target="_blank" rel="noopener">
-                <img src="parametres/Marron_logo.png" alt="NYU Marron Logo" style="height: 35px;">
+                <img src="parametres/Marron_logo.png" alt="NYU Marron Logo" style="height: 35px;" loading="lazy" decoding="async">
             </a>
         </div>
 
@@ -325,11 +484,11 @@ header .nav-link.active,
 </footer>
 
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
-    <script src='parametres/plotly-2.12.1.min.js'></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js" defer></script>
+    <script src='parametres/plotly-2.12.1.min.js' defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js" defer></script>
 
 
     <script>
@@ -369,7 +528,17 @@ header .nav-link.active,
     })();
     </script>
 
-    <script src="parametres/wavejs.js?v=1.0"></script>
+    <script src="parametres/wavejs.js?v=1.0.1" defer></script>
+
+    <script>
+    if ('serviceWorker' in navigator && localStorage.getItem('cacheConsent') === 'accepted') {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                console.log('ServiceWorker registration skipped:', err);
+            });
+        });
+    }
+    </script>
 
 </body>
 </html>

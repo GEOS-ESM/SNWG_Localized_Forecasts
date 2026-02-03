@@ -1,5 +1,69 @@
 
-// LF V1.0
+// LF V1.1 - Performance Optimized
+const performanceUtils = {
+    requestCache: new Map(),
+    
+    // Debounce function for event handlers
+    debounce: function(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func.apply(this, args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
+    
+    throttle: function(func, limit) {
+        let inThrottle;
+        return function(...args) {
+            if (!inThrottle) {
+                func.apply(this, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    },
+    
+    cachedFetch: async function(url, options = {}, ttl = 300000) {
+        const cacheKey = url;
+        const cached = this.requestCache.get(cacheKey);
+        
+        if (cached && (Date.now() - cached.timestamp < ttl)) {
+            return cached.data;
+        }
+        
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            
+            this.requestCache.set(cacheKey, {
+                data: data,
+                timestamp: Date.now()
+            });
+            
+            if (this.requestCache.size > 100) {
+                const firstKey = this.requestCache.keys().next().value;
+                this.requestCache.delete(firstKey);
+            }
+            
+            return data;
+        } catch (error) {
+            if (cached) return cached.data;
+            throw error;
+        }
+    },
+    
+    clearCache: function() {
+        this.requestCache.clear();
+    }
+};
+
+window.performanceUtils = performanceUtils;
+
 $(document).ready(function() {
     $('body').on('click', '.nl_wave_routing', function(e) {
         e.preventDefault(); 
@@ -549,36 +613,49 @@ window.siteDataCache = window.siteDataCache || {};
 
 /**
  * Load forecast data for a specific site
- * Uses simple in-memory caching only (no IndexedDB)
+ * Uses in-memory caching with 5-minute TTL for better performance
  */
 async function loadSiteForecasts(locationName, filename) {
     const cacheKey = filename;
+    const cacheEntry = window.siteDataCache[cacheKey];
     
-    // Check in-memory cache only
-    if (window.siteDataCache[cacheKey]) {
-        return window.siteDataCache[cacheKey];
+    if (cacheEntry && (Date.now() - cacheEntry.timestamp < 300000)) {
+        return cacheEntry.data;
     }
     
     try {
-        const response = await fetch(`precomputed/all_dts/${filename}?t=${Date.now()}`);
+        const response = await fetch(`precomputed/all_dts/${filename}`, {
+            headers: { 'Accept': 'application/json' }
+        });
         if (!response.ok) throw new Error(`Failed to load ${filename}`);
         
         const text = await response.text();
         const sanitizedText = text.replace(/NaN/g, "null");
         const data = JSON.parse(sanitizedText);
         
-        // Cache in memory only
-        window.siteDataCache[cacheKey] = data;
+        window.siteDataCache[cacheKey] = {
+            data: data,
+            timestamp: Date.now()
+        };
+        
+        const cacheKeys = Object.keys(window.siteDataCache);
+        if (cacheKeys.length > 50) {
+            const oldestKey = cacheKeys.reduce((oldest, key) => {
+                const entry = window.siteDataCache[key];
+                const oldestEntry = window.siteDataCache[oldest];
+                return entry.timestamp < oldestEntry.timestamp ? key : oldest;
+            });
+            delete window.siteDataCache[oldestKey];
+        }
+        
         return data;
     } catch (error) {
         console.error(`Error loading ${filename}:`, error);
+        if (cacheEntry) return cacheEntry.data;
         return null;
     }
 }
 
-/**
- * Get current forecast for a site in its local timezone
- */
 function getCurrentForecast(siteData, timezone) {
     if (!siteData || !siteData.forecasts || siteData.forecasts.length === 0) {
         console.warn("No forecasts available for site");
@@ -754,8 +831,9 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
     if (window.currentForecastData) window.currentForecastData = null;
     showLoadingDiv();
 
-
-    fetch(`precomputed/sites_index.json?t=${Date.now()}`)
+    fetch(`precomputed/sites_index.json`, {
+        headers: { 'Accept': 'application/json' }
+    })
         .then(response => {
             if (!response.ok) throw new Error('Failed to fetch sites index');
             return response.json();
@@ -886,10 +964,10 @@ function processHourlySnapshotOptimized(hourlySnapshot, filteredIndices) {
 }
 
 /**
- * Load individual sites 
+ * Load individual sites with optimized batching and caching
  */
 function loadIndividualSitesOptimized(filteredIndices) {
-    const batchSize = 2; 
+    const batchSize = 4; // Increased batch size for better throughput
     const filteredSites = [];
     let processed = 0;
     let skeletonsRemoved = 0;
@@ -901,16 +979,31 @@ function loadIndividualSitesOptimized(filteredIndices) {
             return;
         }
         
-        Promise.all(batch.map(indexEntry => 
-            fetch(`precomputed/all_dts/${indexEntry.location_name}.json?t=${Date.now()}`)
+        Promise.all(batch.map(indexEntry => {
+            // Check cache first
+            const cacheKey = `${indexEntry.location_name}.json`;
+            const cached = window.siteDataCache[cacheKey];
+            if (cached && (Date.now() - cached.timestamp < 300000)) {
+                return Promise.resolve({...indexEntry, data: cached.data});
+            }
+            
+            return fetch(`precomputed/all_dts/${indexEntry.location_name}.json`, {
+                headers: { 'Accept': 'application/json' }
+            })
                 .then(r => r.text())
                 .then(text => {
                     const sanitizedText = text.replace(/NaN/g, 'null');
-                    return JSON.parse(sanitizedText);
+                    const data = JSON.parse(sanitizedText);
+                    // Cache the result
+                    window.siteDataCache[cacheKey] = {
+                        data: data,
+                        timestamp: Date.now()
+                    };
+                    return data;
                 })
                 .then(data => ({...indexEntry, data}))
-                .catch(() => null)
-        ))
+                .catch(() => null);
+        }))
         .then(results => {
             results.forEach(result => {
                 if (result && result.data && result.data.forecasts) {
