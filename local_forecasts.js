@@ -505,33 +505,19 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
                 const selected = (site.species || "no2").toLowerCase();
                 const isPm25 = selected === "pm25" || selected === "pm2.5";
 
-
-                let isCurrent = false;
-                if (matchingForecast && matchingForecast.forecast_datetime) {
-                    const now = new Date();
-                    const forecastDate = new Date(matchingForecast.forecast_datetime);
-                    isCurrent = (
-                        now.getUTCFullYear() === forecastDate.getUTCFullYear() &&
-                        now.getUTCMonth() === forecastDate.getUTCMonth() &&
-                        now.getUTCDate() === forecastDate.getUTCDate() &&
-                        now.getUTCHours() === forecastDate.getUTCHours()
-                    );
-                }
-               
                 let aqi = "--";
-                if (isCurrent && matchingForecast && typeof matchingForecast === "object") {
+
+                // Use pre-computed forecasted_value if available (set during banner processing)
+                if (site.forecasted_value !== undefined && site.forecasted_value !== null && site.forecasted_value !== "N/A") {
+                    aqi = site.forecasted_value;
+                } else if (matchingForecast && typeof matchingForecast === "object") {
+                    // Fall back to reading directly from current_forecast without timestamp gate
                     if (selected === "no2") {
-                        aqi = matchingForecast.no2_aqi !== undefined && matchingForecast.no2_aqi !== null
-                            ? matchingForecast.no2_aqi
-                            : "--";
+                        aqi = matchingForecast.no2_aqi ?? "--";
                     } else if (isPm25) {
-                        aqi = (matchingForecast.pm25_aqi !== undefined && matchingForecast.pm25_aqi !== null) 
-                            ? matchingForecast.pm25_aqi 
-                            : (calculateAqiForPm25(matchingForecast.pm25) ?? "--");
+                        aqi = matchingForecast.pm25_aqi ?? calculateAqiForPm25(matchingForecast.pm25) ?? "--";
                     } else if (selected === "o3") {
-                        aqi = (matchingForecast.o3_aqi !== undefined && matchingForecast.o3_aqi !== null) 
-                            ? matchingForecast.o3_aqi 
-                            : "--";
+                        aqi = matchingForecast.o3_aqi ?? "--";
                     }
                 }
 
@@ -870,7 +856,6 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
                 $(".ticker-track").append(skeleton);
             }
 
-            // Always load individual sites to get correct local time forecasts
             console.log('Loading individual sites for correct local time forecasts...');
             loadIndividualSitesOptimized(filteredIndices);
         })
@@ -881,6 +866,24 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
         });
 }
 
+
+function getAqiFromForecast(forecast, selected) {
+    if (!forecast) return "N/A";
+    const isPm25 = selected === "pm25" || selected === "pm2.5";
+    let v = null;
+    if (selected === "no2") {
+        v = forecast.no2_aqi ?? forecast.NO2_AQI ?? null;
+    } else if (isPm25) {
+        v = forecast.pm25_aqi ?? forecast.PM25_NowCast_AQI ?? null;
+        if (v === null || isNaN(v)) {
+            const conc = forecast.pm25_conc_cnn ?? forecast.pm25 ?? null;
+            if (conc !== null) v = calculateAqiForPm25(conc);
+        }
+    } else if (selected === "o3") {
+        v = forecast.o3_aqi ?? forecast.O3_AQI ?? null;
+    }
+    return (v !== null && v !== undefined && !isNaN(v)) ? v : "N/A";
+}
 
 function processHourlySnapshotOptimized(hourlySnapshot, filteredIndices) {
     // Create lookup map
@@ -901,23 +904,19 @@ function processHourlySnapshotOptimized(hourlySnapshot, filteredIndices) {
             const selected = (indexEntry.species || snapshotData.species || "no2").toLowerCase();
             const isPm25 = selected === "pm25" || selected === "pm2.5";
             
-            let forecasted_value = "N/A";
-            if (selected === "no2") {
-                forecasted_value = snapshotData.no2_aqi ?? "N/A";
-            } else if (isPm25) {
-                forecasted_value = snapshotData.pm25_aqi ?? calculateAqiForPm25(snapshotData.pm25) ?? "N/A";
-            } else if (selected === "o3") {
-                forecasted_value = snapshotData.o3_aqi ?? "N/A";
-            }
+            let forecasted_value = getAqiFromForecast(snapshotData, selected);
             
             if (forecasted_value !== "N/A") {
+                const no2AqiVal  = snapshotData.no2_aqi  ?? snapshotData.NO2_AQI;
+                const o3AqiVal   = snapshotData.o3_aqi   ?? snapshotData.O3_AQI;
+                const pm25AqiVal = snapshotData.pm25_aqi ?? snapshotData.PM25_NowCast_AQI;
                 const obsOptions = {
                     no2: { unit: "μg/m³", value: snapshotData.no2 || "N/A" },
-                    no2_aqi: { unit: "AQI", value: snapshotData.no2_aqi || "N/A" },
+                    no2_aqi: { unit: "AQI", value: no2AqiVal || "N/A" },
                     o3: { unit: "μg/m³", value: snapshotData.o3 || "N/A" },
-                    o3_aqi: { unit: "AQI", value: snapshotData.o3_aqi || "N/A" },
-                    pm25: { unit: "μg/m³", value: snapshotData.pm25 || "N/A" },
-                    pm25_aqi: { unit: "AQI", value: snapshotData.pm25_aqi || "N/A" },
+                    o3_aqi: { unit: "AQI", value: o3AqiVal || "N/A" },
+                    pm25: { unit: "μg/m³", value: (snapshotData.pm25_conc_cnn ?? snapshotData.pm25) || "N/A" },
+                    pm25_aqi: { unit: "AQI", value: pm25AqiVal || "N/A" },
                     t10m: { unit: "K", value: snapshotData.t10m || "N/A" },
                     rh: { unit: "%", value: snapshotData.rh || "N/A" },
                     wind_speed: { unit: "m/s", value: snapshotData.wind_speed || "N/A" }
@@ -1012,14 +1011,7 @@ function loadIndividualSitesOptimized(filteredIndices) {
                     const currentForecast = getCurrentForecast(result.data, result.data.timezone);
                     if (!currentForecast) return;
                     
-                    let forecasted_value = "N/A";
-                    if (selected === "no2") {
-                        forecasted_value = currentForecast.no2_aqi ?? "N/A";
-                    } else if (isPm25) {
-                        forecasted_value = currentForecast.pm25_aqi ?? calculateAqiForPm25(currentForecast.pm25) ?? "N/A";
-                    } else if (selected === "o3") {
-                        forecasted_value = currentForecast.o3_aqi ?? "N/A";
-                    }
+                    let forecasted_value = getAqiFromForecast(currentForecast, selected);
                     
                     if (forecasted_value !== "N/A") {
                         const obsOptions = {};
@@ -1102,23 +1094,19 @@ function processHourlySnapshot(hourlySnapshot, filteredIndices) {
             const selected = (indexEntry.species || snapshotData.species || "no2").toLowerCase();
             const isPm25 = selected === "pm25" || selected === "pm2.5";
             
-            let forecasted_value = "N/A";
-            if (selected === "no2") {
-                forecasted_value = snapshotData.no2_aqi ?? "N/A";
-            } else if (isPm25) {
-                forecasted_value = snapshotData.pm25_aqi ?? calculateAqiForPm25(snapshotData.pm25) ?? "N/A";
-            } else if (selected === "o3") {
-                forecasted_value = snapshotData.o3_aqi ?? "N/A";
-            }
+            let forecasted_value = getAqiFromForecast(snapshotData, selected);
             
             if (forecasted_value !== "N/A") {
+                const no2AqiVal  = snapshotData.no2_aqi  ?? snapshotData.NO2_AQI;
+                const o3AqiVal   = snapshotData.o3_aqi   ?? snapshotData.O3_AQI;
+                const pm25AqiVal = snapshotData.pm25_aqi ?? snapshotData.PM25_NowCast_AQI;
                 const obsOptions = {
                     no2: { unit: "μg/m³", value: snapshotData.no2 || "N/A" },
-                    no2_aqi: { unit: "AQI", value: snapshotData.no2_aqi || "N/A" },
+                    no2_aqi: { unit: "AQI", value: no2AqiVal || "N/A" },
                     o3: { unit: "μg/m³", value: snapshotData.o3 || "N/A" },
-                    o3_aqi: { unit: "AQI", value: snapshotData.o3_aqi || "N/A" },
-                    pm25: { unit: "μg/m³", value: snapshotData.pm25 || "N/A" },
-                    pm25_aqi: { unit: "AQI", value: snapshotData.pm25_aqi || "N/A" },
+                    o3_aqi: { unit: "AQI", value: o3AqiVal || "N/A" },
+                    pm25: { unit: "μg/m³", value: (snapshotData.pm25_conc_cnn ?? snapshotData.pm25) || "N/A" },
+                    pm25_aqi: { unit: "AQI", value: pm25AqiVal || "N/A" },
                     t10m: { unit: "K", value: snapshotData.t10m || "N/A" },
                     rh: { unit: "%", value: snapshotData.rh || "N/A" },
                     wind_speed: { unit: "m/s", value: snapshotData.wind_speed || "N/A" }
@@ -1186,14 +1174,7 @@ function loadIndividualSites(filteredIndices) {
                         const selected = (siteData.species || indexEntry.species || "no2").toLowerCase();
                         const isPm25 = selected === "pm25" || selected === "pm2.5";
                         
-                        let forecasted_value = "N/A";
-                        if (selected === "no2") {
-                            forecasted_value = matchingForecast.no2_aqi ?? "N/A";
-                        } else if (isPm25) {
-                            forecasted_value = matchingForecast.pm25_aqi ?? calculateAqiForPm25(matchingForecast.pm25) ?? "N/A";
-                        } else if (selected === "o3") {
-                            forecasted_value = matchingForecast.o3_aqi ?? "N/A";
-                        }
+                        let forecasted_value = getAqiFromForecast(matchingForecast, selected);
                         
                         if (forecasted_value !== "N/A") {
                             const obsOptions = {};
@@ -1489,53 +1470,44 @@ function add_the_banner(site, param) {
     const obs_options = $.parseJSON(site.obs_options);
 
     if (site.observation_source) {
-        const t10m = precomputed_forecasts?.[0]?.t10m;
-        const rh = precomputed_forecasts?.[0]?.rh;
-        const windSpeed = precomputed_forecasts?.[0]?.wind_speed || "--";
-        const local_time = precomputed_forecasts?.[0]?.local_time || "--";
-        const no2 = precomputed_forecasts?.[0]?.no2 || "--";
-        const no2_aqi = precomputed_forecasts?.[0]?.no2_aqi || "--";
-        const o3 = precomputed_forecasts?.[0]?.o3 || "--";  
-        const o3_aqi = precomputed_forecasts?.[0]?.o3_aqi || "--";
-        const pm25 = precomputed_forecasts?.[0]?.pm25 || "--";
-        const pm25_aqi = precomputed_forecasts?.[0]?.pm25_aqi || calculateAqiForPm25(pm25) || "--";
+        const forecast = precomputed_forecasts?.[0] || {};
+        const t10m = forecast.t10m;
+        const rh = forecast.rh;
 
-        // Strict current hour check in site's local time
-        let isCurrent = false;
-        if (local_time && local_time.length >= 13) {
-            const now = new Date();
-            const formatter = new Intl.DateTimeFormat('en-US', {
-                timeZone: site.timezone,
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                hour12: false
-            });
-            const parts = formatter.formatToParts(now);
-            const partMap = {};
-            parts.forEach(p => { partMap[p.type] = p.value; });
-            const currentLocalHour = `${partMap.year}-${partMap.month}-${partMap.day} ${String(partMap.hour).padStart(2, '0')}:00:00`;
-            isCurrent = (local_time.substring(0, 13) + ':00:00' === currentLocalHour);
-        }
+        // Support both lowercase (no2_aqi) and uppercase (NO2_AQI) field names from JSON
+        const raw_no2_aqi  = forecast.no2_aqi  ?? forecast.NO2_AQI  ?? null;
+        const raw_o3_aqi   = forecast.o3_aqi   ?? forecast.O3_AQI   ?? null;
+        const raw_pm25_aqi = forecast.pm25_aqi ?? forecast.PM25_NowCast_AQI ?? null;
+        const pm25_conc    = forecast.pm25_conc_cnn ?? forecast.pm25 ?? null;
+
+        // Always show the forecast that getCurrentForecast() already selected
+        // (the caller already did the time-matching; no need for an extra isCurrent gate)
+        const temperature = (typeof t10m === "number" && !isNaN(t10m)) ? (t10m - 273.15).toFixed(1) : "--";
+        const humidity    = (typeof rh   === "number" && !isNaN(rh))   ? (rh  * 100).toFixed(0)     : "--";
 
         let aqiValue = '--';
-        let temperature = "--";
-        let humidity = "--";
         let source = '';
-        if (isCurrent) {
-            temperature = (typeof t10m === "number" && !isNaN(t10m)) ? (t10m - 273.15).toFixed(1) : "--";
-            humidity = (typeof rh === "number" && !isNaN(rh)) ? (rh * 100).toFixed(0) : "--";
-            if (param === "no2") {
-                aqiValue = (no2_aqi === undefined || no2_aqi === null || no2_aqi === "N/A" || isNaN(no2_aqi)) ? '--' : parseInt(no2_aqi);
-                source = "NASA GEOS CF, NASA Pandora";
-            } else if (param === "pm25" || param === "pm2.5") {
-                aqiValue = (pm25_aqi === undefined || pm25_aqi === null || pm25_aqi === "N/A" || isNaN(pm25_aqi)) ? '--' : parseInt(pm25_aqi);
-                source = "NASA GEOS-FP, AirNow";
-            } else if (param === "o3") {
-                aqiValue = (o3_aqi === undefined || o3_aqi === null || o3_aqi === "N/A" || isNaN(o3_aqi)) ? '--' : parseInt(o3_aqi);
-                source = "NASA GEOS CF, NASA Pandora";
-            }
+        if (param === "no2") {
+            const v = raw_no2_aqi !== null && !isNaN(raw_no2_aqi) ? parseInt(raw_no2_aqi) : null;
+            aqiValue = v !== null ? v : '--';
+            source = "NASA GEOS CF, NASA Pandora";
+        } else if (param === "pm25" || param === "pm2.5") {
+            const v = raw_pm25_aqi !== null && !isNaN(raw_pm25_aqi)
+                ? parseInt(raw_pm25_aqi)
+                : (pm25_conc !== null ? calculateAqiForPm25(pm25_conc) : null);
+            aqiValue = v !== null ? v : '--';
+            source = "NASA GEOS-FP, AirNow";
+        } else if (param === "o3") {
+            const v = raw_o3_aqi !== null && !isNaN(raw_o3_aqi) ? parseInt(raw_o3_aqi) : null;
+            aqiValue = v !== null ? v : '--';
+            source = "NASA GEOS CF, NASA Pandora";
+        }
+
+        // Final safety-net: fall back to the pre-computed forecasted_value from the caller
+        if ((aqiValue === '--' || aqiValue === null) &&
+            site.forecasted_value !== undefined && site.forecasted_value !== null &&
+            site.forecasted_value !== 'N/A' && !isNaN(site.forecasted_value)) {
+            aqiValue = parseInt(site.forecasted_value);
         }
 
         
@@ -2409,25 +2381,28 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         const dtStr = datetimes[i];
         if (!dtStr) continue;
         const forecastHourStr = dtStr.slice(0, 13);
-        if (forecastHourStr === currentLocalStr && aqiData[i] !== undefined) {
+        if (forecastHourStr === currentLocalStr && aqiData[i] !== undefined && aqiData[i] !== null) {
             currentAqi = Math.round(aqiData[i]);
         }
-        if (forecastHourStr === prevLocalStr && aqiData[i] !== undefined) {
+        if (forecastHourStr === prevLocalStr && aqiData[i] !== undefined && aqiData[i] !== null) {
             prevAqi = Math.round(aqiData[i]);
         }
     }
     
-    if (currentAqi === '--' && pollutantKey === 'pm25') {
+    // Fallback: find closest entry within ±3 hours for any pollutant (handles 3-hourly data)
+    if (currentAqi === '--') {
+        let bestIdx = -1;
+        let bestDiff = Infinity;
         for (let i = 0; i < datetimes.length; i++) {
-            const dtStr = datetimes[i];
-            if (!dtStr) continue;
-            const forecastStart = new Date(dtStr.replace(' ', 'T'));
-            const forecastEnd = new Date(forecastStart.getTime() + 3 * 60 * 60 * 1000);
-            if (siteLocalNow >= forecastStart && siteLocalNow < forecastEnd && aqiData[i] !== undefined) {
-                currentAqi = Math.round(aqiData[i]);
-                break;
+            if (!datetimes[i] || aqiData[i] === undefined || aqiData[i] === null) continue;
+            const entryMs = new Date(datetimes[i].replace(' ', 'T')).getTime();
+            const diff = Math.abs(entryMs - siteLocalNow.getTime());
+            if (diff < bestDiff && diff <= 3 * 60 * 60 * 1000) {
+                bestDiff = diff;
+                bestIdx = i;
             }
         }
+        if (bestIdx !== -1) currentAqi = Math.round(aqiData[bestIdx]);
     }
     
     let changeValue = '--';
@@ -2477,14 +2452,43 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     }
     
     const getAqiForHour = (hourOffset) => {
-        const targetHour = (currentHour + hourOffset) % 24;
-        const targetStr = `${localYear}-${localMonth}-${localDate} ${pad(targetHour)}`;
+        const targetMs = siteLocalNow.getTime() + hourOffset * 60 * 60 * 1000;
+        const targetDate = new Date(targetMs);
+        const tYear  = targetDate.getFullYear();
+        const tMonth = pad(targetDate.getMonth() + 1);
+        const tDay   = pad(targetDate.getDate());
+        const tHour  = targetDate.getHours();
+        const targetStr = `${tYear}-${tMonth}-${tDay} ${pad(tHour)}`;
+
+        // 1. Try exact hour match first
         for (let i = 0; i < datetimes.length; i++) {
-            if (datetimes[i] && datetimes[i].slice(0, 13) === targetStr && aqiData[i] !== undefined) {
-                return { aqi: Math.round(aqiData[i]), hour: targetHour };
+            if (datetimes[i] && datetimes[i].slice(0, 13) === targetStr && aqiData[i] !== undefined && aqiData[i] !== null) {
+                return { aqi: Math.round(aqiData[i]), hour: tHour, date: `${tYear}-${tMonth}-${tDay}` };
             }
         }
-        return { aqi: '--', hour: targetHour };
+
+        // 2. Fall back: find the closest available entry within ±3 hours
+        let bestIdx = -1;
+        let bestDiff = Infinity;
+        for (let i = 0; i < datetimes.length; i++) {
+            if (!datetimes[i] || aqiData[i] === undefined || aqiData[i] === null) continue;
+            const entryMs = new Date(datetimes[i].replace(' ', 'T')).getTime();
+            const diff = Math.abs(entryMs - targetMs);
+            if (diff < bestDiff && diff <= 3 * 60 * 60 * 1000) {
+                bestDiff = diff;
+                bestIdx = i;
+            }
+        }
+        if (bestIdx !== -1) {
+            const entryDate = new Date(datetimes[bestIdx].replace(' ', 'T'));
+            return {
+                aqi: Math.round(aqiData[bestIdx]),
+                hour: entryDate.getHours(),
+                date: datetimes[bestIdx].slice(0, 10)
+            };
+        }
+
+        return { aqi: '--', hour: tHour, date: `${tYear}-${tMonth}-${tDay}` };
     };
     
     const forecast1 = getAqiForHour(3);

@@ -123,6 +123,16 @@
                 { value: 0.6, color: [94, 201, 98, 180] },
                 { value: 0.8, color: [253, 231, 37, 180] },
                 { value: 1.0, color: [253, 231, 37, 180] }
+            ],
+            // mol/mol scale for GEOS-CF trace gases (NO2, O3, CO, SO2)
+            // Typical surface NO2 max ~1e-7, O3 ~1e-7, CO ~2e-7 mol/mol
+            molmol: [
+                { value: 0,    color: [68,  1,  84, 180] },   // 0 – dark purple
+                { value: 2e-9, color: [59, 82, 139, 180] },   // background
+                { value: 1e-8, color: [33,145, 140, 180] },   // low urban
+                { value: 5e-8, color: [94,201,  98, 180] },   // moderate
+                { value: 1e-7, color: [253,231,  37, 180] },  // high
+                { value: 3e-7, color: [253,231,  37, 180] }   // max
             ]
         },
         
@@ -177,7 +187,13 @@
         return upperColor.color;
     }
 
-    function getColorScale(pollutant) {
+    function getColorScale(pollutant, unit) {
+        // NO2 and O3 from GEOS-CF are in mol/mol (~0–1e-7 range), not ppb.
+        // Use a dedicated mol/mol scale when the unit signals that.
+        const isMolMol = unit && (unit.toLowerCase().includes('mol/mol') || unit.toLowerCase() === 'mol mol-1');
+        if (isMolMol && (pollutant === 'no2' || pollutant === 'o3' || pollutant === 'co' || pollutant === 'so2')) {
+            return CONFIG.colorScales.molmol;
+        }
         const key = (pollutant || 'default').toLowerCase();
         return CONFIG.colorScales[key] || CONFIG.colorScales.default;
     }
@@ -231,13 +247,41 @@
     async function discoverAvailableLayers() {
         const layers = [];
 
+        // ----------------------------------------------------------------
+        // 1. load layers_manifest.json
+        // ----------------------------------------------------------------
+        try {
+            const manifestPath = CONFIG.pmtilesPath + 'layers_manifest.json';
+            const resp = await fetch(manifestPath + '?_=' + Date.now()); // bust cache
+            if (resp.ok) {
+                const manifest = await resp.json();
+                if (manifest.layers && manifest.layers.length > 0) {
+                    for (const layer of manifest.layers) {
+                        // Verify the file actually exists before adding
+                        try {
+                            const check = await fetch(layer.path, { method: 'HEAD' });
+                            if (check.ok) {
+                                layers.push(layer);
+                                console.log(`Manifest layer found: ${layer.name}`);
+                            }
+                        } catch (e) { /* skip */ }
+                    }
+                    state.availableLayers = layers;
+                    CONFIG.availableLayers = layers;
+                    console.log(`Loaded ${layers.length} layers from manifest`);
+                    return layers;
+                }
+            }
+        } catch (e) {
+            console.warn('Could not load layers_manifest.json, falling back to static list', e);
+        }
 
+        // ----------------------------------------------------------------
+        // 2. Fallback: static files
+        // ----------------------------------------------------------------
         const knownFiles = [
             { name: '8bit GeoTIFF', file: '8bit_updated.tiff', type: 'geotiff', pollutant: 'no2', date: null, unit: 'ppb' },
             { name: 'GEOS-CF NO₂ 2026-02-01', file: 'geos_cf_NO2_20260201_09z.tif', type: 'geotiff', pollutant: 'no2', date: '2026-02-01', unit: 'ppb' },
-            { name: 'GEOS-CF O₃ 2026-02-01', file: 'geos_cf_O3_20260201_09z.tif', type: 'geotiff', pollutant: 'o3', date: '2026-02-01', unit: 'ppb' },
-            { name: 'GEOS-CF CO 2026-02-01', file: 'geos_cf_CO_20260201_09z.tif', type: 'geotiff', pollutant: 'co', date: '2026-02-01', unit: 'ppm' },
-            { name: 'GEOS-CF SO₂ 2026-02-01', file: 'geos_cf_SO2_20260201_09z.tif', type: 'geotiff', pollutant: 'so2', date: '2026-02-01', unit: 'ppb' }
         ];
         
         // Check each file exists
@@ -431,7 +475,7 @@
                 }
             }
 
-            const colorScale = getColorScale(pollutant);
+            const colorScale = getColorScale(pollutant, unit);
             const minValue = georaster.mins[0];
             const maxValue = georaster.maxs[0];
             
@@ -965,6 +1009,79 @@
         }
     }
 
+    /**
+     * Pick the best layer for a given pollutant:
+     *   1. Today's TIFF (non-test, date === today UTC)
+     *   2. Most-recent TIFF for that pollutant (non-test, sorted by date desc)
+     *   3. Any TIFF for that pollutant (test included)
+     *   4. null – nothing available
+     */
+    function selectDefaultLayer(pollutant) {
+        const todayUTC = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const pool = state.availableLayers.filter(l => l.pollutant === pollutant);
+
+        if (pool.length === 0) return null;
+
+        // 1. Today, non-test
+        const todayLayer = pool.find(l => !l.test && l.date === todayUTC);
+        if (todayLayer) return todayLayer;
+
+        // 2. Most-recent non-test (sort by date desc, nulls last)
+        const nonTest = pool.filter(l => !l.test && l.date).sort((a, b) => b.date.localeCompare(a.date));
+        if (nonTest.length > 0) return nonTest[0];
+
+        // 3. Fallback: any layer for this pollutant (test included, most recent first)
+        const sorted = pool.filter(l => l.date).sort((a, b) => b.date.localeCompare(a.date));
+        return sorted.length > 0 ? sorted[0] : pool[0];
+    }
+
+    /**
+     * Derive the pollutant to auto-load based on the current species-filter value.
+     *   dos_missions → pm25
+     *   pandora      → no2
+     *   anything else → null (no auto-load)
+     */
+    function pollutantForFilter(filterValue) {
+        if (!filterValue) return null;
+        const v = filterValue.toLowerCase();
+        if (v === 'dos_missions') return 'pm25';
+        if (v === 'pandora')      return 'no2';
+        return null;
+    }
+
+    /**
+     * Load the appropriate default layer for a given filter value and update
+     * both dropdowns to reflect the selection.
+     */
+    async function loadDefaultForFilter(filterValue) {
+        const pollutant = pollutantForFilter(filterValue);
+        if (!pollutant) return;
+
+        const layer = selectDefaultLayer(pollutant);
+        if (!layer) {
+            console.log(`No ${pollutant} layer available for filter "${filterValue}"`);
+            return;
+        }
+
+        const todayUTC = new Date().toISOString().split('T')[0];
+        const label = layer.date === todayUTC ? "today's" : `most-recent (${layer.date})`;
+        console.log(`Auto-loading ${label} ${pollutant.toUpperCase()} layer: ${layer.name}`);
+
+        await loadGeoTIFF(layer.path, { pollutant: layer.pollutant, name: layer.name, unit: layer.unit });
+
+        // Sync both dropdowns to show the selected layer
+        ['geotiff-layer-select', 'geotiff-floating-select'].forEach(id => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            for (let i = 0; i < sel.options.length; i++) {
+                if (sel.options[i].value === layer.path) {
+                    sel.selectedIndex = i;
+                    break;
+                }
+            }
+        });
+    }
+
     // Initialize the GeoTIFF Manager
     async function init(options = {}) {
         const {
@@ -1036,34 +1153,20 @@
         console.log('GeoTIFF Manager initialized');
 
         if (CONFIG.loadDefaultOnInit && window.currentMap) {
-            console.log('Loading default GeoTIFF layer...');
-            setTimeout(() => {
-                loadGeoTIFF(CONFIG.defaultLayer, {
-                    pollutant: 'no2',
-                    name: CONFIG.defaultLayerName
-                }).then(() => {
+            console.log('Auto-loading default layer based on active filter...');
+            setTimeout(async () => {
+                // Read the current species-filter value (dos_missions → pm25, pandora → no2)
+                const filterEl = document.getElementById('species-filter');
+                const filterValue = filterEl ? filterEl.value : 'dos_missions';
+                await loadDefaultForFilter(filterValue);
 
-                    const select = document.getElementById('geotiff-layer-select');
-                    if (select) {
-                        for (let i = 0; i < select.options.length; i++) {
-                            if (select.options[i].value === CONFIG.defaultLayer) {
-                                select.selectedIndex = i;
-                                break;
-                            }
-                        }
-                    }
-                    const floatingSelect = document.getElementById('geotiff-floating-select');
-                    if (floatingSelect) {
-                        for (let i = 0; i < floatingSelect.options.length; i++) {
-                            if (floatingSelect.options[i].value === CONFIG.defaultLayer) {
-                                floatingSelect.selectedIndex = i;
-                                break;
-                            }
-                        }
-                    }
-                }).catch(err => {
-                    console.warn('Could not load default layer:', err);
-                });
+                // Re-trigger whenever the user changes the filter
+                if (filterEl && !filterEl._geotiffListenerAttached) {
+                    filterEl._geotiffListenerAttached = true;
+                    filterEl.addEventListener('change', function() {
+                        loadDefaultForFilter(this.value);
+                    });
+                }
             }, 500);
         }
         
@@ -1109,7 +1212,7 @@
         
         let layerOptions = '<option value="">-- Select Layer --</option>';
         state.availableLayers.forEach(layer => {
-            layerOptions += `<option value="${layer.path}" data-type="${layer.type}" data-pollutant="${layer.pollutant}">${layer.name}</option>`;
+            layerOptions += `<option value="${layer.path}" data-type="${layer.type}" data-pollutant="${layer.pollutant}" data-unit="${layer.unit || ''}">${layer.name}</option>`;
         });
         
         panel.innerHTML = `
@@ -1614,6 +1717,9 @@
         loadGeoTIFF,
         loadPMTiles,
         discoverAvailableLayers,
+
+        selectDefaultLayer,
+        loadDefaultForFilter,
         
         // Layer controls
         removeCurrentLayer,
