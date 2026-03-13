@@ -744,7 +744,7 @@
         };
     }
 
-    // Legend - displays color scale and pollutant info
+    // Legend - displays US AQI scale only
     function updateLegend(pollutant, minValue, maxValue, unit) {
         let legend = document.getElementById('geotiff-legend');
         
@@ -755,40 +755,29 @@
             document.body.appendChild(legend);
         }
 
-        const colorScale = getColorScale(pollutant);
-        
-
-        const displayUnit = unit || POLLUTANT_UNITS[pollutant] || POLLUTANT_UNITS.default;
-        
-        const pollutantLabels = {
-            no2: `NO₂ (${displayUnit})`,
-            pm25: `PM2.5 (${displayUnit})`,
-            o3: `O₃ (${displayUnit})`,
-            co: `CO (${displayUnit})`,
-            so2: `SO₂ (${displayUnit})`,
-            default: `Value (${displayUnit})`
-        };
-
-        const gradientStops = colorScale.map((stop, index) => {
-            const percent = (index / (colorScale.length - 1)) * 100;
-            return `rgba(${stop.color[0]}, ${stop.color[1]}, ${stop.color[2]}, ${stop.color[3] / 255}) ${percent}%`;
-        }).join(', ');
-        
-        // Use actual numeric values from the data for legend labels
-        let legendMin = minValue?.toFixed(1) || '0';
-        let legendMid = ((maxValue + minValue) / 2)?.toFixed(1) || '50';
-        let legendMax = maxValue?.toFixed(1) || '100';
+        // Extract date from layer name if available
+        let displayDate = "";
+        if (state.currentLayerName) {
+            const dateMatch = state.currentLayerName.match(/\d{8}/);
+            if (dateMatch) {
+                const d = dateMatch[0];
+                displayDate = `${d.substring(0,4)}-${d.substring(4,6)}-${d.substring(6,8)}`;
+            } else {
+                displayDate = new Date().toISOString().split('T')[0];
+            }
+        }
 
         legend.innerHTML = `
-            <div class="legend-header">
-                <span class="legend-title">${pollutantLabels[pollutant] || pollutantLabels.default}</span>
-                <button class="legend-close" onclick="GeoTIFFManager.toggleLegend()" title="Hide Legend">×</button>
+            <div class="aqi-legend-wrapper">
+            <div class="aqi-category good">Good</div>
+            <div class="aqi-category moderate">Moderate</div>
+            <div class="aqi-category usg">Unhealthy for sensitive groups</div>
+            <div class="aqi-category unhealthy">Unhealthy</div>
+            <div class="aqi-category vunhealthy">Very unhealthy</div>
+            <div class="aqi-category hazardous">Hazardous</div>
+            <div class="aqi-legend-footer">
+                <span>Data provenance: GEOS‑CF; NASA Pandora. Display date: ${displayDate}. Reported values correspond to global daily averages or site-specific hourly means as indicated. GEOS‑FP CNN outputs are presented as 3‑hour running averages. Interpret concentrations in the context of the pollutant units shown.</span>
             </div>
-            <div class="legend-gradient" style="background: linear-gradient(to right, ${gradientStops});"></div>
-            <div class="legend-labels">
-                <span>${legendMin}</span>
-                <span>${legendMid}</span>
-                <span>${legendMax}</span>
             </div>
         `;
 
@@ -1293,115 +1282,128 @@
             /* GeoTIFF Loading Indicator */
             .geotiff-loading {
                 position: fixed;
-                top: 50%;
                 left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0, 0, 0, 0.85);
+                transform: translateX(-50%);
+                bottom: 140px;
+                background: rgba(0, 0, 0, 0.8);
                 color: white;
-                padding: 20px 30px;
-                border-radius: 10px;
+                padding: 4px 8px;
+                border-radius: 0;
                 display: flex;
                 align-items: center;
-                gap: 15px;
-                z-index: 10000;
+                justify-content: center;
+                gap: 8px;
+                z-index: 999;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                width: 100%;
+                font-size: 10px;
             }
             
             .geotiff-loading-spinner {
-                width: 24px;
-                height: 24px;
-                border: 3px solid rgba(255, 255, 255, 0.3);
+                width: 12px;
+                height: 12px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
                 border-top-color: #1da1f2;
                 border-radius: 50%;
                 animation: geotiff-spin 1s linear infinite;
+            }
+            
+            .geotiff-loading-text {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             
             @keyframes geotiff-spin {
                 to { transform: rotate(360deg); }
             }
             
-            /* GeoTIFF Legend - Enhanced for Heatmap */
+            /* GeoTIFF Legend - Horizontal Layout on Banner */
             .geotiff-legend {
                 position: fixed;
-                bottom: 30px;
-                right: 20px;
-                background: rgba(255, 255, 255, 0.97);
-                border-radius: 12px;
-                padding: 16px 18px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-                z-index: 1000;
-                min-width: 220px;
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 140px;
+                background: transparent;
+                border-radius: 0;
+                padding: 0;
+                box-shadow: none;
+                z-index: 999;
+                max-width: 100vw;
+                display: block !important;
+                width: 100%;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-                backdrop-filter: blur(8px);
-                border: 1px solid rgba(255, 255, 255, 0.8);
             }
             
-            .legend-header {
+            /* Static AQI Legend Wrapper */
+            .aqi-legend-wrapper {
                 display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 12px;
-                gap: 8px;
-            }
-            
-            .legend-title {
-                font-weight: 700;
-                font-size: 14px;
-                color: #1a1a1a;
-                letter-spacing: 0.3px;
-            }
-            
-            .legend-close {
-                background: none;
-                border: none;
-                font-size: 20px;
-                cursor: pointer;
-                color: #888;
-                padding: 0 4px;
-                line-height: 1;
-                display: flex;
-                align-items: center;
+                flex-wrap: wrap;
                 justify-content: center;
-                width: 24px;
-                height: 24px;
-                transition: all 0.2s;
-                flex-shrink: 0;
+                align-items: stretch;
+                gap: 0;
+                padding: 0;
+                background: transparent;
+                width: 100%;
             }
             
-            .legend-close:hover {
-                color: #333;
-                transform: scale(1.1);
-            }
-            
-            .legend-gradient {
-                height: 16px;
-                border-radius: 4px;
-                margin-bottom: 10px;
-                border: 1px solid rgba(0, 0, 0, 0.1);
-                box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-            }
-            
-            .legend-labels {
-                display: flex;
-                justify-content: space-between;
-                font-size: 12px;
-                color: #555;
-                font-weight: 500;
-                gap: 4px;
-            }
-            
-            .legend-labels span {
+            /* Individual AQI Categories */
+            .aqi-category {
                 flex: 1;
+                min-width: 60px;
+                max-width: 150px;
+                padding: 6px 8px;
+                font-size: 11px;
+                font-weight: 600;
+                color: white;
                 text-align: center;
+                border: none;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             
-            .legend-labels span:first-child {
-                text-align: left;
+            .aqi-category.good {
+                background-color: #00E400;
+                color: #333;
             }
             
-            .legend-labels span:last-child {
-                text-align: right;
+            .aqi-category.moderate {
+                background-color: #FFFF00;
+                color: #333;
             }
+            
+            .aqi-category.usg {
+                background-color: #FF7E00;
+                color: white;
+            }
+            
+            .aqi-category.unhealthy {
+                background-color: #FF0000;
+                color: white;
+            }
+            
+            .aqi-category.vunhealthy {
+                background-color: #8F3F97;
+                color: white;
+            }
+            
+            .aqi-category.hazardous {
+                background-color: #7E0023;
+                color: white;
+            }
+            
+            /* Legend Footer */
+            .aqi-legend-footer {
+                width: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                font-size: 10px;
+                padding: 4px 8px;
+                text-align: center;
+                font-weight: 500;
+            }
+
             
             /* GeoTIFF Control Section - Enhanced */
             .geotiff-control-section {
@@ -1703,6 +1705,71 @@
             
             .floating-remove-btn:hover {
                 background: rgba(239, 68, 68, 1);
+            }
+            
+            /* Mobile Legend Positioning */
+            @media (max-width: 768px) {
+                .geotiff-legend {
+                    bottom: 130px;
+                }
+                
+                .geotiff-loading {
+                    bottom: 130px;
+                }
+                
+                .aqi-category {
+                    min-width: 50px;
+                    max-width: 100px;
+                    padding: 5px 6px;
+                    font-size: 10px;
+                }
+                
+                .aqi-legend-footer {
+                    font-size: 9px;
+                    padding: 3px 6px;
+                }
+                
+                .geotiff-loading-spinner {
+                    width: 11px;
+                    height: 11px;
+                    border: 1.5px solid rgba(255, 255, 255, 0.3);
+                }
+                
+                .geotiff-loading-text {
+                    font-size: 9px;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                .geotiff-legend {
+                    bottom: 125px;
+                }
+                
+                .geotiff-loading {
+                    bottom: 125px;
+                }
+                
+                .aqi-category {
+                    min-width: 40px;
+                    max-width: 80px;
+                    padding: 4px 4px;
+                    font-size: 9px;
+                }
+                
+                .aqi-legend-footer {
+                    font-size: 8px;
+                    padding: 2px 4px;
+                }
+                
+                .geotiff-loading-spinner {
+                    width: 10px;
+                    height: 10px;
+                    border: 1.5px solid rgba(255, 255, 255, 0.3);
+                }
+                
+                .geotiff-loading-text {
+                    font-size: 8px;
+                }
             }
         `;
         

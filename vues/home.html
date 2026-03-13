@@ -137,7 +137,7 @@
 <style>
 .locations-ticker-banner {
     position: fixed;
-    bottom: 6%;
+    bottom: 50px;
     left: 0;
     right: 0;
     width: 100%;
@@ -408,7 +408,7 @@
 
 @media (max-width: 768px) {
     .locations-ticker-banner {
-        bottom: 60px;
+        bottom: 50px;
     }
     
     .ticker-controls {
@@ -449,11 +449,26 @@
 
 @media (max-width: 480px) {
     .locations-ticker-banner {
-        bottom: 55px;
+        bottom: 45px;
     }
     
     .ticker-search {
-        display: none;
+        display: flex;
+    }
+    
+    .ticker-search-input {
+        width: 80px;
+        font-size: 11px;
+        padding: 5px 10px 5px 26px;
+    }
+    
+    .ticker-search-input:focus {
+        width: 100px;
+    }
+    
+    .ticker-search-icon {
+        font-size: 11px;
+        left: 8px;
     }
     
     .ticker-select {
