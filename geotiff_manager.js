@@ -746,7 +746,19 @@
 
     // Legend - displays US AQI scale only
     function updateLegend(pollutant, minValue, maxValue, unit) {
+        // Only create legend on home page
+        const isHomePage = document.body.classList.contains('home-page');
+        
         let legend = document.getElementById('geotiff-legend');
+        
+        // Hide legend if not on home page
+        if (!isHomePage) {
+            if (legend) {
+                legend.style.display = 'none';
+            }
+            console.log('Legend only displays on home page');
+            return;
+        }
         
         if (!legend) {
             legend = document.createElement('div');
@@ -1318,7 +1330,7 @@
                 to { transform: rotate(360deg); }
             }
             
-            /* GeoTIFF Legend - Horizontal Layout on Banner */
+            /* GeoTIFF Legend - Horizontal Layout on Banner (HOME PAGE ONLY) */
             .geotiff-legend {
                 position: fixed;
                 left: 50%;
@@ -1330,9 +1342,14 @@
                 box-shadow: none;
                 z-index: 999;
                 max-width: 100vw;
-                display: block !important;
+                display: none !important;
                 width: 100%;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            }
+            
+            /* Only show legend on home page */
+            body.home-page .geotiff-legend {
+                display: block !important;
             }
             
             /* Static AQI Legend Wrapper */
