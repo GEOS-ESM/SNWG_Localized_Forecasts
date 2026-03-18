@@ -91,6 +91,26 @@
       "test": false
     },
     {
+      "file": "geos_cf_NO2_20260320_09z.tif",
+      "path": "precomputed/pmtiles_output/geos_cf_NO2_20260320_09z.tif",
+      "name": "GEOS-CF NO2 2026-03-20",
+      "pollutant": "no2",
+      "type": "geotiff",
+      "unit": "mol/mol",
+      "date": "2026-03-20",
+      "test": false
+    },
+    {
+      "file": "geos_cf_NO2_20260321_09z.tif",
+      "path": "precomputed/pmtiles_output/geos_cf_NO2_20260321_09z.tif",
+      "name": "GEOS-CF NO2 2026-03-21",
+      "pollutant": "no2",
+      "type": "geotiff",
+      "unit": "mol/mol",
+      "date": "2026-03-21",
+      "test": false
+    },
+    {
       "file": "geos_cf_PM25_RH35_20260311_09z.tif",
       "path": "precomputed/pmtiles_output/geos_cf_PM25_RH35_20260311_09z.tif",
       "name": "GEOS-CF PM25 RH35 2026-03-11",
@@ -179,7 +199,27 @@
       "unit": "\u03bcg/m\u00b3",
       "date": "2026-03-19",
       "test": false
+    },
+    {
+      "file": "geos_cf_PM25_RH35_20260320_09z.tif",
+      "path": "precomputed/pmtiles_output/geos_cf_PM25_RH35_20260320_09z.tif",
+      "name": "GEOS-CF PM25 RH35 2026-03-20",
+      "pollutant": "pm25",
+      "type": "geotiff",
+      "unit": "\u03bcg/m\u00b3",
+      "date": "2026-03-20",
+      "test": false
+    },
+    {
+      "file": "geos_cf_PM25_RH35_20260321_09z.tif",
+      "path": "precomputed/pmtiles_output/geos_cf_PM25_RH35_20260321_09z.tif",
+      "name": "GEOS-CF PM25 RH35 2026-03-21",
+      "pollutant": "pm25",
+      "type": "geotiff",
+      "unit": "\u03bcg/m\u00b3",
+      "date": "2026-03-21",
+      "test": false
     }
   ],
-  "generated": "2026-03-16T05:51:48.938663+00:00"
+  "generated": "2026-03-18T05:58:17.027772+00:00"
 }
