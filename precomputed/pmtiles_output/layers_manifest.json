@@ -291,6 +291,36 @@
       "test": false
     },
     {
+      "file": "geos_cf_NO2_20260409_09z.tif",
+      "path": "precomputed/pmtiles_output/geos_cf_NO2_20260409_09z.tif",
+      "name": "GEOS-CF NO2 2026-04-09",
+      "pollutant": "no2",
+      "type": "geotiff",
+      "unit": "mol/mol",
+      "date": "2026-04-09",
+      "test": false
+    },
+    {
+      "file": "geos_cf_NO2_20260410_09z.tif",
+      "path": "precomputed/pmtiles_output/geos_cf_NO2_20260410_09z.tif",
+      "name": "GEOS-CF NO2 2026-04-10",
+      "pollutant": "no2",
+      "type": "geotiff",
+      "unit": "mol/mol",
+      "date": "2026-04-10",
+      "test": false
+    },
+    {
+      "file": "geos_cf_NO2_20260411_09z.tif",
+      "path": "precomputed/pmtiles_output/geos_cf_NO2_20260411_09z.tif",
+      "name": "GEOS-CF NO2 2026-04-11",
+      "pollutant": "no2",
+      "type": "geotiff",
+      "unit": "mol/mol",
+      "date": "2026-04-11",
+      "test": false
+    },
+    {
       "file": "geos_cf_PM25_RH35_20260311_09z.tif",
       "path": "precomputed/pmtiles_output/geos_cf_PM25_RH35_20260311_09z.tif",
       "name": "GEOS-CF PM25 RH35 2026-03-11",
@@ -579,7 +609,37 @@
       "unit": "\u03bcg/m\u00b3",
       "date": "2026-04-08",
       "test": false
+    },
+    {
+      "file": "geos_cf_PM25_RH35_20260409_09z.tif",
+      "path": "precomputed/pmtiles_output/geos_cf_PM25_RH35_20260409_09z.tif",
+      "name": "GEOS-CF PM25 RH35 2026-04-09",
+      "pollutant": "pm25",
+      "type": "geotiff",
+      "unit": "\u03bcg/m\u00b3",
+      "date": "2026-04-09",
+      "test": false
+    },
+    {
+      "file": "geos_cf_PM25_RH35_20260410_09z.tif",
+      "path": "precomputed/pmtiles_output/geos_cf_PM25_RH35_20260410_09z.tif",
+      "name": "GEOS-CF PM25 RH35 2026-04-10",
+      "pollutant": "pm25",
+      "type": "geotiff",
+      "unit": "\u03bcg/m\u00b3",
+      "date": "2026-04-10",
+      "test": false
+    },
+    {
+      "file": "geos_cf_PM25_RH35_20260411_09z.tif",
+      "path": "precomputed/pmtiles_output/geos_cf_PM25_RH35_20260411_09z.tif",
+      "name": "GEOS-CF PM25 RH35 2026-04-11",
+      "pollutant": "pm25",
+      "type": "geotiff",
+      "unit": "\u03bcg/m\u00b3",
+      "date": "2026-04-11",
+      "test": false
     }
   ],
-  "generated": "2026-04-05T05:23:54.257910+00:00"
+  "generated": "2026-04-08T15:36:45.734314+00:00"
 }
