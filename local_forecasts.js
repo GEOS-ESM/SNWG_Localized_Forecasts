@@ -1,9 +1,8 @@
-
-// LF V1.1 - Performance Optimized
+// LF-V1.1
 const performanceUtils = {
     requestCache: new Map(),
     
-    // Debounce function for event handlers
+    // Debounce
     debounce: function(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -81,7 +80,7 @@ $(document).ready(function() {
             });
             
             if (page === 'home.html') {
-                // Add home-page class for map view (no scrolling)
+                // Home
                 $('body').removeClass('about-page').addClass('home-page');
                 $('body, html').css({
                     'overflow': 'hidden',
@@ -90,19 +89,19 @@ $(document).ready(function() {
                 
                 setTimeout(() => {
                     if (window.currentMap) {
-                        // Leaflet's method to resize the map
+                        // Resize
                         window.currentMap.invalidateSize();
                     }
                 }, 100);
             } else if (page === 'about.html') {
-                // Add about-page class for scrollable content
+                // About
                 $('body').removeClass('home-page').addClass('about-page');
                 $('body, html').css({
                     'overflow': 'auto',
                     'height': 'auto'
                 });
             } else {
-                // Default for other pages - allow scrolling
+                // Default
                 $('body').removeClass('home-page').addClass('about-page');
                 $('body, html').css({
                     'overflow': 'auto',
@@ -135,7 +134,7 @@ function showLoadingToast() {
 }
 
 
-// Leaflet.js configuration 
+// Leaflet
 
 var deltaDegrees = 25;
 
@@ -408,16 +407,15 @@ function get_open_aq_observations(site_id, param) {
 
 function create_map(sites, param) {
 
-    // Check if map exists AND its container is still in the DOM
-    // When navigating away and back, the DOM element is recreated but window.currentMap points to old instance
+    // Validation
     let map = window.currentMap;
     const mapContainer = document.getElementById('map');
     
-    // If map exists but container is different or doesn't exist, we need to recreate
+    // Recreate
     const needsRecreate = !map || !mapContainer || (map._container !== mapContainer);
     
     if (needsRecreate) {
-        // Clean up old map if it exists
+        // Cleanup
         if (window.currentMap) {
             try {
                 window.currentMap.remove();
@@ -427,16 +425,16 @@ function create_map(sites, param) {
             window.currentMap = null;
         }
         
-        // Clean up old markers
+        // Markers
         if (window.currentMarkers) {
             window.currentMarkers = null;
         }
         
         $('#map').html('');
         
-        var center_point = [-1.9297706, 30.1272444]; // [lat, lng] for Leaflet
+        var center_point = [-1.9297706, 30.1272444];
         
-        // Create Leaflet map with dark tiles
+        // Initialize
         map = L.map('map', {
             center: center_point,
             zoom: 2,
@@ -447,26 +445,25 @@ function create_map(sites, param) {
             maxBoundsViscosity: 1.0
         });
         
-        // Add CartoDB Voyager tiles as default (free, no API key needed)
+        // Tiles
         window.currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             subdomains: 'abcd',
             maxZoom: 20,
-            noWrap: false  // Allow tile wrapping to fill the entire map area
+            noWrap: false
         }).addTo(map);
         
-        // Store reference for future updates
+        // References
         window.currentMap = map;
-        // Start with a simple layer group (no clustering) - clustering disabled by default
         window.currentMarkers = L.layerGroup();
         map.addLayer(window.currentMarkers);
         
-        // Store hover info div reference
+        // Hover
         window.hoverDiv = document.getElementById('map-hover-info');
         
         console.log('Map created/recreated successfully');
     } else {
-        // Map exists and container is valid, just invalidate size
+        // Resize
         map.invalidateSize();
     }
 
@@ -489,7 +486,7 @@ function create_map(sites, param) {
         mapVisible = !mapVisible;
     });
 
-    // Add markers from GeoJSON after map is ready
+    // Markers
     if (sites && sites.features && sites.features.length > 0) {
         updateLeafletMarkers(map, sites);
     }
@@ -507,11 +504,11 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
 
                 let aqi = "--";
 
-                // Use pre-computed forecasted_value if available (set during banner processing)
+                // Precomputed
                 if (site.forecasted_value !== undefined && site.forecasted_value !== null && site.forecasted_value !== "N/A") {
                     aqi = site.forecasted_value;
                 } else if (matchingForecast && typeof matchingForecast === "object") {
-                    // Fall back to reading directly from current_forecast without timestamp gate
+                    // Fallback
                     if (selected === "no2") {
                         aqi = matchingForecast.no2_aqi ?? "--";
                     } else if (isPm25) {
@@ -594,12 +591,11 @@ function generateSmallAqiBox(aqiValue, pollutant) {
     `;
 }
 
-// Cache for loaded site forecasts to avoid reloading
+// Cache
 window.siteDataCache = window.siteDataCache || {};
 
 /**
- * Load forecast data for a specific site
- * Uses in-memory caching with 5-minute TTL for better performance
+ * Load forecast data
  */
 async function loadSiteForecasts(locationName, filename) {
     const cacheKey = filename;
@@ -610,7 +606,7 @@ async function loadSiteForecasts(locationName, filename) {
     }
     
     try {
-        const response = await fetch(`precomputed/all_dts/${filename}`, {
+        const response = await fetch(`https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/all_dts/${filename}`, {
             headers: { 'Accept': 'application/json' }
         });
         if (!response.ok) throw new Error(`Failed to load ${filename}`);
@@ -649,7 +645,7 @@ function getCurrentForecast(siteData, timezone) {
     }
     const now = new Date();
     
-    // Get current hour in site's local timezone
+    // Timezone
     const formatter = new Intl.DateTimeFormat('en-US', {
         timeZone: timezone,
         year: 'numeric',
@@ -667,8 +663,7 @@ function getCurrentForecast(siteData, timezone) {
     
     const currentHour = parseInt(partMap.hour);
     
-    // Check if this is a DoS Mission PM2.5 site (uses 3-hour averages)
-    // DoS Mission PM2.5 sites have observation_source=None and forecasts at 0, 3, 6, 9, 12, 15, 18, 21 hours
+    // DoS-PM25
     const isDosMissionPm25 = siteData.species === 'pm25' && 
                              !siteData.observation_source &&
                              siteData.forecasts.some(f => {
@@ -704,10 +699,10 @@ function getCurrentForecast(siteData, timezone) {
             }
         }
     } else {
-        // forecast for current hour
+        // Hourly
         const currentLocalHour = `${partMap.year}-${partMap.month}-${partMap.day} ${String(currentHour).padStart(2, '0')}:00:00`;
         
-        // exact hour match 
+        // Match
         for (const forecast of siteData.forecasts) {
             if (!forecast.local_time) continue;
             if (forecast.local_time.substring(0, 13) + ':00:00' === currentLocalHour) {
@@ -715,7 +710,7 @@ function getCurrentForecast(siteData, timezone) {
             }
         }
         
-        // find closest by comparing hours
+        // Closest
         for (const forecast of siteData.forecasts) {
             if (!forecast.local_time) continue;
             const forecastHour = parseInt(forecast.local_time.substring(11, 13));
@@ -736,7 +731,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
     if (window.currentForecastData) window.currentForecastData = null;
     showLoadingDiv();
 
-    // Load the lightweight index 
+    // Index
     fetch("precomputed/sites_index.json")
         .then(response => {
             if (!response.ok) throw new Error('Failed to fetch sites index');
@@ -745,7 +740,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
         .then(siteIndex => {
             console.log("Selected source:", selectedSource);
             
-            // Filter sites by source
+            // Filter
             const filteredIndices = siteIndex.filter(site => {
                 if (!Array.isArray(site.sources)) return false;
                 const siteSources = site.sources.map(s => s.toLowerCase());
@@ -759,10 +754,10 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
 
             console.log(`Found ${filteredIndices.length} sites for source: ${selectedSource}`);
             
-            // Clear existing ticker cards and show loading
+            // Clear
             $(".ticker-track").empty();
             
-            // Show ticker loading skeletons
+            // Skeletons
             const skeletonCount = Math.min(12, filteredIndices.length);
             for (let i = 0; i < skeletonCount; i++) {
                 const skeleton = `
@@ -785,7 +780,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
                     const day = String(attemptDate.getUTCDate()).padStart(2, '0');
                     const hour = String(attemptDate.getUTCHours()).padStart(2, '0');
                     
-                    const snapshotPath = `precomputed/hourly_forecasts/${year}-${month}-${day}_${hour}.json`;
+                    const snapshotPath = `https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/hourly_forecasts/${year}-${month}-${day}_${hour}.json`;
                     
                     try {
                         const response = await fetch(snapshotPath);
@@ -827,7 +822,7 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
         .then(siteIndex => {
             console.log("Selected source:", selectedSource);
             
-            // Filter sites by source
+            // Filter
             const filteredIndices = siteIndex.filter(site => {
                 if (!Array.isArray(site.sources)) return false;
                 const siteSources = site.sources.map(s => s.toLowerCase());
@@ -841,10 +836,10 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
 
             console.log(`Found ${filteredIndices.length} sites for source: ${selectedSource}`);
             
-            // Clear existing ticker cards and show loading
+            // Clear
             $(".ticker-track").empty();
             
-            // Show ticker loading skeletons
+            // Skeletons
             const skeletonCount = Math.min(12, filteredIndices.length);
             for (let i = 0; i < skeletonCount; i++) {
                 const skeleton = `
@@ -886,7 +881,7 @@ function getAqiFromForecast(forecast, selected) {
 }
 
 function processHourlySnapshotOptimized(hourlySnapshot, filteredIndices) {
-    // Create lookup map
+    // Lookup
     const snapshotMap = {};
     hourlySnapshot.sites.forEach(site => {
         snapshotMap[site.location_name] = site;
@@ -963,10 +958,10 @@ function processHourlySnapshotOptimized(hourlySnapshot, filteredIndices) {
 }
 
 /**
- * Load individual sites with optimized batching and caching
+ * Optimized loading
  */
 function loadIndividualSitesOptimized(filteredIndices) {
-    const batchSize = 4; // Increased batch size for better throughput
+    const batchSize = 4;
     const filteredSites = [];
     let processed = 0;
     let skeletonsRemoved = 0;
@@ -979,21 +974,21 @@ function loadIndividualSitesOptimized(filteredIndices) {
         }
         
         Promise.all(batch.map(indexEntry => {
-            // Check cache first
+            // Cache
             const cacheKey = `${indexEntry.location_name}.json`;
             const cached = window.siteDataCache[cacheKey];
             if (cached && (Date.now() - cached.timestamp < 300000)) {
                 return Promise.resolve({...indexEntry, data: cached.data});
             }
             
-            return fetch(`precomputed/all_dts/${indexEntry.location_name}.json`, {
+            return fetch(`https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/all_dts/${indexEntry.location_name}.json`, {
                 headers: { 'Accept': 'application/json' }
             })
                 .then(r => r.text())
                 .then(text => {
                     const sanitizedText = text.replace(/NaN/g, 'null');
                     const data = JSON.parse(sanitizedText);
-                    // Cache the result
+                    // Store
                     window.siteDataCache[cacheKey] = {
                         data: data,
                         timestamp: Date.now()
@@ -1070,13 +1065,13 @@ function loadIndividualSitesOptimized(filteredIndices) {
 function finalizeSitesLoadingOptimized(filteredSites) {
     window.currentForecastData = filteredSites;
     const geojson = sitesArrayToGeoJSON(filteredSites);
-    // Always update markers
+    // Update
     updateMapMarkers(geojson);
     hideLoadingDiv();
 }
 
 function processHourlySnapshot(hourlySnapshot, filteredIndices) {
-    // Create lookup map
+    // Lookup
     const snapshotMap = {};
     hourlySnapshot.sites.forEach(site => {
         snapshotMap[site.location_name] = site;
@@ -1090,7 +1085,7 @@ function processHourlySnapshot(hourlySnapshot, filteredIndices) {
             const snapshotData = snapshotMap[indexEntry.location_name];
             if (!snapshotData) continue;
             
-            // species from sites_index
+            // Species
             const selected = (indexEntry.species || snapshotData.species || "no2").toLowerCase();
             const isPm25 = selected === "pm25" || selected === "pm2.5";
             
@@ -1155,7 +1150,7 @@ function processHourlySnapshot(hourlySnapshot, filteredIndices) {
 function loadIndividualSites(filteredIndices) {
     const loadSiteData = async () => {
         const filteredSites = [];
-        const maxConcurrent = 2; // Very conservative to avoid rate limits
+        const maxConcurrent = 2;
         let skeletonsRemoved = 0;
         
         for (let i = 0; i < filteredIndices.length; i += maxConcurrent) {
@@ -1240,11 +1235,11 @@ function finalizeSitesLoading(filteredSites) {
     window.currentForecastData = filteredSites;
     const geojson = sitesArrayToGeoJSON(filteredSites);
     
-    // update the data layer
+    // Layer
     if (window.currentMap && window.currentMap.isStyleLoaded()) {
         updateMapMarkers(geojson);
     } else {
-        // Create map if not exists
+        // Create
         create_map(geojson);
     }
     hideLoadingDiv();
@@ -1258,29 +1253,29 @@ function updateLeafletMarkers(map, geojson) {
         return;
     }
     
-    // Show loading effect
+    // Loading
     if (map && map.getContainer()) {
         const container = map.getContainer();
         container.style.opacity = '0.6';
         container.style.pointerEvents = 'none';
     }
     
-    // Clear existing markers
+    // Clear
     markerCluster.clearLayers();
     
     const hoverDiv = window.hoverDiv;
     
-    // Add new markers from GeoJSON
+    // GeoJSON
     geojson.features.forEach((feature, index) => {
         const coords = feature.geometry.coordinates;
         const props = feature.properties;
-        const latlng = [coords[1], coords[0]]; // Leaflet uses [lat, lng]
+        const latlng = [coords[1], coords[0]];
         
         const aqiValue = props.aqi_value === 'N/A' || props.aqi_value === '--' ? '--' : props.aqi_value;
 
         const aqiColor = props.aqi_color || '#9e9e9e';
         
-        // Create custom div icon with AQI value
+        // Icon
         const icon = L.divIcon({
             className: 'custom-marker-icon',
             html: `
@@ -1307,10 +1302,10 @@ function updateLeafletMarkers(map, geojson) {
         
         const marker = L.marker(latlng, { icon: icon });
         
-        // Store properties on the marker for click handling
+        // Properties
         marker.featureProperties = props;
         
-        // Add hover effects
+        // Hover
         marker.on('mouseover', function(e) {
             const markerEl = e.target.getElement();
             if (markerEl) {
@@ -1356,7 +1351,7 @@ function updateLeafletMarkers(map, geojson) {
             }
         });
         
-        // Add click event
+        // Click
         marker.on('click', function(e) {
             const props = e.target.featureProperties;
             const location_id = props.location_id;
@@ -1401,7 +1396,7 @@ function updateLeafletMarkers(map, geojson) {
     
     console.log(`Updated ${geojson.features.length} Leaflet markers`);
     
-    // Remove loading effect after a short delay
+    // Complete
     setTimeout(() => {
         if (map && map.getContainer()) {
             const container = map.getContainer();
@@ -1423,7 +1418,7 @@ function updateMapMarkers(geojson) {
 }
 
 function showLoadingDiv() {
-    // Create loading div 
+    // Loader
     if ($(".loading-div").length === 0) {
         const loadingHtml = `
             <div class="loading-div">
@@ -1474,14 +1469,13 @@ function add_the_banner(site, param) {
         const t10m = forecast.t10m;
         const rh = forecast.rh;
 
-        // Support both lowercase (no2_aqi) and uppercase (NO2_AQI) field names from JSON
+        // Fields
         const raw_no2_aqi  = forecast.no2_aqi  ?? forecast.NO2_AQI  ?? null;
         const raw_o3_aqi   = forecast.o3_aqi   ?? forecast.O3_AQI   ?? null;
         const raw_pm25_aqi = forecast.pm25_aqi ?? forecast.PM25_NowCast_AQI ?? null;
         const pm25_conc    = forecast.pm25_conc_cnn ?? forecast.pm25 ?? null;
 
-        // Always show the forecast that getCurrentForecast() already selected
-        // (the caller already did the time-matching; no need for an extra isCurrent gate)
+        // Display
         const temperature = (typeof t10m === "number" && !isNaN(t10m)) ? (t10m - 273.15).toFixed(1) : "--";
         const humidity    = (typeof rh   === "number" && !isNaN(rh))   ? (rh  * 100).toFixed(0)     : "--";
 
@@ -1503,7 +1497,7 @@ function add_the_banner(site, param) {
             source = "NASA GEOS CF, NASA Pandora";
         }
 
-        // Final safety-net: fall back to the pre-computed forecasted_value from the caller
+        // Fallback
         if ((aqiValue === '--' || aqiValue === null) &&
             site.forecasted_value !== undefined && site.forecasted_value !== null &&
             site.forecasted_value !== 'N/A' && !isNaN(site.forecasted_value)) {
@@ -1657,7 +1651,7 @@ function readApiBaker(options = {}) {
         current_forecast_timestamp = null
     } = options;
 
-    // Store the current forecast timestamp 
+    // Timestamp
     window.currentForecastTimestamp = current_forecast_timestamp;
     window.hasCustomTimestamp = !!current_forecast_timestamp;
 
@@ -1672,12 +1666,16 @@ function readApiBaker(options = {}) {
     ];
     $('.loader').show();
 
-    const fileUrl = `precomputed/all_dts/${location.replace(/_/g, "-")}.json?version=${new Date().getTime()}`;
+    // Filename
+    const locationWithUnderscore = location.replace(/[-\s]/g, "_");
+    const locationWithHyphen = location.replace(/[_\s]/g, "-");
+    const fileUrl = `https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/all_dts/${locationWithUnderscore}.json?version=${new Date().getTime()}`;
 
     fetch(fileUrl)
         .then(response => {
             if (!response.ok) {
-                const fallbackUrl = `precomputed/all_dts/${location.replace(/[-\s]/g, "_")}.json?version=${new Date().getTime()}`;
+                // Fallback
+                const fallbackUrl = `https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/all_dts/${locationWithHyphen}.json?version=${new Date().getTime()}`;
                 return fetch(fallbackUrl).then(fallbackResponse => {
                     if (!fallbackResponse.ok) throw new Error('Network response was not ok');
                     return fallbackResponse.text();
@@ -1691,7 +1689,13 @@ function readApiBaker(options = {}) {
         })
         .then(data => {
             console.log("Data from API Baker:", data);
-            if (!data || data.status !== "200" || !Array.isArray(data.forecasts) || data.forecasts.length === 0) {
+            if (!data || !Array.isArray(data.forecasts) || data.forecasts.length === 0) {
+                console.error("Data validation failed:", {
+                    hasData: !!data,
+                    status: data?.status,
+                    hasForecasts: Array.isArray(data?.forecasts),
+                    forecastsLength: data?.forecasts?.length
+                });
                 throw new Error("No valid data received");
             }
 
@@ -1715,7 +1719,7 @@ function readApiBaker(options = {}) {
                 if (forecast.local_time) {
                     masterData.master_datetime.push(forecast.local_time);
                 }
-                // Concentrations
+                // NO2
                 if (forecast.no2 !== undefined && forecast.no2 !== null) {
                     masterData.master_no2.push(forecast.no2);
                 }
@@ -1723,7 +1727,7 @@ function readApiBaker(options = {}) {
                     masterData.master_o3.push(forecast.o3);
                 }
                 
-                // PM2.5 handling - check for pm25_conc_cnn field from your JSON
+                // PM25
                 if (forecast.pm25_conc_cnn !== undefined && forecast.pm25_conc_cnn !== null) {
                     masterData.master_pm25.push(forecast.pm25_conc_cnn);
                     masterData.master_pm25_conc_cnn.push(forecast.pm25_conc_cnn);
@@ -1732,7 +1736,7 @@ function readApiBaker(options = {}) {
                     masterData.master_pm25_conc_cnn.push(forecast.pm25);
                 }
                 
-                // PM2.5 AQI - use pm25_aqi from your JSON
+                // PM25-AQI
                 if (forecast.pm25_aqi !== undefined && forecast.pm25_aqi !== null) {
                     masterData.master_pm25_aqi.push(forecast.pm25_aqi);
                 } else if (forecast.PM25_NowCast_AQI !== undefined && forecast.PM25_NowCast_AQI !== null) {
@@ -1748,7 +1752,7 @@ function readApiBaker(options = {}) {
                     masterData.master_observation.push(forecast.pandora);
                 }
                 
-                // AQI values - support both lowercase and uppercase field names
+                // AQI
                 if (forecast.NO2_AQI !== undefined && forecast.NO2_AQI !== null) {
                     masterData.master_no2_aqi.push(forecast.NO2_AQI);
                 } else if (forecast.no2_aqi !== undefined && forecast.no2_aqi !== null) {
@@ -1765,7 +1769,7 @@ function readApiBaker(options = {}) {
                     masterData.master_o3_aqi.push(calculateAqiForO3(forecast.o3));
                 }
                 
-                // For corrected NO2, calculate AQI if not present
+                // Corrected
                 if (forecast.corrected !== undefined && forecast.corrected !== null) {
                     let aqi = forecast.NO2_AQI || forecast.no2_aqi;
                     if (aqi === undefined && forecast.no2 !== undefined && forecast.no2 !== null) {
@@ -1777,7 +1781,7 @@ function readApiBaker(options = {}) {
                 }
             });
             
-            // Generate CNN Markets-style hero section
+            // Hero
             generateForecastHeroSection(masterData, location, timezone, options.param);
             
             const tabsNav = $("#pills-tabContent").prev();
@@ -1822,7 +1826,7 @@ function readApiBaker(options = {}) {
                     displayMetrics: true,
                     enableAqiColors: true 
                 },
-                // Supporting concentration plots
+                // Concentrations
                 {
                     id: "plot_corrected_conc",
                     title: `SNWG NO<sub>2</sub> Forecasts (ppbv)`,
@@ -1871,7 +1875,7 @@ function readApiBaker(options = {}) {
                     displayMetrics: false,
                     enableAqiColors: false 
                 },
-                // Pandora obs plot 
+                // Pandora
                 {
                     id: "plot_pandora",
                     title: "Pandora NO<sub>2</sub> Observations",
@@ -2115,7 +2119,7 @@ function readApiBaker(options = {}) {
             const todayAvg = todayVals.length ? todayVals.reduce((a, b) => a + b, 0) / todayVals.length : 'N/A';
             const tomorrowAvg = tomorrowVals.length ? tomorrowVals.reduce((a, b) => a + b, 0) / tomorrowVals.length : 'N/A';
 
-            // Calculate change rates
+            // Changes
             function getChangeRate(newVal, oldVal) {
             if (typeof newVal === "number" && typeof oldVal === "number" && oldVal !== 0) {
             const diff = newVal - oldVal;
@@ -2134,7 +2138,7 @@ function readApiBaker(options = {}) {
             const changeTodayVsPrev = getChangeRate(todayAvg, prevAvg);
             const changeTomorrowVsToday = getChangeRate(tomorrowAvg, todayAvg);
 
-            // Generate metrics HTML: 2 boxes, each with average and change rate below
+            // Metrics
             const metricsHtml = `
             <div class="xvg_aqi-container">
             <div class="d-xvg" style="flex:1;">
@@ -2182,10 +2186,10 @@ function readApiBaker(options = {}) {
                         plot.unit, 
                         plot.id,
                         plot.columns,
-                        false,   // dates_ranges
-                        false,   // enableFading
-                        "",      // text
-                        "bar",   // plotType
+                        false,
+                        false,
+                        "",
+                        "bar",
                         timezone,
                         plot.enableAqiColors 
                     );
@@ -2389,7 +2393,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         }
     }
     
-    // Fallback: find closest entry within ±3 hours for any pollutant (handles 3-hourly data)
+    // Fallback
     if (currentAqi === '--') {
         let bestIdx = -1;
         let bestDiff = Infinity;
@@ -2460,14 +2464,14 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         const tHour  = targetDate.getHours();
         const targetStr = `${tYear}-${tMonth}-${tDay} ${pad(tHour)}`;
 
-        // 1. Try exact hour match first
+        // Exact
         for (let i = 0; i < datetimes.length; i++) {
             if (datetimes[i] && datetimes[i].slice(0, 13) === targetStr && aqiData[i] !== undefined && aqiData[i] !== null) {
                 return { aqi: Math.round(aqiData[i]), hour: tHour, date: `${tYear}-${tMonth}-${tDay}` };
             }
         }
 
-        // 2. Fall back: find the closest available entry within ±3 hours
+        // Closest
         let bestIdx = -1;
         let bestDiff = Infinity;
         for (let i = 0; i < datetimes.length; i++) {
@@ -2785,7 +2789,7 @@ function readAirNow(options = {}) {
     $('.loader').show();
     const siteTimeZone = timezone || "UTC";
     const paramCode = pollutant_details(param).id;
-    const fileUrl = `precomputed/all_dts/${location}.json?version=${new Date().getTime()}`;
+    const fileUrl = `https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/all_dts/${location}.json?version=${new Date().getTime()}`;
 
     fetch(fileUrl)
         .then(response => {
@@ -3539,11 +3543,11 @@ function draw_plot(
 
     Plotly.newPlot(forecasts_div, traces, layout, {responsive: true});
 
-    // If we have a current forecast timestamp, scroll to center on it
+    // Scroll
     if (window.currentForecastTimestamp) {
         try {
             const targetTime = new Date(window.currentForecastTimestamp.replace(' ', 'T'));
-            const halfDay = 12 * 60 * 60 * 1000; // 12 hours on each side
+            const halfDay = 12 * 60 * 60 * 1000;
             const startTime = new Date(targetTime.getTime() - halfDay).toISOString();
             const endTime = new Date(targetTime.getTime() + halfDay).toISOString();
             
@@ -3559,13 +3563,13 @@ function draw_plot(
 
     $(`#${forecasts_div}`).on('plotly_relayout', function(e, d) {
         if (d['xaxis.range[0]'] && d['xaxis.range[1]']) {
-            // Check if the range is about 7 days (1 week)
+            // Range
             const start = new Date(d['xaxis.range[0]']);
             const end = new Date(d['xaxis.range[1]']);
             const diffDays = (end - start) / (1000 * 60 * 60 * 24);
-            // Only auto-center to today if we don't have a custom forecast timestamp
+            // Center
             if (!window.hasCustomTimestamp && diffDays > 6.5 && diffDays < 7.5) {
-                // Center the view on today
+                // Today
                 const today = new Date();
                 const center = today.getTime();
                 const halfWeek = 3.5 * 24 * 60 * 60 * 1000;
@@ -4096,7 +4100,7 @@ function zoomToLocation(lat, lon, zoomLevel = 10) {
     console.log(`Zooming to location: ${latitude}, ${longitude} (offset center: ${offsetCenter.lat}, ${offsetCenter.lng}) at zoom level ${zoomLevel}`);
 }
 
-// Make zoomToLocation available globally
+// Global
 window.zoomToLocation = zoomToLocation;
 
 $(document).on("click", ".launch-local-forecasts", function() {
@@ -4124,7 +4128,7 @@ $(document).on("click", ".launch-local-forecasts", function() {
     const latitude = $(this).attr("latitude");
     const longitude = $(this).attr("longitude");
     
-    // Zoom to the location on the map
+    // Zoom
     zoomToLocation(latitude, longitude, 12);
 
     openForecastsWindow({
@@ -4217,14 +4221,14 @@ $(document).on("click", '.retrain_model', function() {
 
     });
     
-// MAIN APP
+// Main
 
 $('.modal-dialog').on('show.bs.modal', function () {
     $('#loading-screen').show();
   });
   
  
-  // LF V1.1 starts here
+  // V1.1
 
 $(document).on('click', '.routing_pollutant_param', function(e) {
     $(".loading_div").fadeIn(100);
