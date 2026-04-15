@@ -1,4 +1,4 @@
-// GeoTIFF Manager - Handles raster layer loading and rendering on Leaflet maps
+// GeoTIFF Manager 
 // Deps: Leaflet, proj4, georaster, georaster-layer-for-leaflet
 
 (function(global) {
@@ -54,23 +54,22 @@
         console.log('Proj4 projections registered');
     }
 
-    // Configuration
+    // Config
     const CONFIG = {
-        // Default paths
-        pmtilesPath: 'precomputed/pmtiles_output/',
-        geotiffPath: 'precomputed/pmtiles_output/',
+        // Paths
+        pmtilesPath: 'https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/pmtiles_output/',
+        geotiffPath: 'https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/pmtiles_output/',
         
-        // Default layer to load on init
-        defaultLayer: 'precomputed/pmtiles_output/8bit_updated.tiff',
-        defaultLayerName: '8bit GeoTIFF',
-        loadDefaultOnInit: true,
+        // Layer
+        defaultLayer: null,
+        defaultLayerName: null,
+        loadDefaultOnInit: false,
         
-        // Default layer settings
+        // Layer
         defaultOpacity: 0.7,
         defaultResolution: 256,
         
-        // Color scales for different pollutants
-        // Values are in ppbv (or ppm for CO, μg/m³ for PM2.5)
+        // Colors
         colorScales: {
             no2: [
                 // Viridis colormap - purple (low) to green/yellow (high)
@@ -140,7 +139,7 @@
         availableLayers: []
     };
 
-    // State management
+    // State
     const state = {
         currentLayer: null,
         currentLayerName: null,
@@ -156,7 +155,7 @@
 
 
     function interpolateColor(value, colorScale, minValue, maxValue) {
-        // Normalize value to 0-1
+        // Normalize
         const normalizedValue = (value - minValue) / (maxValue - minValue);
         
         let lowerColor = colorScale[0];
@@ -209,6 +208,7 @@
             loadingDiv.innerHTML = `
                 <div class="geotiff-loading-spinner"></div>
                 <span class="geotiff-loading-text">${message}</span>
+                <span class="geotiff-loading-source">Source: NASA GMAO</span>
             `;
             document.body.appendChild(loadingDiv);
         } else {
@@ -232,6 +232,38 @@
         } else {
             console.log(`[GeoTIFF ${type}]: ${message}`);
         }
+        
+        // Also display in loading area
+        const loadingDiv = document.getElementById('geotiff-loading');
+        if (loadingDiv) {
+            const spinner = loadingDiv.querySelector('.geotiff-loading-spinner');
+            const textSpan = loadingDiv.querySelector('.geotiff-loading-text');
+            const sourceSpan = loadingDiv.querySelector('.geotiff-loading-source');
+            
+            if (type === 'error') {
+                loadingDiv.style.background = 'rgba(239, 68, 68, 0.9)';
+                if (spinner) spinner.style.display = 'none';
+            } else if (type === 'success') {
+                loadingDiv.style.background = 'rgba(34, 197, 94, 0.9)';
+                if (spinner) spinner.style.display = 'none';
+            } else {
+                loadingDiv.style.background = 'rgba(0, 0, 0, 0.8)';
+                if (spinner) spinner.style.display = 'block';
+            }
+            
+            if (textSpan) textSpan.textContent = message;
+            
+            loadingDiv.style.display = 'flex';
+            
+            // Auto-hide success/error messages after 3 seconds
+            if (type === 'error' || type === 'success') {
+                setTimeout(() => {
+                    loadingDiv.style.display = 'none';
+                    loadingDiv.style.background = 'rgba(0, 0, 0, 0.8)';
+                    if (spinner) spinner.style.display = 'block';
+                }, 3000);
+            }
+        }
     }
 
     const POLLUTANT_UNITS = {
@@ -247,64 +279,46 @@
     async function discoverAvailableLayers() {
         const layers = [];
 
-        // ----------------------------------------------------------------
-        // 1. load layers_manifest.json
-        // ----------------------------------------------------------------
-        try {
-            const manifestPath = CONFIG.pmtilesPath + 'layers_manifest.json';
-            const resp = await fetch(manifestPath + '?_=' + Date.now()); // bust cache
-            if (resp.ok) {
-                const manifest = await resp.json();
-                if (manifest.layers && manifest.layers.length > 0) {
-                    for (const layer of manifest.layers) {
-                        // Verify the file actually exists before adding
-                        try {
-                            const check = await fetch(layer.path, { method: 'HEAD' });
-                            if (check.ok) {
-                                layers.push(layer);
-                                console.log(`Manifest layer found: ${layer.name}`);
-                            }
-                        } catch (e) { /* skip */ }
-                    }
-                    state.availableLayers = layers;
-                    CONFIG.availableLayers = layers;
-                    console.log(`Loaded ${layers.length} layers from manifest`);
-                    return layers;
-                }
-            }
-        } catch (e) {
-            console.warn('Could not load layers_manifest.json, falling back to static list', e);
+        // Get date range: today - 5 to today + 5 days
+        const today = new Date();
+        const startDate = new Date(today);
+        startDate.setDate(startDate.getDate() - 5);
+        const endDate = new Date(today);
+        endDate.setDate(endDate.getDate() + 5);
+
+        // Generate date list in YYYYMMDD format
+        const dateList = [];
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            dateList.push(`${year}${month}${day}`);
         }
 
-        // ----------------------------------------------------------------
-        // 2. Fallback: static files
-        // ----------------------------------------------------------------
-        const knownFiles = [
-            { name: '8bit GeoTIFF', file: '8bit_updated.tiff', type: 'geotiff', pollutant: 'no2', date: null, unit: 'ppb' },
-            { name: 'GEOS-CF NO₂ 2026-02-01', file: 'geos_cf_NO2_20260201_09z.tif', type: 'geotiff', pollutant: 'no2', date: '2026-02-01', unit: 'ppb' },
-        ];
-        
-        // Check each file exists
-        for (const layer of knownFiles) {
-            try {
-                const path = CONFIG.pmtilesPath + layer.file;
-                const response = await fetch(path, { method: 'HEAD' });
-                if (response.ok) {
-                    layers.push({
-                        ...layer,
-                        path: path
-                    });
-                    console.log(`Found layer: ${layer.name} at ${path}`);
-                }
-            } catch (error) {
-                console.warn(`Layer not found: ${layer.file}`, error);
+        // Build file list for PM2.5 hourly (00-23 UTC) - static, don't check existence
+        dateList.forEach(dateStr => {
+            // Create hourly PM2.5 files (00-23 UTC)
+            for (let hour = 0; hour < 24; hour++) {
+                const hourStr = String(hour).padStart(2, '0');
+                const displayDate = `${dateStr.substring(0,4)}-${dateStr.substring(4,6)}-${dateStr.substring(6,8)}`;
+                
+                layers.push({
+                    name: `GEOS-CF PM2.5 (RH35) ${displayDate} ${hourStr}Z`,
+                    file: `geos_cf_PM25_RH35_${dateStr}_${hourStr}z.tif`,
+                    type: 'geotiff',
+                    pollutant: 'pm25',
+                    date: displayDate,
+                    hour: hourStr,
+                    unit: 'μg/m³',
+                    path: CONFIG.pmtilesPath + `geos_cf_PM25_RH35_${dateStr}_${hourStr}z.tif`
+                });
             }
-        }
-        
+        });
+
         state.availableLayers = layers;
         CONFIG.availableLayers = layers;
-        
-        console.log(`Discovered ${layers.length} available layers`);
+
+        console.log(`Created ${layers.length} layer options`);
         return layers;
     }
 
@@ -354,7 +368,10 @@
         try {
             const response = await fetch(filePath);
             if (!response.ok) {
-                throw new Error(`Failed to fetch GeoTIFF: ${response.status}`);
+                hideLoading();
+                showNotification(`File not found or not accessible: ${response.status}`, 'error');
+                console.warn(`GeoTIFF file not found: ${filePath}`);
+                return null;
             }
             
             const arrayBuffer = await response.arrayBuffer();
@@ -544,6 +561,25 @@
                 if (typeof map.invalidateSize === 'function') {
                     map.invalidateSize();
                 }
+                
+                // Force map to redraw and pan to bounds if available
+                setTimeout(() => {
+                    try {
+                        if (typeof map.fitBounds === 'function' && layer.getBounds) {
+                            const bounds = layer.getBounds();
+                            if (bounds && bounds.isValid && bounds.isValid()) {
+                                map.fitBounds(bounds);
+                            }
+                        }
+                    } catch (e) {
+                        // Bounds not available, skip
+                    }
+                    
+                    // Redraw the map
+                    if (typeof map.invalidateSize === 'function') {
+                        map.invalidateSize({ pan: false });
+                    }
+                }, 100);
                 
                 // Bring markers to front
                 if (window.currentMarkers && typeof window.currentMarkers.bringToFront === 'function') {
@@ -1153,6 +1189,19 @@
 
         console.log('GeoTIFF Manager initialized');
 
+        // Auto-load the first discovered layer
+        if (window.currentMap && state.availableLayers.length > 0) {
+            console.log('Auto-loading first discovered layer...');
+            setTimeout(async () => {
+                const firstLayer = state.availableLayers[0];
+                await loadGeoTIFF(firstLayer.path, { 
+                    pollutant: firstLayer.pollutant, 
+                    name: firstLayer.name, 
+                    unit: firstLayer.unit 
+                });
+            }, 500);
+        }
+        
         if (CONFIG.loadDefaultOnInit && window.currentMap) {
             console.log('Auto-loading default layer based on active filter...');
             setTimeout(async () => {
@@ -1324,6 +1373,15 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                flex: 1;
+                text-align: center;
+            }
+            
+            .geotiff-loading-source {
+                font-size: 9px;
+                opacity: 0.7;
+                margin-left: 8px;
+                white-space: nowrap;
             }
             
             @keyframes geotiff-spin {
