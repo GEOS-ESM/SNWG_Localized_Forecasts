@@ -1,10 +1,10 @@
-// GeoTIFF Manager 
-// Deps: Leaflet, proj4, georaster, georaster-layer-for-leaflet
+// manager
+// deps
 
 (function(global) {
     'use strict';
 
-    // Register spatial projections for coordinate system support
+    // projections
     function registerProjections() {
         if (typeof proj4 === 'undefined') {
             console.warn('proj4 not loaded');
@@ -39,10 +39,10 @@
             'OGC:CRS84': '+proj=longlat +datum=WGS84 +no_defs'
         };
         
-        // Register each projection
+        // register
         Object.entries(projections).forEach(([code, def]) => {
             try {
-                // Only register if not already defined
+                // guard
                 if (!proj4.defs(code)) {
                     proj4.defs(code, def);
                 }
@@ -56,86 +56,86 @@
 
     // Config
     const CONFIG = {
-        // Paths
+        // paths
         pmtilesPath: 'https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/pmtiles_output/',
         geotiffPath: 'https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/pmtiles_output/',
         
-        // Layer
+        // layer
         defaultLayer: null,
         defaultLayerName: null,
         loadDefaultOnInit: false,
         
-        // Layer
+        // opacity
         defaultOpacity: 0.7,
         defaultResolution: 256,
         
-        // Colors
+        // colors
         colorScales: {
             no2: [
-                // Viridis colormap - purple (low) to green/yellow (high)
-                { value: 0, color: [68, 1, 84, 180] },      // 0 ppbv - Dark purple
-                { value: 50, color: [59, 82, 139, 180] },   // 50 ppbv - Blue-purple
-                { value: 100, color: [33, 145, 140, 180] }, // 100 ppbv - Teal
-                { value: 150, color: [94, 201, 98, 180] },  // 150 ppbv - Green
-                { value: 200, color: [253, 231, 37, 180] }, // 200 ppbv - Yellow
-                { value: 300, color: [253, 231, 37, 180] }  // 300 ppbv - Yellow (max)
+                // viridis
+                { value: 0, color: [68, 1, 84, 180] },      // purple
+                { value: 50, color: [59, 82, 139, 180] },   // blue
+                { value: 100, color: [33, 145, 140, 180] }, // teal
+                { value: 150, color: [94, 201, 98, 180] },  // green
+                { value: 200, color: [253, 231, 37, 180] }, // yellow
+                { value: 300, color: [253, 231, 37, 180] }  // max
             ],
             pm25: [
-                { value: 0, color: [0, 228, 0, 180] },      // 0 μg/m³
-                { value: 12, color: [255, 255, 0, 180] },   // 12 μg/m³
-                { value: 35.4, color: [255, 126, 0, 180] }, // 35.4 μg/m³
-                { value: 55.4, color: [255, 0, 0, 180] },   // 55.4 μg/m³
-                { value: 150.4, color: [143, 63, 151, 180] }, // 150.4 μg/m³
-                { value: 250.4, color: [126, 0, 35, 180] }  // 250.4 μg/m³
+                { value: 0, color: [0, 228, 0, 180] },      // good
+                { value: 12, color: [255, 255, 0, 180] },   // moderate
+                { value: 35.4, color: [255, 126, 0, 180] }, // sensitive
+                { value: 55.4, color: [255, 0, 0, 180] },   // unhealthy
+                { value: 150.4, color: [143, 63, 151, 180] }, // vunhealthy
+                { value: 250.4, color: [126, 0, 35, 180] }  // hazardous
             ],
             o3: [
-                // Viridis colormap for O3 as well
-                { value: 0, color: [68, 1, 84, 180] },      // 0 ppbv - Dark purple
-                { value: 40, color: [59, 82, 139, 180] },   // 40 ppbv - Blue-purple
-                { value: 70, color: [33, 145, 140, 180] },  // 70 ppbv - Teal
-                { value: 100, color: [94, 201, 98, 180] },  // 100 ppbv - Green
-                { value: 150, color: [253, 231, 37, 180] }, // 150 ppbv - Yellow
-                { value: 200, color: [253, 231, 37, 180] }  // 200 ppbv - Yellow (max)
+                // viridis
+                { value: 0, color: [68, 1, 84, 180] },      // purple
+                { value: 40, color: [59, 82, 139, 180] },   // blue
+                { value: 70, color: [33, 145, 140, 180] },  // teal
+                { value: 100, color: [94, 201, 98, 180] },  // green
+                { value: 150, color: [253, 231, 37, 180] }, // yellow
+                { value: 200, color: [253, 231, 37, 180] }  // max
             ],
             co: [
-                // Viridis colormap for CO
-                { value: 0, color: [68, 1, 84, 180] },      // 0 ppm - Dark purple
-                { value: 2, color: [59, 82, 139, 180] },    // 2 ppm - Blue-purple
-                { value: 4, color: [33, 145, 140, 180] },   // 4 ppm - Teal
-                { value: 6, color: [94, 201, 98, 180] },    // 6 ppm - Green
-                { value: 10, color: [253, 231, 37, 180] },  // 10 ppm - Yellow
-                { value: 30, color: [253, 231, 37, 180] }   // 30 ppm - Yellow (max)
+                // viridis
+                { value: 0, color: [68, 1, 84, 180] },      // purple
+                { value: 2, color: [59, 82, 139, 180] },    // blue
+                { value: 4, color: [33, 145, 140, 180] },   // teal
+                { value: 6, color: [94, 201, 98, 180] },    // green
+                { value: 10, color: [253, 231, 37, 180] },  // yellow
+                { value: 30, color: [253, 231, 37, 180] }   // max
             ],
             so2: [
-                // Viridis colormap for SO2
-                { value: 0, color: [68, 1, 84, 180] },      // 0 ppbv - Dark purple
-                { value: 40, color: [59, 82, 139, 180] },   // 40 ppbv - Blue-purple
-                { value: 100, color: [33, 145, 140, 180] }, // 100 ppbv - Teal
-                { value: 350, color: [94, 201, 98, 180] },  // 350 ppbv - Green
-                { value: 500, color: [253, 231, 37, 180] }, // 500 ppbv - Yellow
-                { value: 1000, color: [253, 231, 37, 180] } // 1000 ppbv - Yellow (max)
+                // viridis
+                { value: 0, color: [68, 1, 84, 180] },      // purple
+                { value: 40, color: [59, 82, 139, 180] },   // blue
+                { value: 100, color: [33, 145, 140, 180] }, // teal
+                { value: 350, color: [94, 201, 98, 180] },  // green
+                { value: 500, color: [253, 231, 37, 180] }, // yellow
+                { value: 1000, color: [253, 231, 37, 180] } // max
             ],
             default: [
-                { value: 0, color: [68, 1, 84, 180] },      // Viridis colormap
+                { value: 0, color: [68, 1, 84, 180] },      // viridis
                 { value: 0.2, color: [59, 82, 139, 180] },
                 { value: 0.4, color: [33, 145, 140, 180] },
                 { value: 0.6, color: [94, 201, 98, 180] },
                 { value: 0.8, color: [253, 231, 37, 180] },
                 { value: 1.0, color: [253, 231, 37, 180] }
             ],
-            // mol/mol scale for GEOS-CF trace gases (NO2, O3, CO, SO2)
-            // Typical surface NO2 max ~1e-7, O3 ~1e-7, CO ~2e-7 mol/mol
+            // molmol
+            // range
             molmol: [
-                { value: 0,    color: [68,  1,  84, 180] },   // 0 – dark purple
+                { value: 0,    color: [68,  1,  84, 180] },   // purple
                 { value: 2e-9, color: [59, 82, 139, 180] },   // background
-                { value: 1e-8, color: [33,145, 140, 180] },   // low urban
+                { value: 1e-8, color: [33,145, 140, 180] },   // urban
                 { value: 5e-8, color: [94,201,  98, 180] },   // moderate
                 { value: 1e-7, color: [253,231,  37, 180] },  // high
                 { value: 3e-7, color: [253,231,  37, 180] }   // max
             ]
         },
         
-        // Available PMTiles files
+        // pmtiles
         availableLayers: []
     };
 
@@ -155,7 +155,7 @@
 
 
     function interpolateColor(value, colorScale, minValue, maxValue) {
-        // Normalize
+        // normalize
         const normalizedValue = (value - minValue) / (maxValue - minValue);
         
         let lowerColor = colorScale[0];
@@ -169,11 +169,11 @@
                 lowerColor = colorScale[i];
                 upperColor = colorScale[i + 1];
 
-                // Interpolation factor
+                // factor
                 const range = upperThreshold - lowerThreshold;
                 const factor = range > 0 ? (normalizedValue - lowerThreshold) / range : 0;
                 
-                // Interpolate RGBA values
+                // interpolate
                 return [
                     Math.round(lowerColor.color[0] + (upperColor.color[0] - lowerColor.color[0]) * factor),
                     Math.round(lowerColor.color[1] + (upperColor.color[1] - lowerColor.color[1]) * factor),
@@ -187,8 +187,8 @@
     }
 
     function getColorScale(pollutant, unit) {
-        // NO2 and O3 from GEOS-CF are in mol/mol (~0–1e-7 range), not ppb.
-        // Use a dedicated mol/mol scale when the unit signals that.
+        // unit
+        // scale
         const isMolMol = unit && (unit.toLowerCase().includes('mol/mol') || unit.toLowerCase() === 'mol mol-1');
         if (isMolMol && (pollutant === 'no2' || pollutant === 'o3' || pollutant === 'co' || pollutant === 'so2')) {
             return CONFIG.colorScales.molmol;
@@ -233,7 +233,7 @@
             console.log(`[GeoTIFF ${type}]: ${message}`);
         }
         
-        // Also display in loading area
+        // loading
         const loadingDiv = document.getElementById('geotiff-loading');
         if (loadingDiv) {
             const spinner = loadingDiv.querySelector('.geotiff-loading-spinner');
@@ -255,7 +255,7 @@
             
             loadingDiv.style.display = 'flex';
             
-            // Auto-hide success/error messages after 3 seconds
+            // autohide
             if (type === 'error' || type === 'success') {
                 setTimeout(() => {
                     loadingDiv.style.display = 'none';
@@ -279,14 +279,14 @@
     async function discoverAvailableLayers() {
         const layers = [];
 
-        // Get date range: today - 5 to today + 5 days
+        // range
         const today = new Date();
         const startDate = new Date(today);
         startDate.setDate(startDate.getDate() - 5);
         const endDate = new Date(today);
         endDate.setDate(endDate.getDate() + 5);
 
-        // Generate date list in YYYYMMDD format
+        // dates
         const dateList = [];
         for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
             const year = d.getFullYear();
@@ -295,24 +295,20 @@
             dateList.push(`${year}${month}${day}`);
         }
 
-        // Build file list for PM2.5 hourly (00-23 UTC) - static, don't check existence
+        // files
         dateList.forEach(dateStr => {
-            // Create hourly PM2.5 files (00-23 UTC)
-            for (let hour = 0; hour < 24; hour++) {
-                const hourStr = String(hour).padStart(2, '0');
-                const displayDate = `${dateStr.substring(0,4)}-${dateStr.substring(4,6)}-${dateStr.substring(6,8)}`;
-                
-                layers.push({
-                    name: `GEOS-CF PM2.5 (RH35) ${displayDate} ${hourStr}Z`,
-                    file: `geos_cf_PM25_RH35_${dateStr}_${hourStr}z.tif`,
-                    type: 'geotiff',
-                    pollutant: 'pm25',
-                    date: displayDate,
-                    hour: hourStr,
-                    unit: 'μg/m³',
-                    path: CONFIG.pmtilesPath + `geos_cf_PM25_RH35_${dateStr}_${hourStr}z.tif`
-                });
-            }
+            // daily
+            const displayDate = `${dateStr.substring(0,4)}-${dateStr.substring(4,6)}-${dateStr.substring(6,8)}`;
+            
+            layers.push({
+                name: `GEOS-CF PM2.5 (RH35) ${displayDate}`,
+                file: `geos_cf_PM25_RH35_${dateStr}_09z.tif`,
+                type: 'geotiff',
+                pollutant: 'pm25',
+                date: displayDate,
+                unit: 'μg/m³',
+                path: CONFIG.pmtilesPath + `geos_cf_PM25_RH35_${dateStr}_09z.tif`
+            });
         });
 
         state.availableLayers = layers;
@@ -461,7 +457,7 @@
                     
                     if (epsgCode) {
                         console.log(`Using projection: ${epsgCode}`);
-                        // Register if not already defined
+                        // guard
                         if (!proj4.defs(epsgCode)) {
                             const projDefs = {
                                 'EPSG:4326': '+proj=longlat +datum=WGS84 +no_defs',
@@ -483,7 +479,7 @@
 
             showLoading('Rendering layer...');
 
-            // If projection is 32767 (user-defined) and bounds look like lat/lon,
+            // patch
             if (georaster.projection === 32767 || !georaster.projection) {
                 if (georaster.xmin >= -180.5 && georaster.xmax <= 180.5 && 
                     georaster.ymin >= -90.5 && georaster.ymax <= 90.5) {
@@ -502,7 +498,7 @@
                 map.getPane('geotiffPane').style.pointerEvents = 'none';
             }
 
-            // Create the layer using GeoRasterLayer with proj4 support
+            // layer
             const layerOptions = {
                 georaster: georaster,
                 opacity: opacity,
@@ -552,40 +548,21 @@
                 state.currentLayer = layer;
                 state.currentLayerName = name || filePath;
                 
-                // Track this layer so we can remove it later
+                // track
                 state.allAddedLayers.push(layer);
                 
                 layer.addTo(map);
                 
-                // Invalidate map renderer cache to ensure fresh rendering
+                // refresh
                 if (typeof map.invalidateSize === 'function') {
                     map.invalidateSize();
                 }
                 
-                // Force map to redraw and pan to bounds if available
-                setTimeout(() => {
-                    try {
-                        if (typeof map.fitBounds === 'function' && layer.getBounds) {
-                            const bounds = layer.getBounds();
-                            if (bounds && bounds.isValid && bounds.isValid()) {
-                                map.fitBounds(bounds);
-                            }
-                        }
-                    } catch (e) {
-                        // Bounds not available, skip
-                    }
-                    
-                    // Redraw the map
-                    if (typeof map.invalidateSize === 'function') {
-                        map.invalidateSize({ pan: false });
-                    }
-                }, 100);
-                
-                // Bring markers to front
+                // markers
                 if (window.currentMarkers && typeof window.currentMarkers.bringToFront === 'function') {
                     window.currentMarkers.bringToFront();
                 } else if (window.currentMarkers && typeof window.currentMarkers.eachLayer === 'function') {
-                    // For LayerGroup, bring each child layer to front
+                    // group
                     window.currentMarkers.eachLayer(function(layer) {
                         if (typeof layer.bringToFront === 'function') {
                             layer.bringToFront();
@@ -597,7 +574,7 @@
             hideLoading();
             showNotification('GeoTIFF layer loaded successfully', 'success');
             
-            // Update legend with unit
+            // legend
             updateLegend(pollutant, minValue, maxValue, unit);
             
             return layer;
@@ -672,7 +649,7 @@
         }
     }
 
-    // Remove current raster layer from map
+    // remove
     function removeCurrentLayer() {
         const map = window.currentMap;
         if (!map) return;
@@ -683,7 +660,7 @@
                     if (map.hasLayer(layer)) {
                         map.removeLayer(layer);
                     }
-                    // Also clear the layer's container if it exists
+                    // container
                     if (layer._container) {
                         layer._container.remove();
                     }
@@ -694,11 +671,11 @@
                     console.warn('Error removing layer:', e);
                 }
             });
-            // Clear the array
+            // clear
             state.allAddedLayers = [];
         }
         
-        // Also remove the current layer explicitly
+        // explicit
         if (state.currentLayer) {
             try {
                 if (map.hasLayer(state.currentLayer)) {
@@ -725,7 +702,7 @@
             }
         });
         
-        // Force the map to redraw
+        // redraw
         if (typeof map.invalidateSize === 'function') {
             map.invalidateSize();
         }
@@ -780,14 +757,14 @@
         };
     }
 
-    // Legend - displays US AQI scale only
+    // legend
     function updateLegend(pollutant, minValue, maxValue, unit) {
-        // Only create legend on home page
+        // guard
         const isHomePage = document.body.classList.contains('home-page');
         
         let legend = document.getElementById('geotiff-legend');
         
-        // Hide legend if not on home page
+        // hide
         if (!isHomePage) {
             if (legend) {
                 legend.style.display = 'none';
@@ -803,7 +780,7 @@
             document.body.appendChild(legend);
         }
 
-        // Extract date from layer name if available
+        // date
         let displayDate = "";
         if (state.currentLayerName) {
             const dateMatch = state.currentLayerName.match(/\d{8}/);
@@ -832,7 +809,7 @@
         legend.style.display = state.legendVisible ? 'block' : 'none';
     }
 
-    // Toggle legend visibility
+    // toggle
     function toggleLegend() {
         state.legendVisible = !state.legendVisible;
         const legend = document.getElementById('geotiff-legend');
@@ -842,7 +819,7 @@
         return state.legendVisible;
     }
 
-    // Hide legend
+    // hide
     function hideLegend() {
         state.legendVisible = false;
         const legend = document.getElementById('geotiff-legend');
@@ -874,10 +851,10 @@
         
         console.log('GeoTIFF controls container found:', container);
 
-        // Get current UTC date formatted
+        // utc
         const now = new Date();
-        const utcDateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD format
-        const utcTimeStr = now.toISOString().split('T')[1].substring(0, 5); // HH:MM format
+        const utcDateStr = now.toISOString().split('T')[0]; // date
+        const utcTimeStr = now.toISOString().split('T')[1].substring(0, 5); // time
 
         container.innerHTML = `
             <div class="control-section geotiff-control-section">
@@ -924,17 +901,17 @@
 
         console.log('GeoTIFF control panel HTML inserted');
         
-        // Populate layer dropdown
+        // populate
         populateLayerDropdown();
         
-        // Bind events
+        // bind
         bindControlEvents();
         
         console.log('GeoTIFF control panel created successfully');
         return true;
     }
 
-    // Populate the layer selection dropdown
+    // dropdown
     async function populateLayerDropdown() {
         const select = document.getElementById('geotiff-layer-select');
         if (!select) {
@@ -944,17 +921,17 @@
         
         console.log('Populating GeoTIFF layer dropdown...');
 
-        // Discover available layers if not already done
+        // discover
         if (state.availableLayers.length === 0) {
             await discoverAvailableLayers();
         }
 
-        // Clear existing options (except first)
+        // clear
         while (select.options.length > 1) {
             select.remove(1);
         }
 
-        // Add available layers
+        // add
         state.availableLayers.forEach(layer => {
             const option = document.createElement('option');
             option.value = layer.path;
@@ -969,7 +946,7 @@
     }
 
     function bindControlEvents() {
-        // Layer selection
+        // select
         const layerSelect = document.getElementById('geotiff-layer-select');
         if (layerSelect) {
             layerSelect.addEventListener('change', async function() {
@@ -989,13 +966,25 @@
                 
                 if (type === 'geotiff' || type === 'tiff') {
                     await loadGeoTIFF(path, { pollutant, name, unit });
+                    // url
+                    updateURLParams(path, window.currentMap ? {
+                        lat: window.currentMap.getCenter().lat,
+                        lng: window.currentMap.getCenter().lng,
+                        zoom: window.currentMap.getZoom()
+                    } : null);
                 } else if (type === 'pmtiles') {
                     await loadPMTiles(path, { pollutant, name });
+                    // url
+                    updateURLParams(path, window.currentMap ? {
+                        lat: window.currentMap.getCenter().lat,
+                        lng: window.currentMap.getCenter().lng,
+                        zoom: window.currentMap.getZoom()
+                    } : null);
                 }
             });
         }
 
-        // Visibility toggle
+        // visibility
         const visibilityCheckbox = document.getElementById('geotiff-visibility');
         if (visibilityCheckbox) {
             visibilityCheckbox.addEventListener('change', function() {
@@ -1007,7 +996,7 @@
             });
         }
 
-        // Legend visibility toggle
+        // legend
         const legendCheckbox = document.getElementById('geotiff-legend-visibility');
         if (legendCheckbox) {
             legendCheckbox.addEventListener('change', function() {
@@ -1017,7 +1006,7 @@
             });
         }
 
-        // Opacity slider
+        // opacity
         const opacitySlider = document.getElementById('geotiff-opacity');
         const opacityValue = document.getElementById('geotiff-opacity-value');
         if (opacitySlider) {
@@ -1030,14 +1019,14 @@
             });
         }
 
-        // Remove layer button
+        // remove
         const removeBtn = document.getElementById('geotiff-remove-layer');
         if (removeBtn) {
             removeBtn.addEventListener('click', function() {
                 removeCurrentLayer();
                 hideLegend();
                 
-                // Reset dropdown
+                // reset
                 const select = document.getElementById('geotiff-layer-select');
                 if (select) select.value = '';
                 
@@ -1046,15 +1035,52 @@
         }
     }
 
-    /**
-     * Pick the best layer for a given pollutant:
-     *   1. Today's TIFF (non-test, date === today UTC)
-     *   2. Most-recent TIFF for that pollutant (non-test, sorted by date desc)
-     *   3. Any TIFF for that pollutant (test included)
-     *   4. null – nothing available
-     */
+    // persistence
+    function getURLParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            tif: params.get('tif'),
+            lat: params.get('lat'),
+            lng: params.get('lng'),
+            zoom: params.get('zoom')
+        };
+    }
+
+    function updateURLParams(tifPath, mapState) {
+        const params = new URLSearchParams(window.location.search);
+        
+        if (tifPath) {
+            params.set('tif', tifPath);
+        }
+        
+        if (mapState) {
+            if (mapState.lat !== undefined) params.set('lat', mapState.lat.toFixed(6));
+            if (mapState.lng !== undefined) params.set('lng', mapState.lng.toFixed(6));
+            if (mapState.zoom !== undefined) params.set('zoom', mapState.zoom);
+        }
+        
+        const newURL = window.location.pathname + '?' + params.toString();
+        window.history.replaceState({ path: newURL }, '', newURL);
+    }
+
+    function restoreMapState(map) {
+        const params = getURLParams();
+        
+        if (params.lat && params.lng && params.zoom) {
+            const lat = parseFloat(params.lat);
+            const lng = parseFloat(params.lng);
+            const zoom = parseInt(params.zoom);
+            
+            if (!isNaN(lat) && !isNaN(lng) && !isNaN(zoom)) {
+                map.setView([lat, lng], zoom);
+                console.log(`Restored map state: lat=${lat}, lng=${lng}, zoom=${zoom}`);
+            }
+        }
+    }
+
+
     function selectDefaultLayer(pollutant) {
-        const todayUTC = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const todayUTC = new Date().toISOString().split('T')[0]; // date
         const pool = state.availableLayers.filter(l => l.pollutant === pollutant);
 
         if (pool.length === 0) return null;
@@ -1063,21 +1089,16 @@
         const todayLayer = pool.find(l => !l.test && l.date === todayUTC);
         if (todayLayer) return todayLayer;
 
-        // 2. Most-recent non-test (sort by date desc, nulls last)
+        // 2. Most-recent non-test 
         const nonTest = pool.filter(l => !l.test && l.date).sort((a, b) => b.date.localeCompare(a.date));
         if (nonTest.length > 0) return nonTest[0];
 
-        // 3. Fallback: any layer for this pollutant (test included, most recent first)
+        // 3. Fallback
         const sorted = pool.filter(l => l.date).sort((a, b) => b.date.localeCompare(a.date));
         return sorted.length > 0 ? sorted[0] : pool[0];
     }
 
-    /**
-     * Derive the pollutant to auto-load based on the current species-filter value.
-     *   dos_missions → pm25
-     *   pandora      → no2
-     *   anything else → null (no auto-load)
-     */
+    // filter
     function pollutantForFilter(filterValue) {
         if (!filterValue) return null;
         const v = filterValue.toLowerCase();
@@ -1086,10 +1107,7 @@
         return null;
     }
 
-    /**
-     * Load the appropriate default layer for a given filter value and update
-     * both dropdowns to reflect the selection.
-     */
+    // autoload
     async function loadDefaultForFilter(filterValue) {
         const pollutant = pollutantForFilter(filterValue);
         if (!pollutant) return;
@@ -1106,7 +1124,7 @@
 
         await loadGeoTIFF(layer.path, { pollutant: layer.pollutant, name: layer.name, unit: layer.unit });
 
-        // Sync both dropdowns to show the selected layer
+        // sync
         ['geotiff-layer-select', 'geotiff-floating-select'].forEach(id => {
             const sel = document.getElementById(id);
             if (!sel) return;
@@ -1119,7 +1137,7 @@
         });
     }
 
-    // Initialize the GeoTIFF Manager
+    // init
     async function init(options = {}) {
         const {
             autoCreateControls = true,
@@ -1128,7 +1146,7 @@
 
         console.log('Initializing GeoTIFF Manager...');
         
-        // Reset state to handle reinitialization after navigation
+        // reset
         state.currentLayer = null;
         state.currentLayerName = null;
         state.georaster = null;
@@ -1137,10 +1155,10 @@
         state.legendVisible = true;
         state.allAddedLayers = [];
         
-        // Register projections first
+        // register
         registerProjections();
 
-        // Discover available layers
+        // discover
         await discoverAvailableLayers();
         console.log(`Found ${state.availableLayers.length} available layers`);
         
@@ -1174,7 +1192,7 @@
             } else {
                 const result = createControlPanel(controlsContainer);
                 if (!result) {
-                    // Retry after a short delay if container wasn't found
+                    // retry
                     console.log('Retrying control panel creation in 500ms...');
                     setTimeout(() => createControlPanel(controlsContainer), 500);
                 }
@@ -1189,9 +1207,70 @@
 
         console.log('GeoTIFF Manager initialized');
 
-        // Auto-load the first discovered layer
-        if (window.currentMap && state.availableLayers.length > 0) {
-            console.log('Auto-loading first discovered layer...');
+        // restore
+        if (window.currentMap) {
+            restoreMapState(window.currentMap);
+            
+            // debounce
+            let urlUpdateTimeout = null;
+            const updateURLOnMapChange = () => {
+                if (urlUpdateTimeout) clearTimeout(urlUpdateTimeout);
+                urlUpdateTimeout = setTimeout(() => {
+                    if (state.currentLayer) {
+                        updateURLParams(state.currentLayer.path || state.currentLayerName, {
+                            lat: window.currentMap.getCenter().lat,
+                            lng: window.currentMap.getCenter().lng,
+                            zoom: window.currentMap.getZoom()
+                        });
+                    }
+                }, 300);
+            };
+            
+            // update
+            window.currentMap.on('moveend', updateURLOnMapChange);
+            window.currentMap.on('zoomend', updateURLOnMapChange);
+        }
+
+        // url
+        const urlParams = getURLParams();
+        if (window.currentMap && urlParams.tif) {
+            console.log('Loading TIF from URL parameters:', urlParams.tif);
+            setTimeout(async () => {
+                // find
+                const layer = state.availableLayers.find(l => l.path === urlParams.tif);
+                if (layer) {
+                    // select
+                    const select = document.getElementById('geotiff-layer-select');
+                    if (select) {
+                        for (let i = 0; i < select.options.length; i++) {
+                            if (select.options[i].value === urlParams.tif) {
+                                select.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                    // load
+                    await loadGeoTIFF(layer.path, { 
+                        pollutant: layer.pollutant, 
+                        name: layer.name, 
+                        unit: layer.unit 
+                    });
+                } else {
+                    console.log('TIF from URL not found in available layers, loading first layer');
+                    // fallback
+                    if (state.availableLayers.length > 0) {
+                        const firstLayer = state.availableLayers[0];
+                        await loadGeoTIFF(firstLayer.path, { 
+                            pollutant: firstLayer.pollutant, 
+                            name: firstLayer.name, 
+                            unit: firstLayer.unit 
+                        });
+                    }
+                }
+            }, 500);
+        } else if (window.currentMap && state.availableLayers.length > 0) {
+            // default
+            console.log('No TIF in URL, auto-loading first discovered layer...');
             setTimeout(async () => {
                 const firstLayer = state.availableLayers[0];
                 await loadGeoTIFF(firstLayer.path, { 
@@ -1205,12 +1284,12 @@
         if (CONFIG.loadDefaultOnInit && window.currentMap) {
             console.log('Auto-loading default layer based on active filter...');
             setTimeout(async () => {
-                // Read the current species-filter value (dos_missions → pm25, pandora → no2)
+                // filter
                 const filterEl = document.getElementById('species-filter');
                 const filterValue = filterEl ? filterEl.value : 'dos_missions';
                 await loadDefaultForFilter(filterValue);
 
-                // Re-trigger whenever the user changes the filter
+                // listener
                 if (filterEl && !filterEl._geotiffListenerAttached) {
                     filterEl._geotiffListenerAttached = true;
                     filterEl.addEventListener('change', function() {
@@ -1225,7 +1304,7 @@
         };
     }
     
-    // Create a floating button for quick access to raster layer controls
+    // floating
     function createFloatingButton() {
         if (document.getElementById('geotiff-quick-btn')) return;
         
@@ -1236,7 +1315,7 @@
         btn.innerHTML = '<i class="bi bi-layers-half"></i>';
         
         btn.addEventListener('click', () => {
-            // Toggle a floating panel
+            // toggle
             let panel = document.getElementById('geotiff-floating-panel');
             if (panel) {
                 panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
@@ -1245,7 +1324,7 @@
             }
         });
         
-        // Add to map container
+        // container
         const mapContainer = document.getElementById('map');
         if (mapContainer) {
             mapContainer.parentElement.appendChild(btn);
@@ -1294,7 +1373,7 @@
             document.body.appendChild(panel);
         }
         
-        // Bind events for floating panel
+        // events
         const floatingSelect = document.getElementById('geotiff-floating-select');
         floatingSelect.addEventListener('change', async function() {
             const selectedOption = this.options[this.selectedIndex];
@@ -1340,7 +1419,7 @@
         const styles = document.createElement('style');
         styles.id = 'geotiff-manager-styles';
         styles.textContent = `
-            /* GeoTIFF Loading Indicator */
+            /* loading */
             .geotiff-loading {
                 position: fixed;
                 left: 50%;
@@ -1388,7 +1467,7 @@
                 to { transform: rotate(360deg); }
             }
             
-            /* GeoTIFF Legend - Horizontal Layout on Banner (HOME PAGE ONLY) */
+            /* legend */
             .geotiff-legend {
                 position: fixed;
                 left: 50%;
@@ -1405,12 +1484,12 @@
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             }
             
-            /* Only show legend on home page */
+            /* guard */
             body.home-page .geotiff-legend {
                 display: block !important;
             }
             
-            /* Static AQI Legend Wrapper */
+            /* wrapper */
             .aqi-legend-wrapper {
                 display: flex;
                 flex-wrap: wrap;
@@ -1422,7 +1501,7 @@
                 width: 100%;
             }
             
-            /* Individual AQI Categories */
+            /* categories */
             .aqi-category {
                 flex: 1;
                 min-width: 60px;
@@ -1468,7 +1547,7 @@
                 color: white;
             }
             
-            /* Legend Footer */
+            /* footer */
             .aqi-legend-footer {
                 width: 100%;
                 background: rgba(0, 0, 0, 0.8);
@@ -1480,7 +1559,7 @@
             }
 
             
-            /* GeoTIFF Control Section - Enhanced */
+            /* section */
             .geotiff-control-section {
                 border-top: 1px solid rgba(255, 255, 255, 0.15);
                 padding-top: 16px;
@@ -1503,7 +1582,7 @@
                 opacity: 0.9;
             }
             
-            /* Meta info (date and source) */
+            /* meta */
             .geotiff-meta-info {
                 display: flex;
                 flex-direction: column;
@@ -1527,7 +1606,7 @@
                 opacity: 0.8;
             }
             
-            /* Ensure select and inputs are styled properly */
+            /* inputs */
             .geotiff-control-section .control-select {
                 width: 100%;
                 padding: 10px 12px;
@@ -1655,7 +1734,7 @@
                 letter-spacing: 0.2px;
             }
             
-            /* Floating Quick Access Button */
+            /* button */
             .geotiff-quick-btn {
                 position: absolute;
                 top: 180px;
@@ -1681,7 +1760,7 @@
                 transform: scale(1.05);
             }
             
-            /* Floating Panel */
+            /* panel */
             .geotiff-floating-panel {
                 position: absolute;
                 top: 230px;
@@ -1782,7 +1861,7 @@
                 background: rgba(239, 68, 68, 1);
             }
             
-            /* Mobile Legend Positioning */
+            /* mobile */
             @media (max-width: 768px) {
                 .geotiff-legend {
                     bottom: 130px;
@@ -1852,10 +1931,10 @@
     }
 
     const GeoTIFFManager = {
-        // Initialization
+        // init
         init,
         
-        // Layer loading
+        // loading
         loadGeoTIFF,
         loadPMTiles,
         discoverAvailableLayers,
@@ -1863,7 +1942,7 @@
         selectDefaultLayer,
         loadDefaultForFilter,
         
-        // Layer controls
+        // controls
         removeCurrentLayer,
         toggleLayerVisibility,
         setLayerOpacity,
@@ -1878,16 +1957,16 @@
         createControlPanel,
         populateLayerDropdown,
         
-        // State access
+        // state
         getState: () => ({ ...state }),
         getConfig: () => ({ ...CONFIG }),
         
-        // Utilities
+        // utils
         getColorScale,
         interpolateColor
     };
 
-    // Export to global scope
+    // export
     global.GeoTIFFManager = GeoTIFFManager;
 
 })(typeof window !== 'undefined' ? window : this);
