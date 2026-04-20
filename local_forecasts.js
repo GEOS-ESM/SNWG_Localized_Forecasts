@@ -1476,7 +1476,7 @@ function add_the_banner(site, param) {
         const pm25_conc    = forecast.pm25_conc_cnn ?? forecast.pm25 ?? null;
 
         // Display
-        const temperature = (typeof t10m === "number" && !isNaN(t10m)) ? (t10m - 273.15).toFixed(1) : "--";
+        const temperature = (typeof t10m === "number" && !isNaN(t)) ? (t - 273.15).toFixed(1) : "--";
         const humidity    = (typeof rh   === "number" && !isNaN(rh))   ? (rh  * 100).toFixed(0)     : "--";
 
         let aqiValue = '--';
