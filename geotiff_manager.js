@@ -1039,10 +1039,10 @@
     function getURLParams() {
         const params = new URLSearchParams(window.location.search);
         return {
-            tif: params.get('tif'),
-            lat: params.get('lat'),
-            lng: params.get('lng'),
-            zoom: params.get('zoom')
+            r: params.get('r'),
+            lt: params.get('lt'),
+            lg: params.get('lg'),
+            z: params.get('z')
         };
     }
 
@@ -1050,13 +1050,21 @@
         const params = new URLSearchParams(window.location.search);
         
         if (tifPath) {
-            params.set('tif', tifPath);
+            const m = tifPath.match(/geos_cf_([A-Z0-9]+)_RH35_(\d{4})(\d{2})(\d{2})/) ||
+                      tifPath.match(/geos_cf_([A-Z0-9]+)_(\d{4})(\d{2})(\d{2})/);
+            if (m) {
+                const pollutant = m[1].toLowerCase();
+                const yy = m[2].slice(2);
+                params.set('r', `${pollutant}_${yy}${m[3]}${m[4]}`);
+            } else {
+                params.set('r', tifPath);
+            }
         }
         
         if (mapState) {
-            if (mapState.lat !== undefined) params.set('lat', mapState.lat.toFixed(6));
-            if (mapState.lng !== undefined) params.set('lng', mapState.lng.toFixed(6));
-            if (mapState.zoom !== undefined) params.set('zoom', mapState.zoom);
+            if (mapState.lat !== undefined) params.set('lt', mapState.lat.toFixed(4));
+            if (mapState.lng !== undefined) params.set('lg', mapState.lng.toFixed(4));
+            if (mapState.zoom !== undefined) params.set('z', mapState.zoom);
         }
         
         const newURL = window.location.pathname + '?' + params.toString();
@@ -1066,10 +1074,10 @@
     function restoreMapState(map) {
         const params = getURLParams();
         
-        if (params.lat && params.lng && params.zoom) {
-            const lat = parseFloat(params.lat);
-            const lng = parseFloat(params.lng);
-            const zoom = parseInt(params.zoom);
+        if (params.lt && params.lg && params.z) {
+            const lat = parseFloat(params.lt);
+            const lng = parseFloat(params.lg);
+            const zoom = parseInt(params.z);
             
             if (!isNaN(lat) && !isNaN(lng) && !isNaN(zoom)) {
                 map.setView([lat, lng], zoom);
@@ -1233,17 +1241,21 @@
 
         // url
         const urlParams = getURLParams();
-        if (window.currentMap && urlParams.tif) {
-            console.log('Loading TIF from URL parameters:', urlParams.tif);
+        if (window.currentMap && urlParams.r) {
+            console.log('Loading TIF from URL parameters:', urlParams.r);
             setTimeout(async () => {
+                const rm = urlParams.r.match(/^([a-z0-9]+)_(\d{2})(\d{2})(\d{2})$/);
+                const fullDate = rm ? `20${rm[2]}${rm[3]}${rm[4]}` : null;
                 // find
-                const layer = state.availableLayers.find(l => l.path === urlParams.tif);
+                const layer = fullDate
+                    ? state.availableLayers.find(l => l.path.includes(fullDate))
+                    : state.availableLayers.find(l => l.path === urlParams.r);
                 if (layer) {
                     // select
                     const select = document.getElementById('geotiff-layer-select');
                     if (select) {
                         for (let i = 0; i < select.options.length; i++) {
-                            if (select.options[i].value === urlParams.tif) {
+                            if (select.options[i].value === layer.path) {
                                 select.selectedIndex = i;
                                 break;
                             }

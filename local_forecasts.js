@@ -1,5 +1,6 @@
 // LF-V1.1
-const performanceUtils = {
+if (!window.performanceUtils) {
+window.performanceUtils = {
     requestCache: new Map(),
     
     // Debounce
@@ -60,8 +61,7 @@ const performanceUtils = {
         this.requestCache.clear();
     }
 };
-
-window.performanceUtils = performanceUtils;
+} // end performanceUtils guard
 
 $(document).ready(function() {
     $('body').on('click', '.nl_wave_routing', function(e) {
@@ -1236,7 +1236,9 @@ function finalizeSitesLoading(filteredSites) {
     const geojson = sitesArrayToGeoJSON(filteredSites);
     
     // Layer
-    if (window.currentMap && window.currentMap.isStyleLoaded()) {
+    const mapEl = document.getElementById('map');
+    const mapReady = window.currentMap && mapEl && window.currentMap._container === mapEl;
+    if (mapReady) {
         updateMapMarkers(geojson);
     } else {
         // Create
@@ -1466,7 +1468,7 @@ function add_the_banner(site, param) {
 
     if (site.observation_source) {
         const forecast = precomputed_forecasts?.[0] || {};
-        const t10m = forecast.t10m;
+        const t10m = forecast.t10m ?? forecast.t;
         const rh = forecast.rh;
 
         // Fields
@@ -1476,7 +1478,7 @@ function add_the_banner(site, param) {
         const pm25_conc    = forecast.pm25_conc_cnn ?? forecast.pm25 ?? null;
 
         // Display
-        const temperature = (typeof t10m === "number" && !isNaN(t)) ? (t - 273.15).toFixed(1) : "--";
+        const temperature = (typeof t10m === "number" && !isNaN(t10m)) ? Math.round(t10m - 273.15) : "--";
         const humidity    = (typeof rh   === "number" && !isNaN(rh))   ? (rh  * 100).toFixed(0)     : "--";
 
         let aqiValue = '--';
