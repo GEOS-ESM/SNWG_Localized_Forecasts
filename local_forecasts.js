@@ -2538,7 +2538,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
             <div class="mini-barchart-area">
                 ${scalesH.map(v => `<div class="mini-grid-line" style="bottom:${Math.round((v/chartMax)*100)}%"></div>`).join('')}
                 ${makeStatLine(weekAvg,  'Avg',  chartMax)}
-                ${makeStatLine(epaGoodAqi, 'NAAQS Recommendation ', chartMax, { cls: 'mini-stat-line-epa' })}
+                ${makeStatLine(epaGoodAqi, 'NAAQS Recommended AQI ', chartMax, { cls: 'mini-stat-line-epa' })}
                 <div class="mini-barchart-bars">
                     ${barPoints.map(p => {
                         const heightPct = p.aqi !== null ? Math.max(Math.round((p.aqi / chartMax) * 100), 2) : 0;
@@ -2561,7 +2561,6 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
             <span>← 12h ago</span><span>Now</span><span>+24h →</span>
         </div>`;
     };
-
 
     const dailyMap = new Map();
     for (let i = 0; i < datetimes.length; i++) {
@@ -2600,7 +2599,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
             <div class="mini-barchart-area">
                 ${dScales.map(v => `<div class="mini-grid-line" style="bottom:${Math.round((v/dChartMax)*100)}%"></div>`).join('')}
                 ${makeStatLine(dAvg, 'Avg', dChartMax)}
-                ${makeStatLine(epaGoodAqi, 'EPA Good', dChartMax, { cls: 'mini-stat-line-epa' })}
+                ${makeStatLine(epaGoodAqi, 'NAAQS Recommended AQI ', dChartMax, { cls: 'mini-stat-line-epa' })}
                 <div class="mini-barchart-bars">
                     ${dailyPoints.map(p => {
                         const heightPct = Math.max(Math.round((p.avg / dChartMax) * 100), 2);
