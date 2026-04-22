@@ -1467,7 +1467,10 @@ function add_the_banner(site, param) {
     const obs_options = $.parseJSON(site.obs_options);
 
     if (site.observation_source) {
-        const forecast = precomputed_forecasts?.[0] || {};
+        // current-hour 
+        const siteDataLike = { forecasts: precomputed_forecasts, species: null };
+        const timezone = site.timezone || "UTC";
+        const forecast = getCurrentForecast(siteDataLike, timezone) || precomputed_forecasts?.[0] || {};
         const t10m = forecast.t10m ?? forecast.t;
         const rh = forecast.rh;
 
@@ -1710,6 +1713,7 @@ function readApiBaker(options = {}) {
                 master_pm25: [],
                 master_pm25_aqi: [],
                 master_pm25_conc_cnn: [],
+                master_pm25source: [],
                 master_predicted: [],
                 master_predicted_aqi: [],
                 master_observation: []
@@ -1737,7 +1741,10 @@ function readApiBaker(options = {}) {
                     masterData.master_pm25.push(forecast.pm25);
                     masterData.master_pm25_conc_cnn.push(forecast.pm25);
                 }
-                
+
+                // PM25 source — always push to stay index-aligned with master_datetime
+                masterData.master_pm25source.push(forecast.pm25source || null);
+
                 // PM25-AQI
                 if (forecast.pm25_aqi !== undefined && forecast.pm25_aqi !== null) {
                     masterData.master_pm25_aqi.push(forecast.pm25_aqi);
@@ -2351,229 +2358,359 @@ function calculateAqiForPm25(concentration) {
 function generateForecastHeroSection(masterData, locationName, timezone, requestedParam) {
     const $heroSection = $('#forecast-hero-section');
     if (!$heroSection.length) return;
-    
+
     const siteTimeZone = timezone || "UTC";
     const now = new Date();
     const pad = n => n.toString().padStart(2, '0');
-    const siteLocalNow = new Date(now.toLocaleString("en-US", { timeZone: siteTimeZone }));
-    const currentHour = siteLocalNow.getHours();
-    const localYear = siteLocalNow.getFullYear();
-    const localMonth = pad(siteLocalNow.getMonth() + 1);
-    const localDate = pad(siteLocalNow.getDate());
-    
-    let aqiData = [];
-    let pollutantLabel = 'NO₂';
-    let pollutantKey = 'no2';
-    
+
+    const fmtParts = {};
+    new Intl.DateTimeFormat('en-US', {
+        timeZone: siteTimeZone,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hour12: false
+    }).formatToParts(now).forEach(p => { fmtParts[p.type] = p.value; });
+
+    const currentHour = parseInt(fmtParts.hour) % 24;
+    const currentMin  = fmtParts.minute;
+    const sYear = fmtParts.year, sMon = fmtParts.month, sDay = fmtParts.day;
+    const siteTodayStr     = `${sYear}-${sMon}-${sDay}`;
+    const noonUTC          = Date.UTC(parseInt(sYear), parseInt(sMon) - 1, parseInt(sDay), 12);
+    const siteTomorrowStr  = new Date(noonUTC + 86400000).toISOString().slice(0, 10);
+    const siteYesterdayStr = new Date(noonUTC - 86400000).toISOString().slice(0, 10);
+
+
+    const addHours = (offsetH) => {
+        const totalH = currentHour + offsetH;
+        const dayOff = Math.floor(totalH / 24);
+        const h = ((totalH % 24) + 24) % 24;
+        const base = new Date(noonUTC + dayOff * 86400000);
+        return { year: base.getUTCFullYear().toString(), month: pad(base.getUTCMonth()+1), day: pad(base.getUTCDate()), hour: h };
+    };
+
+    // AQI array based on param
+    let aqiData = [], pollutantLabel = 'NO₂';
     if (requestedParam && requestedParam.toLowerCase().includes('pm25')) {
         aqiData = masterData.master_pm25_aqi || [];
         pollutantLabel = 'PM2.5';
-        pollutantKey = 'pm25';
     } else {
         aqiData = masterData.master_predicted_aqi || masterData.master_no2_aqi || [];
-        pollutantLabel = 'NO₂';
-        pollutantKey = 'no2';
     }
-    
     const datetimes = masterData.master_datetime || [];
-    
-    let currentAqi = '--';
-    let prevAqi = '--';
-    const currentLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(currentHour)}`;
-    const prevHour = (currentHour - 1 + 24) % 24;
-    const prevLocalStr = `${localYear}-${localMonth}-${localDate} ${pad(prevHour)}`;
-    
-    for (let i = 0; i < datetimes.length; i++) {
-        const dtStr = datetimes[i];
-        if (!dtStr) continue;
-        const forecastHourStr = dtStr.slice(0, 13);
-        if (forecastHourStr === currentLocalStr && aqiData[i] !== undefined && aqiData[i] !== null) {
-            currentAqi = Math.round(aqiData[i]);
-        }
-        if (forecastHourStr === prevLocalStr && aqiData[i] !== undefined && aqiData[i] !== null) {
-            prevAqi = Math.round(aqiData[i]);
-        }
-    }
-    
-    // Fallback
-    if (currentAqi === '--') {
-        let bestIdx = -1;
-        let bestDiff = Infinity;
+
+
+    const findAqi = (localHourStr) => {
+        // Exact match
         for (let i = 0; i < datetimes.length; i++) {
-            if (!datetimes[i] || aqiData[i] === undefined || aqiData[i] === null) continue;
-            const entryMs = new Date(datetimes[i].replace(' ', 'T')).getTime();
-            const diff = Math.abs(entryMs - siteLocalNow.getTime());
-            if (diff < bestDiff && diff <= 3 * 60 * 60 * 1000) {
-                bestDiff = diff;
-                bestIdx = i;
-            }
+            if (datetimes[i] && datetimes[i].slice(0, 13) === localHourStr && aqiData[i] != null)
+                return Math.round(aqiData[i]);
         }
-        if (bestIdx !== -1) currentAqi = Math.round(aqiData[bestIdx]);
-    }
-    
-    let changeValue = '--';
-    let changeClass = '';
-    let changeArrow = '';
+        // Nearest within ±3h by comparing the hour integer in the string
+        const targetH = parseInt(localHourStr.slice(11, 13));
+        const targetDate = localHourStr.slice(0, 10);
+        let bi = -1, bd = Infinity;
+        for (let i = 0; i < datetimes.length; i++) {
+            if (!datetimes[i] || aqiData[i] == null) continue;
+            // Only check same or adjacent date
+            const dtDate = datetimes[i].slice(0, 10);
+            if (dtDate !== targetDate) continue;
+            const dtH = parseInt(datetimes[i].slice(11, 13));
+            const d = Math.abs(dtH - targetH);
+            if (d < bd && d <= 3) { bd = d; bi = i; }
+        }
+        return bi !== -1 ? Math.round(aqiData[bi]) : null;
+    };
+
+    // Current hour AQI
+    const currentLocalStr = `${siteTodayStr} ${pad(currentHour)}`;
+    let currentAqi = findAqi(currentLocalStr) ?? '--';
+
+    // Prev hour for change indicator
+    const prevT = addHours(-1);
+    const prevAqi = findAqi(`${prevT.year}-${prevT.month}-${prevT.day} ${pad(prevT.hour)}`);
+
+    let changeValue = '--', changeClass = '', changeArrow = '';
     if (typeof currentAqi === 'number' && typeof prevAqi === 'number') {
         const diff = currentAqi - prevAqi;
         changeValue = Math.abs(diff);
         changeClass = diff > 0 ? 'positive' : diff < 0 ? 'negative' : '';
         changeArrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '';
     }
-    
     const aqiLevel = getAqiLevel(currentAqi);
-    
-    const todayStr = siteLocalNow.toISOString().slice(0, 10);
-    const tomorrowDate = new Date(siteLocalNow.getTime() + 24 * 60 * 60 * 1000);
-    const tomorrowStr = tomorrowDate.toISOString().slice(0, 10);
-    const yesterdayDate = new Date(siteLocalNow.getTime() - 24 * 60 * 60 * 1000);
-    const yesterdayStr = yesterdayDate.toISOString().slice(0, 10);
-    
-    const todayVals = datetimes
-        .map((dt, i) => ({ dt, val: aqiData[i] }))
-        .filter(({ dt, val }) => dt && dt.startsWith(todayStr) && typeof val === 'number')
-        .map(({ val }) => val);
-    const tomorrowVals = datetimes
-        .map((dt, i) => ({ dt, val: aqiData[i] }))
-        .filter(({ dt, val }) => dt && dt.startsWith(tomorrowStr) && typeof val === 'number')
-        .map(({ val }) => val);
-    const yesterdayVals = datetimes
-        .map((dt, i) => ({ dt, val: aqiData[i] }))
-        .filter(({ dt, val }) => dt && dt.startsWith(yesterdayStr) && typeof val === 'number')
-        .map(({ val }) => val);
-    
-    const todayAvg = todayVals.length ? Math.round(todayVals.reduce((a, b) => a + b, 0) / todayVals.length) : '--';
-    const tomorrowAvg = tomorrowVals.length ? Math.round(tomorrowVals.reduce((a, b) => a + b, 0) / tomorrowVals.length) : '--';
-    const yesterdayAvg = yesterdayVals.length ? Math.round(yesterdayVals.reduce((a, b) => a + b, 0) / yesterdayVals.length) : '--';
-    
-    let dailyChange = '--';
-    let dailyChangeClass = '';
-    let dailyArrow = '';
+
+    // Daily aggregates
+    const aggAqi = (prefix) => {
+        const vals = datetimes.map((dt, i) => aqiData[i]).filter((v, i) => datetimes[i] && datetimes[i].startsWith(prefix) && typeof v === 'number');
+        return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : '--';
+    };
+    const todayAvg = aggAqi(siteTodayStr), tomorrowAvg = aggAqi(siteTomorrowStr), yesterdayAvg = aggAqi(siteYesterdayStr);
+
+    let dailyChange = '--', dailyChangeClass = '', dailyArrow = '';
     if (typeof todayAvg === 'number' && typeof yesterdayAvg === 'number') {
         const diff = todayAvg - yesterdayAvg;
-        const pct = yesterdayAvg !== 0 ? ((diff / yesterdayAvg) * 100).toFixed(1) : 0;
+        const pct = yesterdayAvg !== 0 ? ((diff/yesterdayAvg)*100).toFixed(1) : 0;
         dailyChange = `${diff > 0 ? '+' : ''}${diff} (${pct}%)`;
         dailyChangeClass = diff > 0 ? 'up' : diff < 0 ? 'down' : '';
         dailyArrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '';
     }
-    
-    const getAqiForHour = (hourOffset) => {
-        const targetMs = siteLocalNow.getTime() + hourOffset * 60 * 60 * 1000;
-        const targetDate = new Date(targetMs);
-        const tYear  = targetDate.getFullYear();
-        const tMonth = pad(targetDate.getMonth() + 1);
-        const tDay   = pad(targetDate.getDate());
-        const tHour  = targetDate.getHours();
-        const targetStr = `${tYear}-${tMonth}-${tDay} ${pad(tHour)}`;
 
-        // Exact
+    // forecast cards for all offsets [Now,+3,+6,+9,+12,+15,+18,+21,+24]
+    const offsets = [0, 3, 6, 9, 12, 15, 18, 21, 24];
+    const forecasts = offsets.map(off => {
+        if (off === 0) return { label: 'Now', aqi: currentAqi, hour: currentHour, isNow: true };
+        const t = addHours(off);
+        const aqi = findAqi(`${t.year}-${t.month}-${t.day} ${pad(t.hour)}`) ?? '--';
+        return { label: `+${off}h`, aqi, hour: t.hour, isNow: false };
+    });
+
+    // forecast cards HTML per period tab
+    const periodMap = { '6h': 2, '12h': 4, '18h': 6, '24h': 8 };
+    const buildCards = (maxIdx) => forecasts.slice(0, maxIdx + 1).map(f => `
+        <div class="forecast-card${f.isNow ? ' forecast-card-now' : ''}">
+            <div class="card-time">${f.label}</div>
+            <div class="card-aqi" style="color:${getAqiLevel(f.aqi).color};">${f.aqi}</div>
+            <div class="card-level">${pad(f.hour)}:00</div>
+        </div>`).join('');
+
+    // mini bar chart 
+    const sourceData = masterData.master_pm25source || [];
+    const findEntry = (localHourStr) => {
         for (let i = 0; i < datetimes.length; i++) {
-            if (datetimes[i] && datetimes[i].slice(0, 13) === targetStr && aqiData[i] !== undefined && aqiData[i] !== null) {
-                return { aqi: Math.round(aqiData[i]), hour: tHour, date: `${tYear}-${tMonth}-${tDay}` };
-            }
+            if (datetimes[i] && datetimes[i].slice(0, 13) === localHourStr && aqiData[i] != null)
+                return { aqi: Math.round(aqiData[i]), source: sourceData[i] || null };
         }
-
-        // Closest
-        let bestIdx = -1;
-        let bestDiff = Infinity;
+        const targetDate = localHourStr.slice(0, 10);
+        const targetH = parseInt(localHourStr.slice(11, 13));
+        let bi = -1, bd = Infinity;
         for (let i = 0; i < datetimes.length; i++) {
-            if (!datetimes[i] || aqiData[i] === undefined || aqiData[i] === null) continue;
-            const entryMs = new Date(datetimes[i].replace(' ', 'T')).getTime();
-            const diff = Math.abs(entryMs - targetMs);
-            if (diff < bestDiff && diff <= 3 * 60 * 60 * 1000) {
-                bestDiff = diff;
-                bestIdx = i;
-            }
+            if (!datetimes[i] || aqiData[i] == null) continue;
+            if (datetimes[i].slice(0, 10) !== targetDate) continue;
+            const d = Math.abs(parseInt(datetimes[i].slice(11, 13)) - targetH);
+            if (d < bd && d <= 3) { bd = d; bi = i; }
         }
-        if (bestIdx !== -1) {
-            const entryDate = new Date(datetimes[bestIdx].replace(' ', 'T'));
-            return {
-                aqi: Math.round(aqiData[bestIdx]),
-                hour: entryDate.getHours(),
-                date: datetimes[bestIdx].slice(0, 10)
-            };
-        }
-
-        return { aqi: '--', hour: tHour, date: `${tYear}-${tMonth}-${tDay}` };
+        return bi !== -1 ? { aqi: Math.round(aqiData[bi]), source: sourceData[bi] || null } : null;
     };
-    
-    const forecast1 = getAqiForHour(3);
-    const forecast2 = getAqiForHour(6);
-    const forecast3 = getAqiForHour(9);
-    const forecast4 = getAqiForHour(12);
-    
-    const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
-    const formattedDate = siteLocalNow.toLocaleDateString('en-US', dateOptions);
-    const formattedTime = `${pad(currentHour)}:${pad(siteLocalNow.getMinutes())}`;
-    
+
+    const barPoints = [];
+    for (let off = -12; off <= 24; off++) {
+        const t = addHours(off);
+        const entry = findEntry(`${t.year}-${t.month}-${t.day} ${pad(t.hour)}`);
+        barPoints.push({ off, hour: t.hour, aqi: entry ? entry.aqi : null, source: entry ? entry.source : null, isCurrent: off === 0 });
+    }
+
+    const validAqis = barPoints.filter(p => p.aqi !== null).map(p => p.aqi);
+    const maxAqi = Math.max(...validAqis, 50);
+    const chartMax = Math.max(maxAqi * 1.15, 60);
+    const scaleLines = [50, 100, 150, 200].filter(v => v <= chartMax);
+
+    // Week stats 
+    const weekMin  = validAqis.length ? Math.min(...validAqis) : null;
+    const weekMax2 = validAqis.length ? Math.max(...validAqis) : null;
+    const weekAvg  = validAqis.length ? Math.round(validAqis.reduce((a,b)=>a+b,0)/validAqis.length) : null;
+
+    // Source colors 
+    const sourceColors = { 'GEOS-CF': '#1565C0', 'GEOS-FP': '#00838F', 'MERRA-2': '#6A1B9A', 'AirNow': '#2E7D32', 'CNN': '#BF360C', 'ML': '#E65100' };
+    const getSourceColor = (s) => sourceColors[s] || '#888';
+    const uniqueSources = [...new Set(barPoints.filter(p=>p.source).map(p=>p.source))];
+    const sourceLegendHtml = uniqueSources.length > 0 ? `
+        <div class="mini-source-legend">
+            <span class="source-legend-label">Source:</span>
+            ${uniqueSources.map(s => `<span class="source-chip" style="border-color:${getSourceColor(s)};color:${getSourceColor(s)};">&#9679; ${s}</span>`).join('')}
+        </div>` : '';
+
+
+    const makeStatLine = (val, label, cMax, opts = {}) => val !== null && val <= cMax ?
+        `<div class="mini-stat-line ${opts.cls || ''}" style="bottom:${Math.min(Math.round((val/cMax)*100), 99)}%;border-top-style:${opts.dash !== false ? 'dashed' : 'solid'};" title="${label}: ${val}">
+            <span class="mini-stat-label">${label} ${val}</span>
+        </div>` : '';
+
+
+    const epaGoodAqi = 50;
+
+
+    const buildHourlyChart = () => {
+        const scalesH = [50, 100, 150, 200].filter(v => v <= chartMax);
+        return `
+        <div class="mini-barchart-inner">
+            <div class="mini-barchart-yscale">
+                ${scalesH.slice().reverse().map(v => `
+                <div class="yscale-tick" style="bottom:${Math.round((v/chartMax)*100)}%"><span>${v}</span></div>`).join('')}
+            </div>
+            <div class="mini-barchart-area">
+                ${scalesH.map(v => `<div class="mini-grid-line" style="bottom:${Math.round((v/chartMax)*100)}%"></div>`).join('')}
+                ${makeStatLine(weekAvg,  'Avg',  chartMax)}
+                ${makeStatLine(epaGoodAqi, 'NAAQS Recommendation ', chartMax, { cls: 'mini-stat-line-epa' })}
+                <div class="mini-barchart-bars">
+                    ${barPoints.map(p => {
+                        const heightPct = p.aqi !== null ? Math.max(Math.round((p.aqi / chartMax) * 100), 2) : 0;
+                        const col = p.aqi !== null ? getAqiLevel(p.aqi).color : '#e0e0e0';
+                        const srcCol = p.source ? getSourceColor(p.source) : 'transparent';
+                        const showLabel = (p.off % 6 === 0);
+                        const tooltip = `${pad(p.hour)}:00 · AQI ${p.aqi ?? '--'}${p.source ? ' · ' + p.source : ''}`;
+                        return `<div class="mini-bar-wrap${p.isCurrent ? ' mini-bar-now' : ''}" title="${tooltip}">
+                            <div class="mini-bar-inner">
+                                <div class="mini-bar" style="height:${heightPct}%;background:${col};box-shadow:inset 0 -3px 0 ${srcCol};"></div>
+                                ${p.isCurrent ? `<div class="mini-bar-blink" style="background:${col};"></div>` : ''}
+                            </div>
+                            <div class="mini-bar-xlabel">${showLabel ? pad(p.hour)+':00' : ''}</div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>
+        </div>
+        <div class="mini-barchart-xlegend">
+            <span>← 12h ago</span><span>Now</span><span>+24h →</span>
+        </div>`;
+    };
+
+
+    const dailyMap = new Map();
+    for (let i = 0; i < datetimes.length; i++) {
+        if (!datetimes[i] || aqiData[i] == null) continue;
+        const dateKey = datetimes[i].slice(0, 10);
+        if (!dailyMap.has(dateKey)) dailyMap.set(dateKey, { aqis: [], sources: new Set() });
+        dailyMap.get(dateKey).aqis.push(Math.round(aqiData[i]));
+        const src = sourceData[i];
+        if (src) dailyMap.get(dateKey).sources.add(src);
+    }
+    const dailyPoints = [...dailyMap.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([date, d]) => {
+            const avg = Math.round(d.aqis.reduce((a, b) => a + b, 0) / d.aqis.length);
+            const isToday = date === siteTodayStr;
+            const sources = [...d.sources];
+            const dayName = new Date(date + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short' });
+            const dateLabel = new Date(date + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return { date, avg, isToday, sources, dayName, dateLabel };
+        });
+
+    const buildDailyChart = () => {
+        if (!dailyPoints.length) return '<div style="padding:20px;text-align:center;color:#aaa;font-size:12px;">No daily data</div>';
+        const dailyAqis = dailyPoints.map(p => p.avg);
+        const dMin  = Math.min(...dailyAqis);
+        const dMax  = Math.max(...dailyAqis);
+        const dAvg  = Math.round(dailyAqis.reduce((a, b) => a + b, 0) / dailyAqis.length);
+        const dChartMax = Math.max(dMax * 1.15, 60);
+        const dScales = [50, 100, 150, 200].filter(v => v <= dChartMax);
+        return `
+        <div class="mini-barchart-inner">
+            <div class="mini-barchart-yscale">
+                ${dScales.slice().reverse().map(v => `
+                <div class="yscale-tick" style="bottom:${Math.round((v/dChartMax)*100)}%"><span>${v}</span></div>`).join('')}
+            </div>
+            <div class="mini-barchart-area">
+                ${dScales.map(v => `<div class="mini-grid-line" style="bottom:${Math.round((v/dChartMax)*100)}%"></div>`).join('')}
+                ${makeStatLine(dAvg, 'Avg', dChartMax)}
+                ${makeStatLine(epaGoodAqi, 'EPA Good', dChartMax, { cls: 'mini-stat-line-epa' })}
+                <div class="mini-barchart-bars">
+                    ${dailyPoints.map(p => {
+                        const heightPct = Math.max(Math.round((p.avg / dChartMax) * 100), 2);
+                        const col = getAqiLevel(p.avg).color;
+                        const srcCol = p.sources[0] ? getSourceColor(p.sources[0]) : 'transparent';
+                        const tooltip = `${p.dayName} ${p.dateLabel} · Avg AQI ${p.avg}${p.sources.length ? ' · ' + p.sources.join('/') : ''}`;
+                        return `<div class="mini-bar-wrap${p.isToday ? ' mini-bar-now' : ''}" title="${tooltip}" style="min-width:22px;">
+                            <div class="mini-bar-inner">
+                                <div class="mini-bar" style="height:${heightPct}%;background:${col};box-shadow:inset 0 -3px 0 ${srcCol};"></div>
+                                ${p.isToday ? `<div class="mini-bar-blink" style="background:${col};"></div>` : ''}
+                            </div>
+                            <div class="mini-bar-xlabel">${p.dayName}</div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>
+        </div>
+        <div class="mini-barchart-xlegend">
+            <span>← Past</span><span>Today</span><span>Future →</span>
+        </div>`;
+    };
+
+    const barChartHtml = (barPoints.length > 0 || dailyPoints.length > 0) ? `
+        <div class="mini-barchart">
+            <div class="mini-barchart-header">
+                <div class="mini-barchart-title" id="fh-chart-title">Past 12h &amp; next 24h · ${pollutantLabel} AQI</div>
+                <div class="chart-toggle">
+                    <button class="chart-toggle-btn active" id="fh-btn-hourly">Hourly</button>
+                    <button class="chart-toggle-btn" id="fh-btn-daily">Daily</button>
+                </div>
+            </div>
+            ${sourceLegendHtml}
+            <div id="fh-hourly-chart">${buildHourlyChart()}</div>
+            <div id="fh-daily-chart" style="display:none;">${buildDailyChart()}</div>
+        </div>` : '';
+
+    const formattedDate = now.toLocaleDateString('en-US', {
+        timeZone: siteTimeZone, weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+    });
+    const formattedTime = `${pad(currentHour)}:${currentMin}`;
     const cleanLocation = locationName.replace(/[_-]/g, ' ').replace(/\s+/g, ' ').trim();
-    
+
     const heroHtml = `
         <div class="forecast-header">
             <h1 class="location-name">${cleanLocation}</h1>
             <div class="forecast-meta">US AQI · ${formattedTime} ${siteTimeZone} · ${formattedDate}</div>
-            
             <div class="aqi-hero">
                 <span class="aqi-value-main">${currentAqi}</span>
                 ${changeValue !== '--' ? `<span class="aqi-change ${changeClass}">${changeArrow} ${changeValue}</span>` : ''}
-                <span class="aqi-level-badge" style="background-color: ${aqiLevel.color};">${aqiLevel.level}</span>
+                <span class="aqi-level-badge" style="background-color:${aqiLevel.color};">${aqiLevel.level}</span>
             </div>
             <div class="aqi-subtitle">Air Quality Index (${pollutantLabel})</div>
         </div>
-        
+
         <div class="forecast-periods">
-            <button class="period-btn active" data-period="3h">3h</button>
-            <button class="period-btn" data-period="6h">6h</button>
+            <button class="period-btn active" data-period="6h">6h</button>
             <button class="period-btn" data-period="12h">12h</button>
+            <button class="period-btn" data-period="18h">18h</button>
             <button class="period-btn" data-period="24h">24h</button>
         </div>
-        
-        <div class="forecast-grid">
-            <div class="forecast-card">
-                <div class="card-time">+3h</div>
-                <div class="card-aqi" style="color: ${getAqiLevel(forecast1.aqi).color};">${forecast1.aqi}</div>
-                <div class="card-level">${pad(forecast1.hour)}:00</div>
-            </div>
-            <div class="forecast-card">
-                <div class="card-time">+6h</div>
-                <div class="card-aqi" style="color: ${getAqiLevel(forecast2.aqi).color};">${forecast2.aqi}</div>
-                <div class="card-level">${pad(forecast2.hour)}:00</div>
-            </div>
-            <div class="forecast-card">
-                <div class="card-time">+9h</div>
-                <div class="card-aqi" style="color: ${getAqiLevel(forecast3.aqi).color};">${forecast3.aqi}</div>
-                <div class="card-level">${pad(forecast3.hour)}:00</div>
-            </div>
-            <div class="forecast-card">
-                <div class="card-time">+12h</div>
-                <div class="card-aqi" style="color: ${getAqiLevel(forecast4.aqi).color};">${forecast4.aqi}</div>
-                <div class="card-level">${pad(forecast4.hour)}:00</div>
-            </div>
+
+        <div class="forecast-grid" id="fh-forecast-grid">
+            ${buildCards(2)}
         </div>
-        
+
+        ${barChartHtml}
+
         <div class="daily-summary">
             <h6>Daily Outlook</h6>
             <div class="daily-row">
                 <div class="daily-item">
                     <div class="day-label">Today</div>
-                    <div class="day-aqi" style="color: ${getAqiLevel(todayAvg).color};">${todayAvg}</div>
+                    <div class="day-aqi" style="color:${getAqiLevel(todayAvg).color};">${todayAvg}</div>
                     <div class="day-change ${dailyChangeClass}">${dailyArrow} ${dailyChange !== '--' ? dailyChange : 'vs yesterday'}</div>
                 </div>
                 <div class="daily-item">
                     <div class="day-label">Tomorrow</div>
-                    <div class="day-aqi" style="color: ${getAqiLevel(tomorrowAvg).color};">${tomorrowAvg}</div>
-                    <div class="day-change">${typeof tomorrowAvg === 'number' && typeof todayAvg === 'number' ? 
+                    <div class="day-aqi" style="color:${getAqiLevel(tomorrowAvg).color};">${tomorrowAvg}</div>
+                    <div class="day-change">${typeof tomorrowAvg === 'number' && typeof todayAvg === 'number' ?
                         (tomorrowAvg > todayAvg ? '▲' : tomorrowAvg < todayAvg ? '▼' : '') + ' vs today' : ''}</div>
                 </div>
             </div>
         </div>
     `;
-    
+
     $heroSection.html(heroHtml);
-    
+
+
     $heroSection.find('.period-btn').on('click', function() {
         $heroSection.find('.period-btn').removeClass('active');
         $(this).addClass('active');
+        const period = $(this).data('period');
+        const maxIdx = periodMap[period] ?? 2;
+        $('#fh-forecast-grid').html(buildCards(maxIdx));
+    });
+
+
+    $heroSection.find('#fh-btn-hourly').on('click', function() {
+        $heroSection.find('.chart-toggle-btn').removeClass('active');
+        $(this).addClass('active');
+        $('#fh-chart-title').text(`Past 12h \u0026 next 24h \u00b7 ${pollutantLabel} AQI`);
+        $('#fh-hourly-chart').show();
+        $('#fh-daily-chart').hide();
+    });
+    $heroSection.find('#fh-btn-daily').on('click', function() {
+        $heroSection.find('.chart-toggle-btn').removeClass('active');
+        $(this).addClass('active');
+        $('#fh-chart-title').text(`Daily averages \u00b7 ${pollutantLabel} AQI`);
+        $('#fh-hourly-chart').hide();
+        $('#fh-daily-chart').show();
     });
 }
 
