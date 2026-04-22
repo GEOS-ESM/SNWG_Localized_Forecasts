@@ -2359,9 +2359,22 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     const $heroSection = $('#forecast-hero-section');
     if (!$heroSection.length) return;
 
-    const siteTimeZone = timezone || "UTC";
     const now = new Date();
     const pad = n => n.toString().padStart(2, '0');
+
+
+    let siteTimeZone = (timezone && timezone !== 'UTC') ? timezone : null;
+    if (!siteTimeZone) {
+        const firstDt = (masterData.master_datetime || []).find(dt => dt && dt.length >= 22);
+        if (firstDt) {
+            const sign = firstDt[19] === '-' ? -1 : 1;
+            const parts = firstDt.slice(20).split(':');
+            const offsetH = sign * (parseInt(parts[0]) || 0);
+            siteTimeZone = offsetH === 0 ? 'UTC' : `Etc/GMT${offsetH > 0 ? -offsetH : '+' + (-offsetH)}`;
+        } else {
+            siteTimeZone = 'UTC';
+        }
+    }
 
     const fmtParts = {};
     new Intl.DateTimeFormat('en-US', {
@@ -2453,22 +2466,22 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         dailyArrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '';
     }
 
-    // forecast cards for all offsets [Now,+3,+6,+9,+12,+15,+18,+21,+24]
+    // forecast cards 
     const offsets = [0, 3, 6, 9, 12, 15, 18, 21, 24];
     const forecasts = offsets.map(off => {
-        if (off === 0) return { label: 'Now', aqi: currentAqi, hour: currentHour, isNow: true };
+        if (off === 0) return { localTime: 'Now', aqi: currentAqi, hour: currentHour, isNow: true };
         const t = addHours(off);
         const aqi = findAqi(`${t.year}-${t.month}-${t.day} ${pad(t.hour)}`) ?? '--';
-        return { label: `+${off}h`, aqi, hour: t.hour, isNow: false };
+        return { localTime: `${pad(t.hour)}:00`, aqi, hour: t.hour, isNow: false };
     });
 
-    // forecast cards HTML per period tab
+    // forecast cards 
     const periodMap = { '6h': 2, '12h': 4, '18h': 6, '24h': 8 };
     const buildCards = (maxIdx) => forecasts.slice(0, maxIdx + 1).map(f => `
         <div class="forecast-card${f.isNow ? ' forecast-card-now' : ''}">
-            <div class="card-time">${f.label}</div>
+            <div class="card-time">${f.localTime}</div>
             <div class="card-aqi" style="color:${getAqiLevel(f.aqi).color};">${f.aqi}</div>
-            <div class="card-level">${pad(f.hour)}:00</div>
+            <div class="card-level">${getAqiLevel(f.aqi).level}</div>
         </div>`).join('');
 
     // mini bar chart 
@@ -2640,12 +2653,23 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         timeZone: siteTimeZone, weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
     });
     const formattedTime = `${pad(currentHour)}:${currentMin}`;
+
+    const tzLabel = (() => {
+        try {
+            const offsetMin = -new Date().toLocaleString('en-US', { timeZone: siteTimeZone, timeZoneName: 'shortOffset' })
+                .split('GMT')[1]?.split(' ')[0]?.replace(':', '') || 0;
+            const parts = new Intl.DateTimeFormat('en-US', { timeZone: siteTimeZone, timeZoneName: 'shortOffset' })
+                .formatToParts(now);
+            const tzPart = parts.find(p => p.type === 'timeZoneName');
+            return tzPart ? tzPart.value.replace('GMT', 'UTC') : siteTimeZone;
+        } catch(e) { return siteTimeZone; }
+    })();
     const cleanLocation = locationName.replace(/[_-]/g, ' ').replace(/\s+/g, ' ').trim();
 
     const heroHtml = `
         <div class="forecast-header">
             <h1 class="location-name">${cleanLocation}</h1>
-            <div class="forecast-meta">US AQI · ${formattedTime} ${siteTimeZone} · ${formattedDate}</div>
+            <div class="forecast-meta">US AQI · ${formattedTime} ${tzLabel} · ${formattedDate}</div>
             <div class="aqi-hero">
                 <span class="aqi-value-main">${currentAqi}</span>
                 ${changeValue !== '--' ? `<span class="aqi-change ${changeClass}">${changeArrow} ${changeValue}</span>` : ''}
