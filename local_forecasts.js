@@ -2476,7 +2476,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     });
 
     // forecast cards 
-    const periodMap = { '6h': 2, '12h': 4, '18h': 6, '24h': 8 };
+    const periodMap = { '6h': 2, '12h': 4, '18h': 6, '24h': 8, '48h': 16, '72h': 24 };
     const buildCards = (maxIdx) => forecasts.slice(0, maxIdx + 1).map(f => `
         <div class="forecast-card${f.isNow ? ' forecast-card-now' : ''}">
             <div class="card-time">${f.localTime}</div>
@@ -2554,12 +2554,18 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
                 ${makeStatLine(epaGoodAqi, 'NAAQS Recommended AQI ', chartMax, { cls: 'mini-stat-line-epa' })}
                 <div class="mini-barchart-bars">
                     ${barPoints.map(p => {
-                        const heightPct = p.aqi !== null ? Math.max(Math.round((p.aqi / chartMax) * 100), 2) : 0;
+                        const rawPct = p.aqi !== null ? Math.max(Math.round((p.aqi / chartMax) * 100), 2) : 0;
+                        const heightPct = Math.min(rawPct, 60);
                         const col = p.aqi !== null ? getAqiLevel(p.aqi).color : '#e0e0e0';
                         const srcCol = p.source ? getSourceColor(p.source) : 'transparent';
                         const showLabel = (p.off % 6 === 0);
-                        const tooltip = `${pad(p.hour)}:00 · AQI ${p.aqi ?? '--'}${p.source ? ' · ' + p.source : ''}`;
-                        return `<div class="mini-bar-wrap${p.isCurrent ? ' mini-bar-now' : ''}" title="${tooltip}">
+                        const aqiLevel = p.aqi !== null ? getAqiLevel(p.aqi).level : '--';
+                        return `<div class="mini-bar-wrap${p.isCurrent ? ' mini-bar-now' : ''}"
+                            data-hour="${pad(p.hour)}:00"
+                            data-aqi="${p.aqi ?? '--'}"
+                            data-level="${aqiLevel}"
+                            data-source="${p.source || '--'}"
+                            data-color="${col}">
                             <div class="mini-bar-inner">
                                 <div class="mini-bar" style="height:${heightPct}%;background:${col};box-shadow:inset 0 -3px 0 ${srcCol};"></div>
                                 ${p.isCurrent ? `<div class="mini-bar-blink" style="background:${col};"></div>` : ''}
@@ -2615,11 +2621,17 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
                 ${makeStatLine(epaGoodAqi, 'NAAQS Recommended AQI ', dChartMax, { cls: 'mini-stat-line-epa' })}
                 <div class="mini-barchart-bars">
                     ${dailyPoints.map(p => {
-                        const heightPct = Math.max(Math.round((p.avg / dChartMax) * 100), 2);
+                        const rawPct = Math.max(Math.round((p.avg / dChartMax) * 100), 2);
+                        const heightPct = Math.min(rawPct, 60);
                         const col = getAqiLevel(p.avg).color;
                         const srcCol = p.sources[0] ? getSourceColor(p.sources[0]) : 'transparent';
-                        const tooltip = `${p.dayName} ${p.dateLabel} · Avg AQI ${p.avg}${p.sources.length ? ' · ' + p.sources.join('/') : ''}`;
-                        return `<div class="mini-bar-wrap${p.isToday ? ' mini-bar-now' : ''}" title="${tooltip}" style="min-width:22px;">
+                        const aqiLevel = getAqiLevel(p.avg).level;
+                        return `<div class="mini-bar-wrap${p.isToday ? ' mini-bar-now' : ''}" style="min-width:22px;"
+                            data-hour="${p.dayName} ${p.dateLabel}"
+                            data-aqi="${p.avg}"
+                            data-level="${aqiLevel}"
+                            data-source="${p.sources.join('/') || '--'}"
+                            data-color="${col}">
                             <div class="mini-bar-inner">
                                 <div class="mini-bar" style="height:${heightPct}%;background:${col};box-shadow:inset 0 -3px 0 ${srcCol};"></div>
                                 ${p.isToday ? `<div class="mini-bar-blink" style="background:${col};"></div>` : ''}
@@ -2679,14 +2691,16 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         </div>
 
         <div class="forecast-periods">
-            <button class="period-btn active" data-period="6h">6h</button>
+            <button class="period-btn" data-period="6h">6h</button>
             <button class="period-btn" data-period="12h">12h</button>
             <button class="period-btn" data-period="18h">18h</button>
-            <button class="period-btn" data-period="24h">24h</button>
+            <button class="period-btn active" data-period="24h">24h</button>
+            <button class="period-btn" data-period="48h">48h</button>
+            <button class="period-btn" data-period="72h">72h</button>
         </div>
 
         <div class="forecast-grid" id="fh-forecast-grid">
-            ${buildCards(2)}
+            ${buildCards(8)}
         </div>
 
         ${barChartHtml}
@@ -2734,6 +2748,38 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         $('#fh-chart-title').text(`Daily averages \u00b7 ${pollutantLabel} AQI`);
         $('#fh-hourly-chart').hide();
         $('#fh-daily-chart').show();
+    });
+
+    // Bar hover popup
+    if (!document.getElementById('mini-bar-popup')) {
+        $('body').append(`
+            <div id="mini-bar-popup" style="
+                display:none;position:fixed;z-index:99999;pointer-events:none;
+                background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.18);
+                padding:10px 14px;min-width:160px;font-size:12px;line-height:1.6;
+                border-top:4px solid #ccc;
+            "></div>
+        `);
+    }
+    const $barPopup = $('#mini-bar-popup');
+
+    $heroSection.on('mouseenter', '.mini-bar-wrap', function(e) {
+        const $el = $(this);
+        const hour = $el.data('hour') || '--';
+        const aqi = $el.data('aqi');
+        const level = $el.data('level') || '--';
+        const source = $el.data('source') || '--';
+        const color = $el.data('color') || '#888';
+        $barPopup.css('border-top-color', color).html(`
+            <div style="font-weight:700;margin-bottom:4px;">${hour}</div>
+            <div><span style="color:#666;">AQI:</span> <span style="font-weight:600;color:${color};">${aqi ?? '--'}</span></div>
+            <div><span style="color:#666;">Level:</span> ${level}</div>
+            <div><span style="color:#666;">Source:</span> ${source}</div>
+        `).show();
+    }).on('mousemove', '.mini-bar-wrap', function(e) {
+        $barPopup.css({ left: e.clientX + 14, top: e.clientY - 10 });
+    }).on('mouseleave', '.mini-bar-wrap', function() {
+        $barPopup.hide();
     });
 }
 
