@@ -1,28 +1,619 @@
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<style>
+.forecasts-box {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.forecast-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.forecast-header .location-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #000;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+}
+
+.forecast-header .forecast-meta {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.aqi-hero {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.aqi-hero .aqi-value-main {
+    font-size: 48px;
+    font-weight: 700;
+    color: #000;
+    line-height: 1;
+}
+
+.aqi-hero .aqi-change {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.aqi-hero .aqi-change.positive { color: #d32f2f; }
+.aqi-hero .aqi-change.negative { color: #388e3c; }
+
+.aqi-hero .aqi-level-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.forecast-header .aqi-subtitle {
+    font-size: 13px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.forecast-periods {
+    display: flex;
+    gap: 4px;
+    padding: 12px 24px;
+    background: #fafafa;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.forecast-periods .period-btn {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: all 0.2s;
+}
+
+.forecast-periods .period-btn:hover {
+    background: #e8e8e8;
+}
+
+.forecast-periods .period-btn.active {
+    background: #000;
+    color: #fff;
+}
+
+.forecast-grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0;
+    background: #e5e5e5;
+    margin: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.forecast-grid::-webkit-scrollbar { display: none; }
+
+.forecast-card {
+    background: #fff;
+    padding: 16px 12px;
+    text-align: center;
+    flex: 0 0 80px;
+    min-width: 80px;
+    scroll-snap-align: start;
+    border-right: 1px solid #e5e5e5;
+}
+
+.forecast-card .card-time {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.forecast-card .card-aqi {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.forecast-card .card-level {
+    font-size: 10px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-met {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 10px;
+    color: #888;
+    flex-wrap: wrap;
+}
+
+.card-met span {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.card-met i {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.forecast-date-header {
+    flex: 0 0 auto;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-size: 9px;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    background: #f0f0f0;
+    border-right: 1px solid #ddd;
+    padding: 8px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.daily-summary {
+    padding: 16px 24px;
+    background: #fff;
+    border-top: 1px solid #e5e5e5;
+}
+
+.daily-summary h6 {
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 12px 0;
+}
+
+.daily-row {
+    display: flex;
+    gap: 16px;
+}
+
+.daily-item {
+    flex: 1;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.daily-item .day-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.daily-item .day-aqi {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.daily-item .day-change {
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+.daily-item .day-change.up { color: #d32f2f; }
+.daily-item .day-change.down { color: #388e3c; }
+
+/* Mini bar chart */
+.mini-barchart {
+    padding: 14px 20px 4px;
+    background: #fff;
+    border-top: 1px solid #e5e5e5;
+}
+.mini-barchart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 8px;
+}
+.mini-barchart-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex: 1;
+    margin: 0;
+}
+.chart-toggle {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.chart-toggle-btn {
+    background: #fff;
+    border: none;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    line-height: 1.4;
+    transition: background 0.15s, color 0.15s;
+}
+.chart-toggle-btn + .chart-toggle-btn {
+    border-left: 1px solid #ddd;
+}
+.chart-toggle-btn.active {
+    background: #1565C0;
+    color: #fff;
+}
+.mini-barchart-inner {
+    display: flex;
+    gap: 4px;
+    align-items: stretch;
+}
+.mini-barchart-yscale {
+    position: relative;
+    width: 28px;
+    flex-shrink: 0;
+    height: 130px;
+}
+.yscale-tick {
+    position: absolute;
+    left: 0;
+    transform: translateY(50%);
+    font-size: 9px;
+    color: #bbb;
+    text-align: right;
+    width: 100%;
+    line-height: 1;
+}
+.mini-barchart-area {
+    flex: 1;
+    position: relative;
+    height: 130px;
+    overflow: visible;
+}
+.mini-grid-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: #e8e8e8;
+    pointer-events: none;
+}
+.mini-barchart-bars {
+    display: flex;
+    align-items: flex-end;
+    height: 130px;
+    gap: 1px;
+    overflow: visible;
+}
+.mini-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    min-width: 6px;
+    height: 100%;
+    position: relative;
+    cursor: default;
+}
+.mini-bar-inner {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+    height: 100%;
+}
+.mini-bar {
+    width: 70%;
+    border-radius: 1px;
+    min-height: 3px;
+    transition: opacity 0.2s;
+}
+.mini-bar-wrap:hover .mini-bar { opacity: 0.75; }
+.mini-bar-blink {
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 1.5px solid #fff;
+    animation: blink-dot 1.2s ease-in-out infinite;
+}
+@keyframes blink-dot {
+    0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+    50%       { opacity: 0.3; transform: translateX(-50%) scale(0.7); }
+}
+.mini-bar-wrap.mini-bar-now .mini-bar {
+    outline: 2px solid rgba(0,0,0,0.35);
+    outline-offset: 1px;
+}
+.mini-bar-xlabel {
+    position: absolute;
+    bottom: -16px;
+    font-size: 9px;
+    color: #aaa;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.mini-barchart-xlegend {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 22px;
+    font-size: 10px;
+    color: #bbb;
+    padding-bottom: 6px;
+}
+.mini-source-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+.source-legend-label {
+    font-size: 10px;
+    color: #aaa;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.source-chip {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1.5px solid;
+    background: transparent;
+    letter-spacing: 0.3px;
+}
+.mini-stat-line {
+    position: absolute;
+    left: 0; right: 0;
+    border-top: 1.5px dashed #555;
+    pointer-events: none;
+    z-index: 2;
+}
+.mini-stat-line-epa {
+    border-top-color: #2E7D32;
+}
+.mini-stat-line-epa .mini-stat-label {
+    color: #2E7D32;
+    left: auto;
+    right: 3px;
+}
+.mini-stat-label {
+    position: absolute;
+    left: 3px;
+    top: -16px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #111;
+    background: rgba(255,255,255,0.92);
+    padding: 0 3px;
+    border-radius: 2px;
+    line-height: 1.4;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+}
+
+/* Page-level site header bar */
+.site-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid #e5e5e5;
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.site-page-header .back-btn {
+    font-size: 13px;
+    color: #1565C0;
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+}
+.site-page-header .back-btn:hover { text-decoration: underline; }
+
+/* Hide only legacy layout wrappers — keep tabs and plots visible */
+.module_title,
+.sub-title,
+.model_data {
+    display: none !important;
+}
+
+.local_forecats_window {
+    display: block;
+    padding: 0;
+    margin: 0;
+}
+
+/* Tabs section styling */
+.thewindow {
+    display: block;
+}
+
+ul#pills-tab {
+    display: flex !important;
+    flex-wrap: wrap;
+    padding: 12px 20px 0;
+    margin: 0;
+    border-bottom: 1px solid #e5e5e5;
+    background: #fafafa;
+    list-style: none;
+    gap: 4px;
+}
+
+ul#pills-tab .nav-link {
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    padding: 8px 16px;
+    border-radius: 20px 20px 0 0;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+ul#pills-tab .nav-link:hover {
+    background: #e8e8e8;
+    color: #222;
+}
+
+ul#pills-tab .nav-link.active {
+    background: #fff;
+    color: #1565C0;
+    border-color: #e5e5e5 #e5e5e5 #fff;
+    font-weight: 600;
+}
+
+.tab-content {
+    padding: 0;
+    background: #fff;
+}
+
+.tab-pane {
+    padding: 0 20px 20px;
+}
+
+.frcst-plt-dets {
+    padding: 16px 0 8px;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 12px;
+}
+
+.frcst-plt-dets h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 4px;
+}
+
+.frcst-plt-dets p {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.plot_description {
+    padding: 10px 0 4px;
+}
+
+.plot_description h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 2px;
+}
+
+.plot_description h6 {
+    font-size: 11px;
+    color: #888;
+    margin: 0;
+}
+
+.plot-container {
+    margin: 8px 0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.download_plot_data {
+    text-align: right;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.aqi-multi-hour-box,
+.xvg_aqi-container {
+    margin: 8px 0;
+}
+
+/* Separator between hero and tabs */
+.site-tabs-separator {
+    height: 1px;
+    background: #e5e5e5;
+    margin: 0;
+}
+
+/* Section label above tabs */
+.site-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 18px 24px 0;
+    background: #fafafa;
+}
+</style>
 
 <div class="forecasts-box">
- 
-      <div class="container">
-      <div class="forecasts-view row">
-          <h3 class="module_title location_parameter_name"></h3>
-          <h1 class="sub-title site-name"><span class="current_location_name"></span></h1>
-          
-          <div class="thewindow">
-              <div class="row local_forecats_window"></div>
-              <div class="tab-content" id="pills-tabContent"></div>
-          </div>
-      </div>
-      <div class="model_data"></div>
-      </div>
+    <div class="site-page-header">
+        <a class="back-btn" href="../index.html">&#8592; All Locations</a>
+        <span id="site-page-title" style="font-size:13px;font-weight:600;color:#333;"></span>
+        <span></span>
+    </div>
+    <div id="forecast-hero-section"></div>
+    <div class="site-tabs-separator"></div>
+
+    <div class="site-section-label">Pollutant Time Series</div>
+
+    <div class="forecasts-view row">
+        <h3 class="module_title location_parameter_name"></h3>
+        <h1 class="sub-title site-name"><span class="current_location_name"></span></h1>
+        <div class="thewindow">
+            <div class="row local_forecats_window"></div>
+            <div class="tab-content" id="pills-tabContent"></div>
+        </div>
+    </div>
+    <div class="model_data"></div>
 </div>
-    
+
 <script src='parametres/plotly-2.12.1.min.js'></script>
 <script src="local_forecasts.js?v=1.4.0"></script>
 <script src="local_forecasts_assets.js?v=1.4.0"></script>
 <script>
-
 
 function getQueryParams() {
     const params = {};
@@ -37,11 +628,150 @@ const locationName = queryParams.site || "";
 const param = queryParams.param || "no2";
 const timezone = queryParams.timezone || "UTC";
 
+// Set page title
+if (locationName) {
+    document.getElementById('site-page-title').textContent = locationName.replace(/_/g, ' ');
+    document.title = locationName.replace(/_/g, ' ') + ' — Air Quality Forecast';
+}
 
 openForecastsWindow({
-            location_name: locationName,
-            param: param,
-            timezone: "utc",
-            isModal: false
-        });
+    location_name: locationName,
+    param: param,
+    timezone: timezone,
+    isModal: false
+});
+
+// Inject merged "Air Quality & AQI Scale" tab after plots render
+function injectAqiScaleTab() {
+    const tabsList = document.getElementById('pills-tab');
+    const tabContent = document.getElementById('pills-tabContent');
+    if (!tabsList || !tabContent) return;
+    if (document.getElementById('tab-aqi-scale')) return; // already injected
+
+    const tabId = 'aqi-scale';
+    const li = document.createElement('li');
+    li.className = 'nav-item';
+    li.setAttribute('role', 'presentation');
+    li.innerHTML = `<a class="nav-link" id="tab-${tabId}" data-bs-toggle="pill" href="#${tabId}" role="tab" aria-controls="${tabId}" aria-selected="false">Air Quality &amp; AQI Scale</a>`;
+    tabsList.appendChild(li);
+
+    const pollutants = [
+        {
+            abbr: 'NO₂', name: 'Nitrogen Dioxide',
+            color: '#1565C0',
+            source: 'NASA SNWG bias-corrected model + GEOS-CF',
+            desc: 'Produced mainly by vehicle engines and fossil fuel combustion. Exposure can irritate the respiratory tract, worsen asthma and lung diseases, and contribute to the formation of ground-level ozone and fine particles.',
+            unit: 'ppbv',
+            standard: 'EPA 1-hour NAAQS: 100 ppb (AQI 100)'
+        },
+        {
+            abbr: 'PM2.5', name: 'Fine Particulate Matter',
+            color: '#2E7D32',
+            source: 'NASA GEOS-FP + CNN Machine Learning',
+            desc: 'Tiny particles (≤2.5 µm) from combustion, dust, and secondary reactions. They penetrate deep into the lungs and bloodstream, increasing risk of respiratory and cardiovascular disease, especially with long-term exposure.',
+            unit: 'µg/m³',
+            standard: 'EPA 24-hour NAAQS: 35 µg/m³ (AQI 100)'
+        },
+        {
+            abbr: 'O₃', name: 'Ozone',
+            color: '#E65100',
+            source: 'NASA GEOS-CF',
+            desc: 'Ground-level ozone forms when NOx and VOCs react in sunlight. It irritates the airways, worsens asthma and chronic lung disease, and can reduce lung function even in healthy individuals during outdoor exertion.',
+            unit: 'ppbv',
+            standard: 'EPA 8-hour NAAQS: 0.070 ppm (AQI 100)'
+        }
+    ];
+
+    const pollutantCards = pollutants.map(p => `
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid #f0f0f0;">
+            <div style="flex-shrink:0;width:48px;height:48px;border-radius:8px;background:${p.color}18;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${p.color};text-align:center;line-height:1.2;">${p.abbr}</div>
+            <div style="flex:1;">
+                <div style="font-size:14px;font-weight:700;color:#111;margin-bottom:2px;">${p.name} <span style="font-size:11px;font-weight:500;color:#888;">(${p.unit})</span></div>
+                <div style="font-size:11px;color:#888;margin-bottom:5px;">Source: ${p.source}</div>
+                <div style="font-size:12px;color:#444;line-height:1.55;margin-bottom:4px;">${p.desc}</div>
+                <div style="font-size:11px;color:${p.color};font-weight:600;">${p.standard}</div>
+            </div>
+        </div>`).join('');
+
+    const scales = [
+        { range: '0–50',    level: 'Good',                           color: '#4CAF50', textColor: '#fff',
+          who: 'Air quality is satisfactory and poses little or no risk.',
+          sensitive: 'No precautions needed.',
+          general: 'Enjoy outdoor activities.' },
+        { range: '51–100',  level: 'Moderate',                       color: '#FFEB3B', textColor: '#333',
+          who: 'Air quality is acceptable; some pollutants may concern a small number of people.',
+          sensitive: 'Unusually sensitive individuals should consider reducing prolonged outdoor activity.',
+          general: 'Active children and adults may consider reducing prolonged outdoor exertion.' },
+        { range: '101–150', level: 'Unhealthy for Sensitive Groups',  color: '#FF9800', textColor: '#fff',
+          who: 'Members of sensitive groups may experience health effects.',
+          sensitive: 'People with heart or lung disease, older adults, and children should reduce heavy outdoor exertion.',
+          general: 'General public is not likely to be affected.' },
+        { range: '151–200', level: 'Unhealthy',                      color: '#F44336', textColor: '#fff',
+          who: 'Everyone may begin to experience health effects.',
+          sensitive: 'Sensitive groups should avoid prolonged outdoor exertion.',
+          general: 'Everyone else should reduce prolonged or heavy outdoor exertion.' },
+        { range: '201–300', level: 'Very Unhealthy',                  color: '#9C27B0', textColor: '#fff',
+          who: 'Health alert: everyone may experience more serious health effects.',
+          sensitive: 'Sensitive groups should avoid all outdoor activity.',
+          general: 'Everyone should avoid prolonged or heavy outdoor exertion.' },
+        { range: '301–500', level: 'Hazardous',                      color: '#7E0023', textColor: '#fff',
+          who: 'Health warnings of emergency conditions.',
+          sensitive: 'Everyone should avoid all outdoor activity.',
+          general: 'Stay indoors and keep activity levels low.' },
+    ];
+
+    const scaleRows = scales.map(s => `
+        <tr style="border-bottom:1px solid #f5f5f5;">
+            <td style="padding:8px 10px;white-space:nowrap;">
+                <span style="display:inline-block;background:${s.color};color:${s.textColor};padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">${s.range}</span>
+            </td>
+            <td style="padding:8px 10px;font-weight:600;color:${s.color === '#FFEB3B' ? '#555' : s.color};">${s.level}</td>
+            <td style="padding:8px 10px;font-size:12px;color:#444;">${s.who}</td>
+            <td style="padding:8px 10px;font-size:12px;color:#555;">${s.sensitive}</td>
+            <td style="padding:8px 10px;font-size:12px;color:#555;">${s.general}</td>
+        </tr>`).join('');
+
+    const pane = document.createElement('div');
+    pane.className = 'tab-pane fade';
+    pane.id = tabId;
+    pane.setAttribute('role', 'tabpanel');
+    pane.setAttribute('aria-labelledby', `tab-${tabId}`);
+    pane.innerHTML = `
+        <div class="frcst-plt-dets">
+            <h2>Air Quality Information &amp; AQI Scale</h2>
+            <p>Pollutant descriptions, data sources, and the US EPA Air Quality Index (AQI) health categories.</p>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">Pollutants Monitored</div>
+            ${pollutantCards}
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">US AQI Health Categories</div>
+        <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                    <tr style="border-bottom:2px solid #e5e5e5;text-align:left;background:#fafafa;">
+                        <th style="padding:8px 10px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;">AQI</th>
+                        <th style="padding:8px 10px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Category</th>
+                        <th style="padding:8px 10px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Air Quality</th>
+                        <th style="padding:8px 10px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Sensitive Groups</th>
+                        <th style="padding:8px 10px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">General Public</th>
+                    </tr>
+                </thead>
+                <tbody>${scaleRows}</tbody>
+            </table>
+        </div>`;
+    tabContent.appendChild(pane);
+}
+
+// Wait for tabs to be injected by openForecastsWindow, then add AQI Scale tab
+const tabObserver = new MutationObserver(() => {
+    const tabsList = document.getElementById('pills-tab');
+    if (tabsList && tabsList.querySelectorAll('.nav-item').length > 0) {
+        injectAqiScaleTab();
+        tabObserver.disconnect();
+    }
+});
+tabObserver.observe(document.body, { childList: true, subtree: true });
 </script>
