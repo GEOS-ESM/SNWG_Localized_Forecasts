@@ -81,6 +81,12 @@
     font-weight: 700;
     color: #000;
     line-height: 1;
+    animation: hero-aqi-pulse 2s ease-in-out infinite;
+}
+
+@keyframes hero-aqi-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.55; }
 }
 
 .aqi-hero .aqi-change {
@@ -157,6 +163,40 @@
     min-width: 80px;
     scroll-snap-align: start;
     border-right: 1px solid #e5e5e5;
+}
+
+/* Current-hour card blink */
+.forecast-card.forecast-card-now {
+    background: #f0f7ff;
+    border-right: 1px solid #b3d4ff;
+    position: relative;
+}
+.forecast-card.forecast-card-now::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #1565C0;
+    animation: card-now-blink 1.4s ease-in-out infinite;
+}
+.forecast-card.forecast-card-now .card-time {
+    color: #1565C0;
+    font-weight: 700;
+}
+.forecast-card.forecast-card-now .card-aqi {
+    animation: card-aqi-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes card-now-blink {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.25; transform: scale(0.6); }
+}
+@keyframes card-aqi-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.6; }
 }
 
 .forecast-card .card-time {

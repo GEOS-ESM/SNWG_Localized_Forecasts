@@ -313,12 +313,27 @@ function filter_data_set_by_date(master_data, start, end, enableFilter = false) 
         return master_data.master_observation[index];
     });
 
+    var filteredObservationSourceData = filteredDatetimeIndices.map(function(index) {
+        return master_data.master_observation_source ? master_data.master_observation_source[index] : null;
+    });
+
+    var filteredObservationPandoraData = filteredDatetimeIndices.map(function(index) {
+        return master_data.master_observation_pandora ? master_data.master_observation_pandora[index] : null;
+    });
+
+    var filteredObservationCorrectedData = filteredDatetimeIndices.map(function(index) {
+        return master_data.master_observation_corrected ? master_data.master_observation_corrected[index] : null;
+    });
+
     var filteredPandoraNo2L1ColData = filteredDatetimeIndices.map(function(index) {
         return master_data.master_pandora_no2_l1col[index];
     });
 
     filteredMasterData.master_datetime = filteredDatetimeData;
     filteredMasterData.master_observation = filteredObservationData;
+    filteredMasterData.master_observation_source = filteredObservationSourceData;
+    filteredMasterData.master_observation_pandora = filteredObservationPandoraData;
+    filteredMasterData.master_observation_corrected = filteredObservationCorrectedData;
     filteredMasterData.master_localized = filteredLocalizedData;
     filteredMasterData.master_uncorrected = filteredUncorrectedData;
     filteredMasterData.master_pandora_no2_l1col = filteredPandoraNo2L1ColData;
@@ -1718,7 +1733,7 @@ function readApiBaker(options = {}) {
     ];
     $('.loader').show();
 
-    // Filename
+
     const locationWithUnderscore = location.replace(/[-\s]/g, "_");
     const locationWithHyphen = location.replace(/[_\s]/g, "-");
     const fileUrl = `https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/all_dts/${locationWithUnderscore}.json?version=${new Date().getTime()}`;
@@ -1765,6 +1780,9 @@ function readApiBaker(options = {}) {
                 master_predicted_aqi: [],
                 master_overall_aqi: [],
                 master_observation: [],
+                master_observation_source: [],   
+                master_observation_pandora: [],   
+                master_observation_corrected: [], 
                 master_t: [],
                 master_rh: [],
                 master_wind: []
@@ -1776,13 +1794,14 @@ function readApiBaker(options = {}) {
                 if (forecast.local_time) {
                     masterData.master_datetime.push(forecast.local_time);
                 }
-                // NO2
-                if (forecast.no2 !== undefined && forecast.no2 !== null) {
-                    masterData.master_no2.push(forecast.no2);
-                }
-                if (forecast.o3 !== undefined && forecast.o3 !== null) {
-                    masterData.master_o3.push(forecast.o3);
-                }
+                // NO2 
+                masterData.master_no2.push(
+                    (forecast.no2 !== undefined && forecast.no2 !== null) ? forecast.no2 : null
+                );
+                // O3 
+                masterData.master_o3.push(
+                    (forecast.o3 !== undefined && forecast.o3 !== null) ? forecast.o3 : null
+                );
                 
                 // PM25
                 if (forecast.pm25_conc_cnn !== undefined && forecast.pm25_conc_cnn !== null) {
@@ -1793,7 +1812,7 @@ function readApiBaker(options = {}) {
                     masterData.master_pm25_conc_cnn.push(forecast.pm25);
                 }
 
-                // PM25 source — always push to stay index-aligned with master_datetime
+                // PM25 source
                 masterData.master_pm25source.push(forecast.pm25source || null);
 
                 // PM25-AQI
@@ -1808,8 +1827,21 @@ function readApiBaker(options = {}) {
                 if (forecast.corrected !== undefined && forecast.corrected !== null) {
                     masterData.master_predicted.push(forecast.corrected);
                 }
-                if (forecast.pandora !== undefined && forecast.pandora !== null) {
+                if (forecast.pandora !== undefined && forecast.pandora !== null && !isNaN(forecast.pandora)) {
                     masterData.master_observation.push(forecast.pandora);
+                    masterData.master_observation_source.push("pandora");
+                    masterData.master_observation_pandora.push(forecast.pandora);
+                    masterData.master_observation_corrected.push(null);
+                } else if (forecast.corrected !== undefined && forecast.corrected !== null && !isNaN(forecast.corrected)) {
+                    masterData.master_observation.push(forecast.corrected);
+                    masterData.master_observation_source.push("corrected");
+                    masterData.master_observation_pandora.push(null);
+                    masterData.master_observation_corrected.push(forecast.corrected);
+                } else {
+                    masterData.master_observation.push(null);
+                    masterData.master_observation_source.push(null);
+                    masterData.master_observation_pandora.push(null);
+                    masterData.master_observation_corrected.push(null);
                 }
                 const tVal = forecast.t10m ?? forecast.t ?? null;
                 masterData.master_t.push(tVal !== null ? Math.round((tVal - 273.15) * 10) / 10 : null);
@@ -1860,81 +1892,116 @@ function readApiBaker(options = {}) {
             const plots = [
                 {
                     id: "plot_corrected_conc",
-                    title: `SNWG NO<sub>2</sub> Forecasts (ppbv)`,
-                    unit: "ppbv",
+                    title: `SNWG NO<sub>2</sub> Bias-Corrected Forecast`,
+                    unit: "parts per billion by volume (ppbv)",
                     data: masterData,
                     param: "no2",
                     tabName: "Nitrogen Dioxide (NO<sub>2</sub>)",
                     tabId: "tab_no2",
-                    description: "Supporting: NASA SNWG bias-corrected forecasts",
+                    description: "Source: NASA SNWG bias-corrected forecasts",
                     columns: [
-                        { column: "master_predicted", name: "Corrected", color: "blue", width: 2 }
+                        { column: "master_predicted", name: "Estimated NO₂", color: "#1565C0", width: 2 }
                     ],
+                    // NAAQS annual standard: 53 ppb NO2
+                    naaqsValue: 53,
+                    naaqsLabel: "NAAQS Annual Standard (53 ppbv NO₂)",
                     displayAQI: false,
                     displayMetrics: false,
                     enableAqiColors: false 
                 },
                 {
                     id: "plot_pm25_conc",
-                    title: `Particulate Matter (PM<sub>2.5</sub>) (μg/m³)`,
+                    title: `Particulate Matter (PM<sub>2.5</sub>) Concentration`,
                     unit: "μg/m³",
                     data: masterData,
                     param: "pm25",
                     tabName: "Fine Particulate Matter (PM<sub>2.5</sub>)",
                     tabId: "tab_pm25",
-                    description: "NASA GEOS-CF PM2.5 Concentration Forecast",
+                    description: "Source: NASA GEOS-CF PM2.5 Concentration Forecast",
                     columns: [
-                        { column: "master_pm25_conc_cnn", name: "PM2.5", color: "green", width: 2 }
+                        { column: "master_pm25_conc_cnn", name: "PM2.5", color: "#2E7D32", width: 2 }
                     ],
+                    // NAAQS annual standard: 9 µg/m³ PM2.5 (2024 update)
+                    naaqsValue: 9,
+                    naaqsLabel: "NAAQS Annual Standard (9 μg/m³ PM2.5)",
                     displayAQI: false,
                     displayMetrics: false,
                     enableAqiColors: false 
                 },
                 {
                     id: "plot_o3_conc",
-                    title: `Ozone (O<sub>3</sub>) (ppbv)`,
-                    unit: "ppbv",
+                    title: `Ozone (O<sub>3</sub>) Concentration`,
+                    unit: "parts per billion by volume (ppbv)",
                     data: masterData,
                     param: "o3",
                     tabName: "Ozone (O<sub>3</sub>)",
                     tabId: "tab_o3",
-                    description: "Supporting: NASA GEOS-CF forecasts",
+                    description: "Source: NASA GEOS-CF",
                     columns: [
-                        { column: "master_o3", name: "O3", color: "orange", width: 2 }
+                        { column: "master_o3", name: "O₃", color: "#E65100", width: 2 }
                     ],
-                    displayAQI: false,
+                    // NAAQS 8-hour standard: 70 ppb O3
+                    naaqsValue: 70,
+                    naaqsLabel: "NAAQS 8-hr Standard (70 ppbv O₃)",                    displayAQI: false,
                     displayMetrics: false,
                     enableAqiColors: false 
                 },
-                // Pandora
-                {
-                    id: "plot_pandora",
-                    title: "Pandora NO<sub>2</sub> Observations",
-                    unit: "ppbv",
-                    data: masterData,
-                    param: "no2",
-                    tabName: "Nitrogen dioxide (NO<sub>2</sub>)",
-                    tabId: "tab_no2",
-                    description: "Source: NASA Pandora",
-                    columns: [
-                        { column: "master_observation", name: "Pandora", color: "black", width: 2 }
-                    ],
-                    displayAQI: false,
-                    displayMetrics: false,
-                    enableAqiColors: false 
-                },
+
+
+                (() => {
+                    const hasPandora = masterData.master_observation_source.some(s => s === "pandora");
+                    const hasCorrected = masterData.master_observation_source.some(s => s === "corrected");
+                    const columns = [];
+                    if (hasPandora) {
+                        columns.push({ column: "master_observation_pandora", name: "Pandora NO₂ (observed)", color: "#212121", width: 2 });
+                    }
+                    if (hasCorrected) {
+                        columns.push({ column: "master_observation_corrected", name: "Estimated NO₂ ", color: "#9E9E9E", width: 2, dash: "dot" });
+                    }
+                    if (!columns.length) {
+                        columns.push({ column: "master_observation", name: "NO₂ Observation", color: "#212121", width: 2 });
+                    }
+                    return {
+                        id: "plot_pandora",
+                        title: hasPandora && hasCorrected
+                            ? "Pandora NO<sub>2</sub> Observations (with corrected fallback)"
+                            : hasPandora
+                                ? "Pandora NO<sub>2</sub> Observations"
+                                : "NO<sub>2</sub> Observations (Bias-Corrected Forecast)",
+                        unit: "parts per billion by volume (ppbv)",
+                        data: masterData,
+                        param: "no2",
+                        tabName: "Nitrogen dioxide (NO<sub>2</sub>)",
+                        tabId: "tab_no2",
+                        description: hasPandora && hasCorrected
+                            ? "Source: NASA Pandora · Corrected forecast used where Pandora is unavailable"
+                            : hasPandora
+                                ? "Source: NASA Pandora"
+                                : "Source: NASA SNWG bias-corrected forecast (Pandora data unavailable)",
+                        columns,
+                        // NAAQS annual standard: 53 ppb NO2
+                        naaqsValue: 53,
+                        naaqsLabel: "NAAQS Annual Standard (53 ppbv NO₂)",
+                        displayAQI: false,
+                        displayMetrics: false,
+                        enableAqiColors: false
+                    };
+                })(),
                 {
                     id: "plot_no2_model",
-                    title: "Supporting Data: model-based NO<sub>2</sub> forecast",
-                    unit: "ppbv",
+                    title: "Model-based NO<sub>2</sub> Forecast (GEOS-CF)",
+                    unit: "parts per billion by volume (ppbv)",
                     data: masterData,
                     param: "no2",
                     tabName: "Nitrogen dioxide (NO<sub>2</sub>)",
                     tabId: "tab_no2",
                     description: "Source: NASA GEOS-CF",
                     columns: [
-                        { column: "master_no2", name: "NO2", color: "red", width: 2 }
+                        { column: "master_no2", name: "GEOS-CF NO₂", color: "#C62828", width: 2 }
                     ],
+                    // NAAQS annual standard: 53 ppb NO2
+                    naaqsValue: 53,
+                    naaqsLabel: "NAAQS Annual Standard (53 ppbv NO₂)",
                     displayAQI: false,
                     displayMetrics: false,
                     enableAqiColors: false 
@@ -2222,7 +2289,9 @@ function readApiBaker(options = {}) {
                         "",
                         "bar",
                         timezone,
-                        plot.enableAqiColors 
+                        plot.enableAqiColors,
+                        plot.naaqsValue ?? null,
+                        plot.naaqsLabel ?? ''
                     );
                 } else {
                     console.error(`No DOM element with id '${plot.id}' exists on the page.`);
@@ -2449,16 +2518,16 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         dailyArrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '';
     }
 
-    // Build full forecast card list from actual data, up to 72h ahead
+
     const tData = masterData.master_t || [];
     const rhData = masterData.master_rh || [];
     const windData = masterData.master_wind || [];
 
-    // Cutoff: now in site local time
+    // Cutoff
     const nowLocalMs = now.getTime();
     const cutoff72h = nowLocalMs + 72 * 3600 * 1000;
 
-    // Build cards from datetimes array
+    // datetimes array
     const allForecastCards = datetimes.map((dt, i) => {
         if (!dt) return null;
         const dtMs = new Date(dt.replace(' ', 'T')).getTime();
@@ -2671,7 +2740,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     const barChartHtml = (barPoints.length > 0 || dailyPoints.length > 0) ? `
         <div class="mini-barchart">
             <div class="mini-barchart-header">
-                <div class="mini-barchart-title" id="fh-chart-title">Past 12h &amp; next 24h · ${pollutantLabel} AQI</div>
+                <div class="mini-barchart-title" id="fh-chart-title">Past 12h &amp; next 24h · US AQI</div>
                 <div class="chart-toggle">
                     <button class="chart-toggle-btn active" id="fh-btn-hourly">Hourly</button>
                     <button class="chart-toggle-btn" id="fh-btn-daily">Daily</button>
@@ -3559,7 +3628,9 @@ function draw_plot(
     text = "Forecasts",
     plotType = "scatter",
     timezone = "UTC",
-    enableAqiColors = false  
+    enableAqiColors = false,
+    naaqsValue = null,
+    naaqsLabel = ''
 ) {
 
     const datetime_data = combined_dataset["master_datetime"];
@@ -3624,6 +3695,20 @@ function draw_plot(
         };
     });
 
+
+    // NAAQS reference line as a dedicated trace (shows in legend)
+    if (naaqsValue !== null && naaqsValue !== undefined) {
+        traces.push({
+            type: 'scatter',
+            mode: 'lines',
+            x: [cleanedData.master_datetime[0], cleanedData.master_datetime[cleanedData.master_datetime.length - 1]],
+            y: [naaqsValue, naaqsValue],
+            line: { color: '#E53935', width: 2, dash: 'dash' },
+            name: naaqsLabel || `NAAQS Standard (${naaqsValue} ${unit})`,
+            hoverinfo: 'name+y',
+            showlegend: true
+        });
+    }
 
     for (let i = 0; i < cleanedData.master_datetime.length; i++) {
         const datetime = new Date(cleanedData.master_datetime[i]);
@@ -3755,18 +3840,16 @@ function draw_plot(
                     dash: 'dot'
                 }
             },
-            {
-                type: 'line',
-                x0: cleanedData.master_datetime[0],
-                x1: cleanedData.master_datetime[cleanedData.master_datetime.length - 1],
-                y0: maxValue,
-                y1: maxValue,
-                line: {
-                    color: 'red',
-                    width: 1,
-                    dash: 'dash'
-                }
-            }
+            ...(naaqsValue !== null && naaqsValue !== undefined ? [{
+                type: 'rect',
+                xref: 'paper',
+                yref: 'y',
+                x0: 0, x1: 1,
+                y0: 0, y1: naaqsValue,
+                fillcolor: 'rgba(76,175,80,0.06)',
+                line: { width: 0 },
+                layer: 'below'
+            }] : [])
         ]
     };
 
@@ -3821,23 +3904,64 @@ function draw_plot(
             </div>
         `);
 
+        const getDownloadName = () => {
+            const locRaw = (window._lastOpenedLocationName || forecasts_div || 'location')
+                .replace(/[^a-zA-Z0-9_\-]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+            const species = (param || 'pollutant').toLowerCase();
+            return `${locRaw}_${species}`;
+        };
+
+     
+        const buildDownloadCSV = () => {
+            const cleanedData = cleanAndSortData(combined_dataset["master_datetime"], combined_dataset);
+            const locName = (window._lastOpenedLocationName || '').replace(/[_-]/g, ' ').trim() || forecasts_div;
+            const valueColumns = plot_columns.map(c => c.column);
+            const valueHeaders = plot_columns.map(c => c.name || c.column);
+
+            const header = ['datetime', 'location', ...valueHeaders].join(',');
+            const rows = cleanedData.master_datetime.map((dt, i) => {
+                const vals = valueColumns.map(col => {
+                    const v = (cleanedData[col] || [])[i];
+                    return (v !== null && v !== undefined) ? v : '';
+                });
+                return [`"${dt}"`, `"${locName}"`, ...vals].join(',');
+            });
+            return [header, ...rows].join('\n');
+        };
+
+        const buildDownloadJSON = () => {
+            const cleanedData = cleanAndSortData(combined_dataset["master_datetime"], combined_dataset);
+            const locName = (window._lastOpenedLocationName || '').replace(/[_-]/g, ' ').trim() || forecasts_div;
+            const valueColumns = plot_columns.map(c => c.column);
+            return JSON.stringify(
+                cleanedData.master_datetime.map((dt, i) => {
+                    const row = { datetime: dt, location: locName };
+                    plot_columns.forEach(c => {
+                        row[c.name || c.column] = (cleanedData[c.column] || [])[i] ?? null;
+                    });
+                    return row;
+                }),
+                null, 2
+            );
+        };
+
         $(`#download-csv-${forecasts_div}`).on('click', function() {
-            const csv = formatToCSV(combined_dataset);
-            const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-            const link = document.createElement("a");
+            const csv = buildDownloadCSV();
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `${forecasts_div}_data.csv`;
+            link.download = `${getDownloadName()}.csv`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         });
 
         $(`#download-json-${forecasts_div}`).on('click', function() {
-            const json = JSON.stringify(combined_dataset, null, 2);
-            const blob = new Blob([json], { type: "application/json" });
-            const link = document.createElement("a");
+            const json = buildDownloadJSON();
+            const blob = new Blob([json], { type: 'application/json' });
+            const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `location_data.json`;
+            link.download = `${getDownloadName()}.json`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -4187,6 +4311,9 @@ function openForecastsWindow(options = {}) {
     if (obsSrcFinal === 'NASA Pandora') {
         obsSrcFinal = 's3';
     }
+
+    // Store for download filename
+    window._lastOpenedLocationName = location_name.replace(/[_-]/g, ' ').trim();
 
     if (isModal) {
         const fileToLoad = `vues/location.html`;
