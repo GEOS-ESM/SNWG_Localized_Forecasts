@@ -801,7 +801,7 @@
             <div class="aqi-category vunhealthy">Very unhealthy</div>
             <div class="aqi-category hazardous">Hazardous</div>
             <div class="aqi-legend-footer">
-                <span>Data provenance: GEOS‑CF; NASA Pandora. Display date: ${displayDate}. Reported values correspond to global daily averages or site-specific hourly means as indicated. GEOS‑FP CNN outputs are presented as 3‑hour running averages. Interpret concentrations in the context of the pollutant units shown.</span>
+                <span><strong>Data:</strong> NASA GEOS‑CF · GEOS‑FP CNN · Pandora &nbsp;|&nbsp; <strong>Date:</strong> ${displayDate} &nbsp;|&nbsp; Global daily averages; site values are hourly means. GEOS‑FP CNN shown as 3‑h running averages.</span>
             </div>
             </div>
         `;
