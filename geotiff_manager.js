@@ -801,7 +801,7 @@
             <div class="aqi-category vunhealthy">Very unhealthy</div>
             <div class="aqi-category hazardous">Hazardous</div>
             <div class="aqi-legend-footer">
-                <span class="legend-footer-item"><strong>NASA GEOS‑CF</strong> <span class="legend-meta">Daily · Global, Site Specific</span></span>
+                <span class="legend-footer-item">Data Sources: <strong>NASA GEOS‑CF</strong> <span class="legend-meta">Daily · Global, Site Specific</span></span>
                 <span class="legend-footer-sep">·</span>
                 <span class="legend-footer-item"><strong>NASA GEOS‑FP + CNN</strong> <span class="legend-meta">3h · Site Specific</span></span>
                 <span class="legend-footer-sep">·</span>
