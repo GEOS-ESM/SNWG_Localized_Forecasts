@@ -2028,9 +2028,7 @@ function readApiBaker(options = {}) {
                 
 
                 if (plot.displayAQI) {
-                    const columnKey = plot.columns[0].column;
-                    console.log(columnKey);
-                    const values = masterData[columnKey] || [];
+                    const values = masterData.master_overall_aqi || [];
                     const datetimes = masterData.master_datetime || [];
                     const siteTimeZone = timezone;
                     const now = new Date();
