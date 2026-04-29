@@ -1981,8 +1981,7 @@ function readApiBaker(options = {}) {
             plots.forEach((plot, index) => {
                 const colKey = plot.columns[0]?.column;
                 const dataArr = plot.data && colKey && Array.isArray(plot.data[colKey]) ? plot.data[colKey] : [];
-                const hasData = dataArr.length > 0 && dataArr.some(v => v !== null && v !== undefined && v !== 'N/A');
-                if (!hasData) {
+                if (!dataArr.length) {
                     return;
                 }
 
@@ -2486,7 +2485,6 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     const currentResult = findAqiWithLocalTime(currentLocalStr);
     let currentAqi = currentResult.aqi ?? '--';
     let localTimeStr = currentResult.localTime;
-    const currentForecastIndex = currentResult.index;
 
     const prevT = addHours(-1);
     const prevAqi = findAqi(`${prevT.year}-${prevT.month}-${prevT.day} ${pad(prevT.hour)}`);
@@ -2500,13 +2498,16 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     }
     const aqiLevel = getAqiLevel(currentAqi);
 
+    // For DoS missions (3-hour average), get the current 3-hour forecast value
     let currentThreeHourAvg = '--';
     const isDosMissionData = masterData.master_datetime && masterData.master_datetime.some(dt => {
         const hour = parseInt(dt.substring(11, 13));
-        return hour % 3 === 0;
+        return hour % 3 === 0; // DoS has 3-hour intervals
     });
     
     if (isDosMissionData && typeof currentAqi === 'number') {
+        // For DoS missions, the currentAqi is already the 3-hour average
+        // Just display it as the current 3-hour average
         currentThreeHourAvg = currentAqi;
     }
 
@@ -2541,8 +2542,21 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         const dtMs = new Date(dt.replace(' ', 'T')).getTime();
         if (isNaN(dtMs)) return null;
         const aqi = aqiData[i] != null ? Math.round(aqiData[i]) : '--';
+        const forecastHour = parseInt(dt.substring(11, 13));
+        const forecastDate = dt.substring(0, 10);
         
-        const isNow = (currentForecastIndex !== -1 && i === currentForecastIndex);
+        // For DoS missions with 3-hour intervals, check if this is the current 3-hour window
+        let isNow = false;
+        if (isDosMissionData) {
+            const windowStart = Math.floor(currentHour / 3) * 3;
+            // Match on both hour and a reasonable date range (today or within 1 day)
+            const dateDiff = Math.abs(new Date(forecastDate).getTime() - new Date(siteTodayStr).getTime());
+            const isSameDayOrAdjacentDay = dateDiff < 86400000 * 1.5; // within 1.5 days
+            isNow = isSameDayOrAdjacentDay && forecastHour === windowStart;
+        } else {
+            // For regular hourly forecasts, use time-based check
+            isNow = Math.abs(dtMs - nowLocalMs) < 1800000; // within 30min
+        }
         
         const isPast = dtMs < nowLocalMs - 1800000;
         const isFuture72 = dtMs <= cutoff72h;
@@ -3700,7 +3714,7 @@ function draw_plot(
     });
 
 
-    // NAAQS
+    // NAAQS reference line as a dedicated trace (shows in legend)
     if (naaqsValue !== null && naaqsValue !== undefined) {
         traces.push({
             type: 'scatter',
@@ -3711,22 +3725,6 @@ function draw_plot(
             name: naaqsLabel || `NAAQS Standard (${naaqsValue} ${unit})`,
             hoverinfo: 'name+y',
             showlegend: true
-        });
-    }
-
-    if (currentX && currentValueNumeric !== null) {
-        traces.push({
-            type: 'scatter',
-            mode: 'markers',
-            x: [currentX],
-            y: [currentValueNumeric],
-            marker: {
-                size: 10,
-                color: '#FFFFFF',
-                line: { color: '#000000', width: 2 }
-            },
-            hoverinfo: 'skip',
-            showlegend: false
         });
     }
 
@@ -3741,36 +3739,6 @@ function draw_plot(
             break;
         }
     }
-
-    let currentValueText = '--';
-    let currentValueNumeric = null;
-    if (currentY !== null && currentY !== undefined && currentY !== 'N/A') {
-        currentValueNumeric = typeof currentY === 'number' ? currentY : parseFloat(currentY);
-        currentValueText = typeof currentY === 'number' ? currentY.toFixed(2) : currentY;
-    } else if (plot_columns.length > 0 && plot_columns[0].column) {
-        const firstColumnData = cleanedData[plot_columns[0].column];
-        for (let i = 0; i < cleanedData.master_datetime.length; i++) {
-            const datetime = new Date(cleanedData.master_datetime[i]);
-            const dateString = datetime.toISOString().split('T')[0];
-            const hour = datetime.getHours();
-
-            if (dateString === currentDateString && hour === currentHour) {
-                const val = firstColumnData[i];
-                if (val !== null && val !== undefined && val !== 'N/A') {
-                    currentValueNumeric = typeof val === 'number' ? val : parseFloat(val);
-                    currentValueText = typeof val === 'number' ? val.toFixed(2) : val;
-                }
-                break;
-            }
-        }
-    }
-
-    const currentTimeFormatted = localNow.toLocaleString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-        timeZone: timezone
-    });
 
     const layout = {
         margin: {
@@ -3793,30 +3761,7 @@ function draw_plot(
                     color: '#000000'
                 },
                 align: 'center'
-            },
-            ...(currentX && currentValueText !== '--' ? [{
-                x: currentX,
-                y: currentValueNumeric,
-                xref: 'x',
-                yref: 'y',
-                text: `<b>${currentValueText}</b> ${unit}<br>${currentTimeFormatted}`,
-                showarrow: true,
-                arrowhead: 0,
-                arrowsize: 0,
-                arrowwidth: 0,
-                arrowcolor: 'transparent',
-                ax: 0,
-                ay: -60,
-                font: {
-                    size: 13,
-                    color: '#000000'
-                },
-                bgcolor: 'rgba(255, 255, 255, 0.9)',
-                bordercolor: '#000000',
-                borderwidth: 1,
-                borderpad: 8,
-                align: 'center'
-            }] : [])
+            }
         ],
         autosize: true,
         plot_bgcolor: '#FFFFFF',
