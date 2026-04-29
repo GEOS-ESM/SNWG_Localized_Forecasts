@@ -3714,6 +3714,22 @@ function draw_plot(
         });
     }
 
+    if (currentX && currentValueNumeric !== null) {
+        traces.push({
+            type: 'scatter',
+            mode: 'markers',
+            x: [currentX],
+            y: [currentValueNumeric],
+            marker: {
+                size: 10,
+                color: '#FFFFFF',
+                line: { color: '#000000', width: 2 }
+            },
+            hoverinfo: 'skip',
+            showlegend: false
+        });
+    }
+
     for (let i = 0; i < cleanedData.master_datetime.length; i++) {
         const datetime = new Date(cleanedData.master_datetime[i]);
         const dateString = datetime.toISOString().split('T')[0];
@@ -3725,6 +3741,36 @@ function draw_plot(
             break;
         }
     }
+
+    let currentValueText = '--';
+    let currentValueNumeric = null;
+    if (currentY !== null && currentY !== undefined && currentY !== 'N/A') {
+        currentValueNumeric = typeof currentY === 'number' ? currentY : parseFloat(currentY);
+        currentValueText = typeof currentY === 'number' ? currentY.toFixed(2) : currentY;
+    } else if (plot_columns.length > 0 && plot_columns[0].column) {
+        const firstColumnData = cleanedData[plot_columns[0].column];
+        for (let i = 0; i < cleanedData.master_datetime.length; i++) {
+            const datetime = new Date(cleanedData.master_datetime[i]);
+            const dateString = datetime.toISOString().split('T')[0];
+            const hour = datetime.getHours();
+
+            if (dateString === currentDateString && hour === currentHour) {
+                const val = firstColumnData[i];
+                if (val !== null && val !== undefined && val !== 'N/A') {
+                    currentValueNumeric = typeof val === 'number' ? val : parseFloat(val);
+                    currentValueText = typeof val === 'number' ? val.toFixed(2) : val;
+                }
+                break;
+            }
+        }
+    }
+
+    const currentTimeFormatted = localNow.toLocaleString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: timezone
+    });
 
     const layout = {
         margin: {
@@ -3747,7 +3793,30 @@ function draw_plot(
                     color: '#000000'
                 },
                 align: 'center'
-            }
+            },
+            ...(currentX && currentValueText !== '--' ? [{
+                x: currentX,
+                y: currentValueNumeric,
+                xref: 'x',
+                yref: 'y',
+                text: `<b>${currentValueText}</b> ${unit}<br>${currentTimeFormatted}`,
+                showarrow: true,
+                arrowhead: 0,
+                arrowsize: 0,
+                arrowwidth: 0,
+                arrowcolor: 'transparent',
+                ax: 0,
+                ay: -60,
+                font: {
+                    size: 13,
+                    color: '#000000'
+                },
+                bgcolor: 'rgba(255, 255, 255, 0.9)',
+                bordercolor: '#000000',
+                borderwidth: 1,
+                borderpad: 8,
+                align: 'center'
+            }] : [])
         ],
         autosize: true,
         plot_bgcolor: '#FFFFFF',
