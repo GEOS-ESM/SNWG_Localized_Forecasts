@@ -1981,7 +1981,8 @@ function readApiBaker(options = {}) {
             plots.forEach((plot, index) => {
                 const colKey = plot.columns[0]?.column;
                 const dataArr = plot.data && colKey && Array.isArray(plot.data[colKey]) ? plot.data[colKey] : [];
-                if (!dataArr.length) {
+                const hasData = dataArr.length > 0 && dataArr.some(v => v !== null && v !== undefined && v !== 'N/A');
+                if (!hasData) {
                     return;
                 }
 
