@@ -457,7 +457,7 @@ header .nav-link.active,
         
 
         <div class="d-flex align-items-center gap-3">
-            <p class="mb-0">© 2025 SNWG Localized Forecasts.</p>
+            <p class="mb-0">© <span id="current-year"></span> SNWG Localized Forecasts.</p>
             <p class="mb-0">Version 2 (beta)</p>
             <p class="mb-0" id="last-updated">Updated on <span id="last-commit-date">--/--/----</span></p>
         </div>
@@ -485,6 +485,12 @@ header .nav-link.active,
 
     <script>
     (function() {
+        // Set current year automatically
+        const yearEl = document.getElementById('current-year');
+        if (yearEl) {
+            yearEl.textContent = new Date().getFullYear();
+        }
+
         const owner = 'GEOS-ESM';
         const repo = 'SNWG_Localized_Forecasts';
         const branch = 'pandora';

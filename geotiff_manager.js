@@ -801,7 +801,14 @@
             <div class="aqi-category vunhealthy">Very unhealthy</div>
             <div class="aqi-category hazardous">Hazardous</div>
             <div class="aqi-legend-footer">
-                <span><strong>Data:</strong> NASA GEOS‑CF · GEOS‑FP CNN · Pandora &nbsp;|&nbsp; <strong>Date:</strong> ${displayDate} &nbsp;|&nbsp; Global daily averages; site values are hourly means. GEOS‑FP CNN shown as 3‑h running averages.</span>
+                <span class="legend-footer-item">Data Sources: <strong>NASA GEOS‑CF</strong> <span class="legend-meta">Daily · Global, Site Specific</span></span>
+                <span class="legend-footer-sep">·</span>
+                <span class="legend-footer-item"><strong>NASA GEOS‑FP + CNN</strong> <span class="legend-meta">3h · Site Specific</span></span>
+                <span class="legend-footer-sep">·</span>
+                <span class="legend-footer-item"><strong>NASA/ ESA Pandora</strong> <span class="legend-meta">Historical, Real-time · Site Specific
+</span></span>
+                <span class="legend-footer-sep">|</span>
+                <span class="legend-footer-item"><strong>Date</strong> ${displayDate}</span>
             </div>
             </div>
         `;
@@ -1562,12 +1569,33 @@
             /* footer */
             .aqi-legend-footer {
                 width: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                color: white;
+                background: rgba(0, 0, 0, 0.75);
+                color: rgba(255,255,255,0.85);
                 font-size: 10px;
-                padding: 4px 8px;
-                text-align: center;
-                font-weight: 500;
+                padding: 5px 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                flex-wrap: wrap;
+                letter-spacing: 0.2px;
+            }
+            .legend-footer-item {
+                white-space: nowrap;
+            }
+            .legend-footer-item strong {
+                color: #fff;
+                font-weight: 600;
+                margin-right: 3px;
+            }
+            .legend-footer-sep {
+                color: rgba(255,255,255,0.35);
+                font-size: 11px;
+            }
+            .legend-meta {
+                color: rgba(255,255,255,0.65);
+                font-size: 9px;
+                margin-left: 4px;
             }
 
             

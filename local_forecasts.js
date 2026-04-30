@@ -2498,6 +2498,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     }
     const aqiLevel = getAqiLevel(currentAqi);
 
+<<<<<<< HEAD
 
     let currentThreeHourAvg = '--';
     const isDosMissionData = masterData.master_datetime && masterData.master_datetime.some(dt => {
@@ -2506,6 +2507,18 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     });
     
     if (isDosMissionData && typeof currentAqi === 'number') {
+=======
+    // For DoS missions (3-hour average), get the current 3-hour forecast value
+    let currentThreeHourAvg = '--';
+    const isDosMissionData = masterData.master_datetime && masterData.master_datetime.some(dt => {
+        const hour = parseInt(dt.substring(11, 13));
+        return hour % 3 === 0; // DoS has 3-hour intervals
+    });
+    
+    if (isDosMissionData && typeof currentAqi === 'number') {
+        // For DoS missions, the currentAqi is already the 3-hour average
+        // Just display it as the current 3-hour average
+>>>>>>> 8241efc77d7c29bebad21402fc4847aac49e4d00
         currentThreeHourAvg = currentAqi;
     }
 
@@ -2543,6 +2556,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         const forecastHour = parseInt(dt.substring(11, 13));
         const forecastDate = dt.substring(0, 10);
         
+<<<<<<< HEAD
         let isNow = false;
         if (isDosMissionData) {
             const windowStart = Math.floor(currentHour / 3) * 3;
@@ -2550,6 +2564,19 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
             isNow = forecastDate === siteTodayStr && forecastHour === windowStart;
         } else {
             isNow = forecastDate === siteTodayStr && forecastHour === currentHour;
+=======
+        // For DoS missions with 3-hour intervals, check if this is the current 3-hour window
+        let isNow = false;
+        if (isDosMissionData) {
+            const windowStart = Math.floor(currentHour / 3) * 3;
+            // Match on both hour and a reasonable date range (today or within 1 day)
+            const dateDiff = Math.abs(new Date(forecastDate).getTime() - new Date(siteTodayStr).getTime());
+            const isSameDayOrAdjacentDay = dateDiff < 86400000 * 1.5; // within 1.5 days
+            isNow = isSameDayOrAdjacentDay && forecastHour === windowStart;
+        } else {
+            // For regular hourly forecasts, use time-based check
+            isNow = Math.abs(dtMs - nowLocalMs) < 1800000; // within 30min
+>>>>>>> 8241efc77d7c29bebad21402fc4847aac49e4d00
         }
         
         const isPast = dtMs < nowLocalMs - 1800000;
