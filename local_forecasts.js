@@ -519,18 +519,16 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
 
                 let aqi = "--";
 
-                // Precomputed
-                if (site.forecasted_value !== undefined && site.forecasted_value !== null && site.forecasted_value !== "N/A") {
-                    aqi = site.forecasted_value;
-                } else if (matchingForecast && typeof matchingForecast === "object") {
-                    // Fallback
-                    if (selected === "no2") {
-                        aqi = matchingForecast.no2_aqi ?? "--";
-                    } else if (isPm25) {
-                        aqi = matchingForecast.pm25_aqi ?? calculateAqiForPm25(matchingForecast.pm25) ?? "--";
-                    } else if (selected === "o3") {
-                        aqi = matchingForecast.o3_aqi ?? "--";
+                // Use overall_aqi from JSON file exclusively for all locations
+                if (matchingForecast && typeof matchingForecast === "object") {
+                    if (matchingForecast.overall_aqi !== undefined && matchingForecast.overall_aqi !== null && !isNaN(matchingForecast.overall_aqi)) {
+                        aqi = matchingForecast.overall_aqi;
+                    } else if (site.forecasted_value !== undefined && site.forecasted_value !== null && site.forecasted_value !== "N/A") {
+                        // Fallback to precomputed value if available
+                        aqi = site.forecasted_value;
                     }
+                } else if (site.forecasted_value !== undefined && site.forecasted_value !== null && site.forecasted_value !== "N/A") {
+                    aqi = site.forecasted_value;
                 }
 
                 const aqiLevel = aqi === "--" || aqi === "N/A"
@@ -798,7 +796,7 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
                     const day = String(attemptDate.getUTCDate()).padStart(2, '0');
                     const hour = String(attemptDate.getUTCHours()).padStart(2, '0');
                     
-                    const snapshotPath = `https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/hourly_forecasts/${year}-${month}-${day}_${hour}.json`;
+                    const snapshotPath = `https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/hourly_forecasts/${year}-${month}-${day}_${hour}.json?version=${new Date().getTime()}`;
                     
                     try {
                         const response = await fetch(snapshotPath);
@@ -904,20 +902,14 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
 
 function getAqiFromForecast(forecast, selected) {
     if (!forecast) return "N/A";
+    // For Pandora or any location, use overall_aqi exclusively if available
     if (forecast.overall_aqi != null && !isNaN(forecast.overall_aqi)) return forecast.overall_aqi;
+    // For non-Pandora locations, fall back to pollutant-specific AQI values
     const isPm25 = selected === "pm25" || selected === "pm2.5";
     let v = null;
-    if (selected === "no2" || selected === "pandora") {
+    if (selected === "no2") {
         v = forecast.no2_aqi ?? forecast.NO2_AQI ?? null;
         if (v === null && forecast.no2 != null) v = calculateAqiForNo2(forecast.no2);
-        // Pandora fallback: also try pm25 if no no2 data
-        if ((v === null || isNaN(v)) && selected === "pandora") {
-            v = forecast.pm25_aqi ?? forecast.PM25_NowCast_AQI ?? null;
-            if (v === null || isNaN(v)) {
-                const conc = forecast.pm25_conc_cnn ?? forecast.pm25 ?? null;
-                if (conc !== null) v = calculateAqiForPm25(conc);
-            }
-        }
     } else if (isPm25) {
         v = forecast.pm25_aqi ?? forecast.PM25_NowCast_AQI ?? null;
         if (v === null || isNaN(v)) {
@@ -1536,40 +1528,24 @@ function add_the_banner(site, param) {
         const t10m = forecast.t10m ?? forecast.t;
         const rh = forecast.rh;
 
-        // Fields
-        const raw_no2_aqi  = forecast.no2_aqi  ?? forecast.NO2_AQI  ?? null;
-        const raw_o3_aqi   = forecast.o3_aqi   ?? forecast.O3_AQI   ?? null;
-        const raw_pm25_aqi = forecast.pm25_aqi ?? forecast.PM25_NowCast_AQI ?? null;
-        const pm25_conc    = forecast.pm25_conc_cnn ?? forecast.pm25 ?? null;
+        // Use overall_aqi exclusively for all locations (Pandora, GEOS-CF, etc.)
+        let aqiValue = '--';
+        let source = '';
+        
+        if (forecast.overall_aqi !== undefined && forecast.overall_aqi !== null && !isNaN(forecast.overall_aqi)) {
+            aqiValue = parseInt(forecast.overall_aqi);
+            source = "NASA GEOS CF, NASA Pandora";
+        } else {
+            // Fallback to site.forecasted_value if available
+            if (site.forecasted_value !== undefined && site.forecasted_value !== null &&
+                site.forecasted_value !== 'N/A' && !isNaN(site.forecasted_value)) {
+                aqiValue = parseInt(site.forecasted_value);
+            }
+        }
 
         // Display
         const temperature = (typeof t10m === "number" && !isNaN(t10m)) ? Math.round(t10m - 273.15) : "--";
         const humidity    = (typeof rh   === "number" && !isNaN(rh))   ? (rh  * 100).toFixed(0)     : "--";
-
-        let aqiValue = '--';
-        let source = '';
-        if (param === "no2") {
-            const v = raw_no2_aqi !== null && !isNaN(raw_no2_aqi) ? parseInt(raw_no2_aqi) : null;
-            aqiValue = v !== null ? v : '--';
-            source = "NASA GEOS CF, NASA Pandora";
-        } else if (param === "pm25" || param === "pm2.5") {
-            const v = raw_pm25_aqi !== null && !isNaN(raw_pm25_aqi)
-                ? parseInt(raw_pm25_aqi)
-                : (pm25_conc !== null ? calculateAqiForPm25(pm25_conc) : null);
-            aqiValue = v !== null ? v : '--';
-            source = "NASA GEOS-FP, AirNow";
-        } else if (param === "o3") {
-            const v = raw_o3_aqi !== null && !isNaN(raw_o3_aqi) ? parseInt(raw_o3_aqi) : null;
-            aqiValue = v !== null ? v : '--';
-            source = "NASA GEOS CF, NASA Pandora";
-        }
-
-        // Fallback
-        if ((aqiValue === '--' || aqiValue === null) &&
-            site.forecasted_value !== undefined && site.forecasted_value !== null &&
-            site.forecasted_value !== 'N/A' && !isNaN(site.forecasted_value)) {
-            aqiValue = parseInt(site.forecasted_value);
-        }
 
         
         const aqiLevel = getAqiLevel(aqiValue, param);
@@ -1599,8 +1575,7 @@ function add_the_banner(site, param) {
                 precomputed_forecasts='${JSON.stringify(precomputed_forecasts)}'
                 timezone="${site.timezone}"
                 tabindex="0"
-                role="button"
-            >
+                role="button">
                 <div class="ticker-card-aqi ${aqiClass}">${aqiValue}</div>
                 <div class="ticker-card-info">
                     <div class="ticker-card-name">${
@@ -1609,6 +1584,7 @@ function add_the_banner(site, param) {
                             : site.location_name.replace(/_/g, ' ').replace(/\./g, ' ')
                     }</div>
                     <div class="ticker-card-meta">
+                        <span><i class="fas fa-clock"></i> ${forecast.local_time ? forecast.local_time.substring(11, 16) : '--'}</span>
                         <span><i class="fas fa-thermometer-half"></i> ${temperature}°C</span>
                         <span><i class="fas fa-tint"></i> ${humidity}%</span>
                     </div>
@@ -1870,13 +1846,6 @@ function readApiBaker(options = {}) {
                 } else {
                     masterData.master_overall_aqi.push(null);
                 }
-
-                if (forecast.corrected !== undefined && forecast.corrected !== null) {
-                    const aqi = calculateAqiForNo2(forecast.corrected);
-                    if (aqi !== 'N/A' && aqi !== undefined) {
-                        masterData.master_predicted_aqi.push(aqi);
-                    }
-                }
             });
             
             // Hero
@@ -2095,9 +2064,7 @@ function readApiBaker(options = {}) {
                 
 
                 if (plot.displayAQI) {
-                    const columnKey = plot.columns[0].column;
-                    console.log(columnKey);
-                    const values = masterData[columnKey] || [];
+                    const values = masterData.master_overall_aqi || [];
                     const datetimes = masterData.master_datetime || [];
                     const siteTimeZone = timezone;
                     const now = new Date();
@@ -2485,11 +2452,40 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         return bi !== -1 ? Math.round(aqiData[bi]) : null;
     };
 
-    // Current hour AQI
-    const currentLocalStr = `${siteTodayStr} ${pad(currentHour)}`;
-    let currentAqi = findAqi(currentLocalStr) ?? '--';
+    const findAqiWithLocalTime = (localHourStr) => {
+        let matchIndex = -1;
+        // Exact match
+        for (let i = 0; i < datetimes.length; i++) {
+            if (datetimes[i] && datetimes[i].slice(0, 13) === localHourStr && aqiData[i] != null) {
+                matchIndex = i;
+                break;
+            }
+        }
+        // Nearest within ±3h
+        if (matchIndex === -1) {
+            const targetH = parseInt(localHourStr.slice(11, 13));
+            const targetDate = localHourStr.slice(0, 10);
+            let bd = Infinity;
+            for (let i = 0; i < datetimes.length; i++) {
+                if (!datetimes[i] || aqiData[i] == null) continue;
+                const dtDate = datetimes[i].slice(0, 10);
+                if (dtDate !== targetDate) continue;
+                const dtH = parseInt(datetimes[i].slice(11, 13));
+                const d = Math.abs(dtH - targetH);
+                if (d < bd && d <= 3) { bd = d; matchIndex = i; }
+            }
+        }
+        
+        const aqi = matchIndex !== -1 ? Math.round(aqiData[matchIndex]) : null;
+        const localTime = matchIndex !== -1 && datetimes[matchIndex] ? datetimes[matchIndex].substring(11, 16) : '--';
+        return { aqi, localTime, index: matchIndex };
+    };
 
-    // Prev hour for change indicator
+    const currentLocalStr = `${siteTodayStr} ${pad(currentHour)}`;
+    const currentResult = findAqiWithLocalTime(currentLocalStr);
+    let currentAqi = currentResult.aqi ?? '--';
+    let localTimeStr = currentResult.localTime;
+
     const prevT = addHours(-1);
     const prevAqi = findAqi(`${prevT.year}-${prevT.month}-${prevT.day} ${pad(prevT.hour)}`);
 
@@ -2501,6 +2497,17 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         changeArrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '';
     }
     const aqiLevel = getAqiLevel(currentAqi);
+
+
+    let currentThreeHourAvg = '--';
+    const isDosMissionData = masterData.master_datetime && masterData.master_datetime.some(dt => {
+        const hour = parseInt(dt.substring(11, 13));
+        return hour % 3 === 0; 
+    });
+    
+    if (isDosMissionData && typeof currentAqi === 'number') {
+        currentThreeHourAvg = currentAqi;
+    }
 
     // Daily aggregates
     const aggAqi = (prefix) => {
@@ -2527,13 +2534,24 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     const nowLocalMs = now.getTime();
     const cutoff72h = nowLocalMs + 72 * 3600 * 1000;
 
-    // datetimes array
+
     const allForecastCards = datetimes.map((dt, i) => {
         if (!dt) return null;
         const dtMs = new Date(dt.replace(' ', 'T')).getTime();
         if (isNaN(dtMs)) return null;
         const aqi = aqiData[i] != null ? Math.round(aqiData[i]) : '--';
-        const isNow = Math.abs(dtMs - nowLocalMs) < 1800000; // within 30min
+        const forecastHour = parseInt(dt.substring(11, 13));
+        const forecastDate = dt.substring(0, 10);
+        
+        let isNow = false;
+        if (isDosMissionData) {
+            const windowStart = Math.floor(currentHour / 3) * 3;
+
+            isNow = forecastDate === siteTodayStr && forecastHour === windowStart;
+        } else {
+            isNow = forecastDate === siteTodayStr && forecastHour === currentHour;
+        }
+        
         const isPast = dtMs < nowLocalMs - 1800000;
         const isFuture72 = dtMs <= cutoff72h;
         const dateStr = dt.slice(0, 10);
@@ -2550,6 +2568,17 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         const cutoff = nowLocalMs + maxHours * 3600 * 1000;
         const cards = allForecastCards.filter(f => f.isNow || f.dtMs <= cutoff);
         if (!cards.length) return '<div style="padding:16px;color:#aaa;font-size:12px;">No forecast data</div>';
+        
+        let foundNow = false;
+        cards.forEach(f => {
+            if (f.isNow && !foundNow) {
+                foundNow = true;
+                f.aqi = currentAqi;
+            } else if (f.isNow && foundNow) {
+                f.isNow = false;
+            }
+        });
+        
         let lastDate = null;
         return cards.map(f => {
             let dateHeader = '';
@@ -2771,13 +2800,13 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     const heroHtml = `
         <div class="forecast-header">
             <h1 class="location-name1">${cleanLocation}</h1>
-            <div class="forecast-meta">US AQI · ${formattedTime} ${tzLabel} · ${formattedDate}</div>
+            <div class="forecast-meta">US AQI · ${formattedTime} ${tzLabel} · ${formattedDate} · Local: ${localTimeStr}</div>
             <div class="aqi-hero">
                 <span class="aqi-value-main">${currentAqi}</span>
                 ${changeValue !== '--' ? `<span class="aqi-change ${changeClass}">${changeArrow} ${changeValue}</span>` : ''}
                 <span class="aqi-level-badge" style="background-color:${aqiLevel.color};">${aqiLevel.level}</span>
             </div>
-            <div class="aqi-subtitle">Air Quality Index (USAQI)</div>
+            <div class="aqi-subtitle">${isDosMissionData ? `3-hour Average (${currentThreeHourAvg}) · ${localTimeStr} Local` : `Air Quality Index (USAQI) · ${localTimeStr} Local`}</div>
         </div>
 
         <div class="forecast-periods">
@@ -3178,8 +3207,8 @@ function readAirNow(options = {}) {
                     const observationValue = forecast.value || null;
                     masterData.master_observation.push(observationValue);
 
-
-                    const aqiValue = calculateAqiForPm25(observationValue);
+                    // Use overall_aqi from JSON if available, otherwise calculate from observation
+                    const aqiValue = (forecast.overall_aqi !== undefined && forecast.overall_aqi !== null) ? forecast.overall_aqi : calculateAqiForPm25(observationValue);
                     masterData.master_aqi.push(aqiValue);
                 });
             }
@@ -3239,7 +3268,7 @@ function readAirNow(options = {}) {
                     false,
                     plot.id === "aqi_plot_for_airnow"
                         ? "<b>PM 2.5 AQI</b> | Calculated from PM 2.5 concentrations"
-                        : "<b>Sources:</b> NASA Modern-Era Retrospective analysis for Research and Applications (MERRA-2)| | SNWG Bias CNN Model.",
+                        : "<b>Sources:</b> NASA Modern-Era Retrospective analysis for Research and Applications (MERRA-2)| | SNWG Bias CNN Model.",
                     "bar",
                     siteTimeZone
                 );
@@ -3255,28 +3284,22 @@ function readAirNow(options = {}) {
             const nexttHour = (currentDate.getHours() + 1)
             
 
-            let currentValue = 'N/A';
-            let nextValue = 'N/A';
+            let currentAqi = 'N/A';
+            let nextAqi = 'N/A';
             
- 
             for (let i = 0; i < masterData.master_datetime.length; i++) {
                 const datetime = new Date(masterData.master_datetime[i]);
                 const dateString = datetime.toISOString().split('T')[0];
                 const hour = datetime.getHours();
-            
-
+                
                 if (dateString === currentDateString && hour <= currentHour && currentHour < hour + 3) {
-                    currentValue = masterData.master_observation[i];
+                    currentAqi = masterData.master_aqi[i];
                 }
-            
-
+                
                 if (dateString === currentDateString && hour <= currentHour + 3 && currentHour + 3 < hour + 3) {
-                    nextValue = masterData.master_observation[i];
+                    nextAqi = masterData.master_aqi[i];
                 }
             }
-
-            const currentAqi = param === "no2" ? calculateAqiForNo2(currentValue) : calculateAqiForPm25(currentValue);
-            const nextAqi = param === "no2" ? calculateAqiForNo2(nextValue) : calculateAqiForPm25(nextValue);
 
             let aqiElement = `<div class="prediction-container">`;
             
