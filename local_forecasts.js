@@ -192,6 +192,18 @@ function pollutant_details(code, format = "full") {
             abbr: "O<sub>3</sub>", 
             id: 4,
             desc: `Ozone at ground-level is harmful, and forms from reactions of other pollutants (<a href="https://www.epa.gov/ozone-pollution/ground-level-ozone-basics" target="_blank">click to learn more</a>).`
+        },
+        overall: {
+            name: "US Air Quality Index",
+            abbr: "US AQI",
+            id: 5,
+            desc: `The US AQI is a composite index reflecting the air quality based on NO₂, PM₂.₅, and O₃ concentrations, following EPA standards (<a href="https://www.airnow.gov/aqi/aqi-basics/" target="_blank">click to learn more</a>).`
+        },
+        "5": {
+            name: "US Air Quality Index",
+            abbr: "US AQI",
+            id: 5,
+            desc: `The US AQI is a composite index reflecting the air quality based on NO₂, PM₂.₅, and O₃ concentrations, following EPA standards (<a href="https://www.airnow.gov/aqi/aqi-basics/" target="_blank">click to learn more</a>).`
         }
     };
     const p = pollutants[code?.toString().toLowerCase()];
@@ -565,18 +577,31 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
 function generateSmallAqiBox(aqiValue, pollutant) {
     if (aqiValue === 'N/A' || aqiValue === undefined || aqiValue === null || isNaN(aqiValue) || aqiValue === '--') return '';
 
-    let aqi = 'N/A';
-    if (pollutant === 'no2') {
-        aqi = aqiValue;
-    } else if (pollutant === 'pm25') {
-        aqi = aqiValue;
-    } else if (pollutant === 'o3') {
-        aqi = aqiValue;
-    }
-
-    if (aqi === 'N/A' || isNaN(aqi)) return '';
+    const aqi = Number(aqiValue);
+    if (isNaN(aqi)) return '';
 
     const aqiLevel = getAqiLevel(aqi);
+
+
+    const segments = [
+        { min: 0,   max: 50  },
+        { min: 51,  max: 100 },
+        { min: 101, max: 150 },
+        { min: 151, max: 200 },
+        { min: 201, max: 300 },
+        { min: 301, max: 500 }
+    ];
+    const segmentWidth = 100 / segments.length; // 16.666...%
+    let arrowPos = 0;
+    for (let i = 0; i < segments.length; i++) {
+        const { min, max } = segments[i];
+        if (aqi <= max || i === segments.length - 1) {
+            const clampedAqi = Math.min(Math.max(aqi, min), max);
+            arrowPos = i * segmentWidth + ((clampedAqi - min) / (max - min)) * segmentWidth;
+            break;
+        }
+    }
+    arrowPos = Math.min(Math.max(arrowPos, 0), 100);
 
     return `
         <div style="padding:6px 10px; min-width:120px; background:#fff; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.12); font-size:13px;">
@@ -597,8 +622,8 @@ function generateSmallAqiBox(aqiValue, pollutant) {
                 <div style="flex:1;background:#9C27B0;"></div>
                 <div style="flex:1;background:#7E0023;"></div>
             </div>
-            <div style="position:relative;height:0;">
-                <div style="position:absolute;top:-8px;left:${Math.min(Math.max((aqi/500)*100,0),100)}%;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:7px solid #222;transform:translateX(-50%);"></div>
+            <div style="position:relative;height:8px;">
+                <div style="position:absolute;top:0;left:${arrowPos}%;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:7px solid #222;transform:translateX(-50%);"></div>
             </div>
         </div>
     `;
@@ -902,9 +927,9 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
 
 function getAqiFromForecast(forecast, selected) {
     if (!forecast) return "N/A";
-    // For Pandora or any location, use overall_aqi exclusively if available
+
     if (forecast.overall_aqi != null && !isNaN(forecast.overall_aqi)) return forecast.overall_aqi;
-    // For non-Pandora locations, fall back to pollutant-specific AQI values
+
     const isPm25 = selected === "pm25" || selected === "pm2.5";
     let v = null;
     if (selected === "no2") {
@@ -1521,14 +1546,13 @@ function add_the_banner(site, param) {
     const obs_options = $.parseJSON(site.obs_options);
 
     if (site.observation_source) {
-        // current-hour 
+
         const siteDataLike = { forecasts: precomputed_forecasts, species: null };
         const timezone = site.timezone || "UTC";
         const forecast = getCurrentForecast(siteDataLike, timezone) || precomputed_forecasts?.[0] || {};
         const t10m = forecast.t10m ?? forecast.t;
         const rh = forecast.rh;
 
-        // Use overall_aqi exclusively for all locations (Pandora, GEOS-CF, etc.)
         let aqiValue = '--';
         let source = '';
         
@@ -1536,7 +1560,6 @@ function add_the_banner(site, param) {
             aqiValue = parseInt(forecast.overall_aqi);
             source = "NASA GEOS CF, NASA Pandora";
         } else {
-            // Fallback to site.forecasted_value if available
             if (site.forecasted_value !== undefined && site.forecasted_value !== null &&
                 site.forecasted_value !== 'N/A' && !isNaN(site.forecasted_value)) {
                 aqiValue = parseInt(site.forecasted_value);
@@ -1779,25 +1802,34 @@ function readApiBaker(options = {}) {
                     (forecast.o3 !== undefined && forecast.o3 !== null) ? forecast.o3 : null
                 );
                 
-                // PM25
                 if (forecast.pm25_conc_cnn !== undefined && forecast.pm25_conc_cnn !== null) {
                     masterData.master_pm25.push(forecast.pm25_conc_cnn);
                     masterData.master_pm25_conc_cnn.push(forecast.pm25_conc_cnn);
+                } else if (forecast.PM25_NowCast_Concentration !== undefined && forecast.PM25_NowCast_Concentration !== null) {
+                    masterData.master_pm25.push(forecast.PM25_NowCast_Concentration);
+                    masterData.master_pm25_conc_cnn.push(forecast.PM25_NowCast_Concentration);
+                } else if (forecast.pm25_rh35 !== undefined && forecast.pm25_rh35 !== null) {
+                    masterData.master_pm25.push(forecast.pm25_rh35);
+                    masterData.master_pm25_conc_cnn.push(forecast.pm25_rh35);
                 } else if (forecast.pm25 !== undefined && forecast.pm25 !== null) {
                     masterData.master_pm25.push(forecast.pm25);
                     masterData.master_pm25_conc_cnn.push(forecast.pm25);
+                } else {
+                    masterData.master_pm25.push(null);
+                    masterData.master_pm25_conc_cnn.push(null);
                 }
 
                 // PM25 source
                 masterData.master_pm25source.push(forecast.pm25source || null);
 
-                // PM25-AQI
-                if (forecast.pm25_aqi !== undefined && forecast.pm25_aqi !== null) {
-                    masterData.master_pm25_aqi.push(forecast.pm25_aqi);
-                } else if (forecast.PM25_NowCast_AQI !== undefined && forecast.PM25_NowCast_AQI !== null) {
+                if (forecast.PM25_NowCast_AQI !== undefined && forecast.PM25_NowCast_AQI !== null) {
                     masterData.master_pm25_aqi.push(forecast.PM25_NowCast_AQI);
+                } else if (forecast.pm25_aqi !== undefined && forecast.pm25_aqi !== null) {
+                    masterData.master_pm25_aqi.push(forecast.pm25_aqi);
                 } else if (forecast.pm25_conc_cnn !== undefined && forecast.pm25_conc_cnn !== null) {
                     masterData.master_pm25_aqi.push(calculateAqiForPm25(forecast.pm25_conc_cnn));
+                } else {
+                    masterData.master_pm25_aqi.push(null);
                 }
 
                 if (forecast.corrected !== undefined && forecast.corrected !== null) {
@@ -1824,21 +1856,25 @@ function readApiBaker(options = {}) {
                 masterData.master_rh.push(forecast.rh != null ? Math.round(forecast.rh <= 1 ? forecast.rh * 100 : forecast.rh) : null);
                 masterData.master_wind.push(forecast.wind_speed != null ? Math.round(forecast.wind_speed * 10) / 10 : null);
                 
-                // AQI
+
                 if (forecast.NO2_AQI !== undefined && forecast.NO2_AQI !== null) {
                     masterData.master_no2_aqi.push(forecast.NO2_AQI);
                 } else if (forecast.no2_aqi !== undefined && forecast.no2_aqi !== null) {
                     masterData.master_no2_aqi.push(forecast.no2_aqi);
                 } else if (forecast.no2 !== undefined && forecast.no2 !== null) {
                     masterData.master_no2_aqi.push(calculateAqiForNo2(forecast.no2));
+                } else {
+                    masterData.master_no2_aqi.push(null);
                 }
-                
+
                 if (forecast.O3_AQI !== undefined && forecast.O3_AQI !== null) {
                     masterData.master_o3_aqi.push(forecast.O3_AQI);
                 } else if (forecast.o3_aqi !== undefined && forecast.o3_aqi !== null) {
                     masterData.master_o3_aqi.push(forecast.o3_aqi);
                 } else if (forecast.o3 !== undefined && forecast.o3 !== null) {
                     masterData.master_o3_aqi.push(calculateAqiForO3(forecast.o3));
+                } else {
+                    masterData.master_o3_aqi.push(null);
                 }
                 
                 if (forecast.overall_aqi !== undefined && forecast.overall_aqi !== null) {
@@ -1859,6 +1895,25 @@ function readApiBaker(options = {}) {
             tabsNav.append(tabsList);
 
             const plots = [
+                {
+                    id: "plot_overall_aqi",
+                    title: "Overall Air Quality Index (AQI)",
+                    unit: "US AQI",
+                    data: masterData,
+                    param: "overall",
+                    tabName: "Overall Air Quality Index",
+                    tabId: "tab_overall",
+                    description: "Source: Composite of all pollutant AQI values",
+                    columns: [
+                        { column: "master_overall_aqi", name: "Overall AQI", color: "#F57C00", width: 2 }
+                    ],
+                    naaqsValue: 50,
+                    naaqsLabel: "NAAQS Recommended AQI 50",
+                    displayAQI: false,
+                    displayMetrics: false,
+                    enableAqiColors: true,
+                    additionalColumns: ["master_no2_aqi", "master_pm25_aqi"]
+                },
                 {
                     id: "plot_corrected_conc",
                     title: `SNWG NO<sub>2</sub> Bias-Corrected Forecast`,
@@ -1909,7 +1964,7 @@ function readApiBaker(options = {}) {
                     columns: [
                         { column: "master_o3", name: "O₃", color: "#E65100", width: 2 }
                     ],
-                    // NAAQS 8-hour standard: 70 ppb O3
+
                     naaqsValue: 70,
                     naaqsLabel: "NAAQS 8-hr Standard (70 ppbv O₃)",                    displayAQI: false,
                     displayMetrics: false,
@@ -1922,13 +1977,13 @@ function readApiBaker(options = {}) {
                     const hasCorrected = masterData.master_observation_source.some(s => s === "corrected");
                     const columns = [];
                     if (hasPandora) {
-                        columns.push({ column: "master_observation_pandora", name: "Pandora NO₂ (observed)", color: "#212121", width: 2 });
+                        columns.push({ column: "master_observation_pandora", name: "Pandora NO₂ (observed)", color: "#1565C0", width: 2 });
                     }
                     if (hasCorrected) {
-                        columns.push({ column: "master_observation_corrected", name: "Estimated NO₂ ", color: "#9E9E9E", width: 2, dash: "dot" });
+                        columns.push({ column: "master_observation_corrected", name: "Estimated NO₂", color: "#5252A3", width: 3, dash: "dot" });
                     }
                     if (!columns.length) {
-                        columns.push({ column: "master_observation", name: "NO₂ Observation", color: "#212121", width: 2 });
+                        columns.push({ column: "master_observation", name: "NO₂ Observation", color: "#1565C0", width: 2 });
                     }
                     return {
                         id: "plot_pandora",
@@ -1966,28 +2021,84 @@ function readApiBaker(options = {}) {
                     tabId: "tab_no2",
                     description: "Source: NASA GEOS-CF",
                     columns: [
-                        { column: "master_no2", name: "GEOS-CF NO₂", color: "#C62828", width: 2 }
+                        { column: "master_no2", name: "GEOS-CF NO₂", color: "#1565C0", width: 2 }
                     ],
-                    // NAAQS annual standard: 53 ppb NO2
                     naaqsValue: 53,
                     naaqsLabel: "NAAQS Annual Standard (53 ppbv NO₂)",
                     displayAQI: false,
                     displayMetrics: false,
                     enableAqiColors: false 
+                },
+                {
+                    id: "plot_no2_aqi",
+                    title: "NO<sub>2</sub> Air Quality Index (AQI)",
+                    unit: "US AQI",
+                    data: masterData,
+                    param: "no2",
+                    tabName: "Nitrogen Dioxide (NO<sub>2</sub>)",
+                    tabId: "tab_no2",
+                    description: "Source: NASA SNWG and GEOS-CF",
+                    columns: [
+                        { column: "master_no2_aqi", name: "NO₂ AQI", color: "#1565C0", width: 2 }
+                    ],
+                    naaqsValue: 50,
+                    naaqsLabel: "NAAQS Recommended AQI 50",
+                    displayAQI: false,
+                    displayMetrics: false,
+                    enableAqiColors: true
+                },
+                {
+                    id: "plot_pm25_aqi",
+                    title: "PM<sub>2.5</sub> Air Quality Index (AQI)",
+                    unit: "US AQI",
+                    data: masterData,
+                    param: "pm25",
+                    tabName: "Fine Particulate Matter (PM<sub>2.5</sub>)",
+                    tabId: "tab_pm25",
+                    description: "Source: NASA GEOS-CF PM2.5",
+                    columns: [
+                        { column: "master_pm25_aqi", name: "PM₂.₅ AQI", color: "#2E7D32", width: 2 }
+                    ],
+                    naaqsValue: 50,
+                    naaqsLabel: "NAAQS Recommended AQI 50",
+                    displayAQI: false,
+                    displayMetrics: false,
+                    enableAqiColors: true,
+                    sourceColumn: "master_pm25source"
+                },
+                {
+                    id: "plot_o3_aqi",
+                    title: "Ozone (O<sub>3</sub>) Air Quality Index (AQI)",
+                    unit: "US AQI",
+                    data: masterData,
+                    param: "o3",
+                    tabName: "Ozone (O<sub>3</sub>)",
+                    tabId: "tab_o3",
+                    description: "Source: NASA GEOS-CF",
+                    columns: [
+                        { column: "master_o3_aqi", name: "O₃ AQI", color: "#E65100", width: 2 }
+                    ],
+                    naaqsValue: 50,
+                    naaqsLabel: "NAAQS Recommended AQI 50",
+                    displayAQI: false,
+                    displayMetrics: false,
+                    enableAqiColors: true
                 }
             ];
+
+            const hasRealData = (arr) => Array.isArray(arr) && arr.some(v => v !== null && v !== undefined && !isNaN(v));
 
             const tabMap = {};
             plots.forEach((plot, index) => {
                 const colKey = plot.columns[0]?.column;
-                const dataArr = plot.data && colKey && Array.isArray(plot.data[colKey]) ? plot.data[colKey] : [];
-                if (!dataArr.length) {
+                const dataArr = plot.data && colKey ? plot.data[colKey] : [];
+                if (!hasRealData(dataArr)) {
                     return;
                 }
 
                 const tabId = plot.tabId;
                 if (!tabMap[tabId]) {
-                    const isActive = Object.keys(tabMap).length === 0 ? "active" : "";
+                    const isActive = tabId === "tab_overall" || Object.keys(tabMap).length === 0 ? "active" : "";
                     tabsList.append(`
                         <li class="nav-item" role="presentation">
                             <a class="nav-link ${isActive}" id="tab-${tabId}" data-bs-toggle="pill" href="#${tabId}" role="tab" aria-controls="${tabId}" aria-selected="${isActive === 'active'}">
@@ -1996,7 +2107,7 @@ function readApiBaker(options = {}) {
                         </li>
                     `);
                     tabsContainer.append(`
-                        <div class="tab-pane fade ${isActive} show" id="${tabId}" role="tabpanel" aria-labelledby="tab-${tabId}">
+                        <div class="tab-pane fade${isActive ? ' show active' : ''}" id="${tabId}" role="tabpanel" aria-labelledby="tab-${tabId}">
                         <div class="frcst-plt-dets"> <h2>${pollutant_details(plot.param, "full")}</h2><p>${pollutant_details(plot.param, "desc")}</p></div>
                         
                             <div class="plot-container" id="${plot.id}"></div>
@@ -2240,8 +2351,8 @@ function readApiBaker(options = {}) {
 
             plots.forEach(plot => {
                 const colKey = plot.columns[0]?.column;
-                const dataArr = plot.data && colKey && Array.isArray(plot.data[colKey]) ? plot.data[colKey] : [];
-                if (!dataArr.length) return;
+                const dataArr = plot.data && colKey ? plot.data[colKey] : [];
+                if (!hasRealData(dataArr)) return;
                 const plotContainer = $(`#${plot.id}`);
                 plotContainer.before(`<div class="plot_description"><h4>${plot.title}</h4><h6>${plot.description || ""}</h6></div>`);
                 if (plotContainer.length > 0) {
@@ -2258,7 +2369,9 @@ function readApiBaker(options = {}) {
                         timezone,
                         plot.enableAqiColors,
                         plot.naaqsValue ?? null,
-                        plot.naaqsLabel ?? ''
+                        plot.naaqsLabel ?? '',
+                        plot.sourceColumn ?? null,
+                        plot.additionalColumns ?? null
                     );
                 } else {
                     console.error(`No DOM element with id '${plot.id}' exists on the page.`);
@@ -3653,11 +3766,14 @@ function draw_plot(
     timezone = "UTC",
     enableAqiColors = false,
     naaqsValue = null,
-    naaqsLabel = ''
+    naaqsLabel = '',
+    sourceColumn = null,
+    additionalColumns = null
 ) {
 
     const datetime_data = combined_dataset["master_datetime"];
     const cleanedData = cleanAndSortData(datetime_data, combined_dataset);
+    const sourceData = sourceColumn ? (combined_dataset[sourceColumn] || []) : [];
     const maxValues = plot_columns.map(({ column }) => Math.max(...cleanedData[column]));
     const maxValue = Math.max(...maxValues);
 
@@ -3685,9 +3801,21 @@ function draw_plot(
                 return getAqiBarColor(value, param, alpha);
             });
         } else {
+            // Use the column's defined color, falling back to the default blue
+            const baseColor = color || '#2196f3';
+            // Convert hex to rgba for the faded (future) variant
+            const hexToRgba = (hex, alpha) => {
+                const h = hex.replace('#', '');
+                const bigint = parseInt(h.length === 3
+                    ? h.split('').map(c => c + c).join('')
+                    : h, 16);
+                return `rgba(${(bigint >> 16) & 255},${(bigint >> 8) & 255},${bigint & 255},${alpha})`;
+            };
+            const solidColor = baseColor.startsWith('#') ? hexToRgba(baseColor, 1) : baseColor;
+            const fadedColor = baseColor.startsWith('#') ? hexToRgba(baseColor, 0.45) : baseColor + '73';
             barColors = cleanedData.master_datetime.map((datetime) => {
                 const dataTime = new Date(datetime);
-                return dataTime < localNow ? '#2196f3' : '#2196f3c2';
+                return dataTime < localNow ? solidColor : fadedColor;
             });
         }
 
@@ -3713,7 +3841,32 @@ function draw_plot(
                 : undefined,
             fill: plotType === "bar" ? undefined : enableFading && index === 0 ? 'tozeroy' : 'none',
             fillcolor: plotType === "bar" ? undefined : enableFading && index === 0 ? fadingColor : 'none',
-            hoverinfo: 'x+y',
+            hovertemplate: (() => {
+                if (sourceColumn && sourceData.length > 0) {
+                    return '<b>%{x}</b><br>' +
+                           'AQI: %{y}<br>' +
+                           'Source: <b>%{customdata[0]}</b><br>' +
+                           '<extra></extra>';
+                } else if (additionalColumns && additionalColumns.length > 0) {
+                    return '<b>%{x}</b><br>' +
+                           'Overall AQI: %{y}<br>' +
+                           'NO₂ AQI: %{customdata[0]}<br>' +
+                           'PM₂.₅ AQI: %{customdata[1]}<br>' +
+                           '<extra></extra>';
+                }
+                return '';
+            })(),
+            customdata: (() => {
+                if (sourceColumn && sourceData.length > 0) {
+                    return sourceData.map(s => [s || 'N/A']);
+                } else if (additionalColumns && additionalColumns.length > 0) {
+                    const additionalData = additionalColumns.map(col => cleanedData[col] || []);
+                    return cleanedData.master_datetime.map((_, i) => 
+                        additionalData.map(data => data[i] || 'N/A')
+                    );
+                }
+                return undefined;
+            })(),
             name: name
         };
     });

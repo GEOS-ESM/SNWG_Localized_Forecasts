@@ -521,19 +521,38 @@
     letter-spacing: 0.2px;
 }
 
-ul#pills-tab,
+/* Hide most elements by default */
 .plot_description,
 div#plot_pm25_aqi,
-.plot-container,
-.frcst-plt-dets,
 .download_plot_data,
 .aqi-multi-hour-box,
 .xvg_aqi-container,
 .module_title,
 .sub-title,
-.thewindow,
 .model_data {
     display: none !important;
+}
+
+/* Show the window and tab navigation */
+.thewindow,
+ul#pills-tab,
+#pills-tab {
+    display: block !important;
+}
+
+/* Hide inactive tab panes */
+.tab-pane {
+    display: none !important;
+}
+
+/* Show active tab pane and its contents */
+.tab-pane.show.active {
+    display: block !important;
+}
+
+.tab-pane.show.active .plot-container,
+.tab-pane.show.active .frcst-plt-dets {
+    display: block !important;
 }
 
 .tab-content {
@@ -587,4 +606,136 @@ div#plot_pm25_aqi,
         const observer = new MutationObserver(updateMoreInfoLink);
         observer.observe(locationNameElem, { childList: true, subtree: true, characterData: true });
     }
+
+    // Inject "AQI Scale" tab after plots are rendered
+    function injectAqiScaleTab() {
+        const tabsList = document.getElementById('pills-tab');
+        const tabContent = document.getElementById('pills-tabContent');
+        if (!tabsList || !tabContent) return;
+        if (document.getElementById('tab-aqi-scale')) return;
+
+        const tabId = 'aqi-scale';
+        const li = document.createElement('li');
+        li.className = 'nav-item';
+        li.setAttribute('role', 'presentation');
+        li.innerHTML = `<a class="nav-link" id="tab-${tabId}" data-bs-toggle="pill" href="#${tabId}" role="tab" aria-controls="${tabId}" aria-selected="false">AQI Scale</a>`;
+        tabsList.appendChild(li);
+
+        const pollutants = [
+            {
+                abbr: 'NO₂', name: 'Nitrogen Dioxide',
+                color: '#1565C0',
+                source: 'NASA SNWG bias-corrected model + GEOS-CF',
+                desc: 'Produced mainly by vehicle engines and fossil fuel combustion. Exposure can irritate the respiratory tract, worsen asthma and lung diseases, and contribute to the formation of ground-level ozone and fine particles.',
+                unit: 'ppbv',
+                standard: 'EPA 1-hour NAAQS: 100 ppb (AQI 100)'
+            },
+            {
+                abbr: 'PM2.5', name: 'Fine Particulate Matter',
+                color: '#2E7D32',
+                source: 'NASA GEOS-FP + CNN Machine Learning',
+                desc: 'Tiny particles (≤2.5 µm) from combustion, dust, and secondary reactions. They penetrate deep into the lungs and bloodstream, increasing risk of respiratory and cardiovascular disease, especially with long-term exposure.',
+                unit: 'µg/m³',
+                standard: 'EPA 24-hour NAAQS: 35 µg/m³ (AQI 100)'
+            },
+            {
+                abbr: 'O₃', name: 'Ozone',
+                color: '#E65100',
+                source: 'NASA GEOS-CF',
+                desc: 'Ground-level ozone forms when NOx and VOCs react in sunlight. It irritates the airways, worsens asthma and chronic lung disease, and can reduce lung function even in healthy individuals during outdoor exertion.',
+                unit: 'ppbv',
+                standard: 'EPA 8-hour NAAQS: 0.070 ppm (AQI 100)'
+            }
+        ];
+
+        const pollutantCards = pollutants.map(p => `
+            <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid #f0f0f0;">
+                <div style="flex-shrink:0;width:48px;height:48px;border-radius:8px;background:${p.color}18;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${p.color};text-align:center;line-height:1.2;">${p.abbr}</div>
+                <div style="flex:1;">
+                    <div style="font-size:14px;font-weight:700;color:#111;margin-bottom:2px;">${p.name} <span style="font-size:11px;font-weight:500;color:#888;">(${p.unit})</span></div>
+                    <div style="font-size:11px;color:#888;margin-bottom:5px;">Source: ${p.source}</div>
+                    <div style="font-size:12px;color:#444;line-height:1.55;margin-bottom:4px;">${p.desc}</div>
+                    <div style="font-size:11px;color:${p.color};font-weight:600;">${p.standard}</div>
+                </div>
+            </div>`).join('');
+
+        const scales = [
+            { range: '0–50',    level: 'Good',                           color: '#4CAF50', textColor: '#fff',
+              who: 'Air quality is satisfactory and poses little or no risk.',
+              sensitive: 'No precautions needed.',
+              general: 'Enjoy outdoor activities.' },
+            { range: '51–100',  level: 'Moderate',                       color: '#FFEB3B', textColor: '#333',
+              who: 'Air quality is acceptable; some pollutants may concern a small number of people.',
+              sensitive: 'Unusually sensitive individuals should consider reducing prolonged outdoor activity.',
+              general: 'Active children and adults may consider reducing prolonged outdoor exertion.' },
+            { range: '101–150', level: 'Unhealthy for Sensitive Groups',  color: '#FF9800', textColor: '#fff',
+              who: 'Members of sensitive groups may experience health effects.',
+              sensitive: 'People with heart or lung disease, older adults, and children should reduce heavy outdoor exertion.',
+              general: 'General public is not likely to be affected.' },
+            { range: '151–200', level: 'Unhealthy',                      color: '#F44336', textColor: '#fff',
+              who: 'Everyone may begin to experience health effects.',
+              sensitive: 'Sensitive groups should avoid prolonged outdoor exertion.',
+              general: 'Everyone else should reduce prolonged or heavy outdoor exertion.' },
+            { range: '201–300', level: 'Very Unhealthy',                  color: '#9C27B0', textColor: '#fff',
+              who: 'Health alert: everyone may experience more serious health effects.',
+              sensitive: 'Sensitive groups should avoid all outdoor activity.',
+              general: 'Everyone should avoid prolonged or heavy outdoor exertion.' },
+            { range: '301–500', level: 'Hazardous',                      color: '#7E0023', textColor: '#fff',
+              who: 'Health warnings of emergency conditions.',
+              sensitive: 'Everyone should avoid all outdoor activity.',
+              general: 'Stay indoors and keep activity levels low.' },
+        ];
+
+        const scaleRows = scales.map(s => `
+            <tr style="border-bottom:1px solid #f5f5f5;">
+                <td style="padding:8px 10px;white-space:nowrap;">
+                    <span style="display:inline-block;background:${s.color};color:${s.textColor};padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">${s.range}</span>
+                </td>
+                <td style="padding:8px 10px;font-weight:600;color:${s.color === '#FFEB3B' ? '#555' : s.color};">${s.level}</td>
+                <td style="padding:8px 10px;font-size:12px;color:#444;">${s.who}</td>
+                <td style="padding:8px 10px;font-size:12px;color:#555;">${s.sensitive}</td>
+                <td style="padding:8px 10px;font-size:12px;color:#555;">${s.general}</td>
+            </tr>`).join('');
+
+        const pane = document.createElement('div');
+        pane.className = 'tab-pane fade';
+        pane.id = tabId;
+        pane.setAttribute('role', 'tabpanel');
+        pane.setAttribute('aria-labelledby', `tab-${tabId}`);
+        pane.innerHTML = `
+            <div class="frcst-plt-dets" style="display:block!important;">
+                <h2>Air Quality Information &amp; AQI Scale</h2>
+                <p>Pollutant descriptions, data sources, and the US EPA Air Quality Index (AQI) health categories.</p>
+            </div>
+            <div style="margin-bottom:20px;">
+                <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">Pollutants Monitored</div>
+                ${pollutantCards}
+            </div>
+            <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">US AQI Health Categories</div>
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead>
+                        <tr style="border-bottom:2px solid #e5e5e5;text-align:left;background:#fafafa;">
+                            <th style="padding:8px 10px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;">AQI</th>
+                            <th style="padding:8px 10px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Category</th>
+                            <th style="padding:8px 10px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Air Quality</th>
+                            <th style="padding:8px 10px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Sensitive Groups</th>
+                            <th style="padding:8px 10px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">General Public</th>
+                        </tr>
+                    </thead>
+                    <tbody>${scaleRows}</tbody>
+                </table>
+            </div>`;
+        tabContent.appendChild(pane);
+    }
+
+    // Wait for tabs to be injected, then add AQI Scale tab
+    const aqiScaleObserver = new MutationObserver(() => {
+        const tabsList = document.getElementById('pills-tab');
+        if (tabsList && tabsList.querySelectorAll('.nav-item').length > 0) {
+            injectAqiScaleTab();
+            aqiScaleObserver.disconnect();
+        }
+    });
+    aqiScaleObserver.observe(document.body, { childList: true, subtree: true });
 </script>
