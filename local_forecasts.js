@@ -1607,9 +1607,9 @@ function add_the_banner(site, param) {
                             : site.location_name.replace(/_/g, ' ').replace(/\./g, ' ')
                     }</div>
                     <div class="ticker-card-meta">
-                        <span><i class="fas fa-clock"></i> ${forecast.local_time ? forecast.local_time.substring(11, 16) : '--'}</span>
-                        <span><i class="fas fa-thermometer-half"></i> ${temperature}°C</span>
-                        <span><i class="fas fa-tint"></i> ${humidity}%</span>
+                        <span>${forecast.local_time ? forecast.local_time.substring(11, 16) : '--'}</span>
+                        <span>${temperature}°C</span>
+                        <span>${humidity}%</span>
                     </div>
                 </div>
             </div>

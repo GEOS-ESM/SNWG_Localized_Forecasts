@@ -102,6 +102,9 @@
             <button class="ticker-scroll-btn" id="ticker-scroll-left" aria-label="Scroll left">
                 <i class="fas fa-chevron-left"></i>
             </button>
+            <button class="ticker-play-pause-btn" id="ticker-play-pause" aria-label="Play/Pause" title="Play/Pause auto-scroll">
+                <i class="fas fa-play"></i>
+            </button>
         </div>
         <div class="ticker-search-filter">
             <div class="ticker-dropdown">
@@ -183,6 +186,29 @@
     color: #fff;
 }
 
+.ticker-play-pause-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.ticker-play-pause-btn:hover {
+    color: #fff;
+    background: rgba(136, 136, 136, 0.1);
+}
+
+.ticker-play-pause-btn.playing {
+    color: #1da1f2;
+}
+
 .ticker-search-filter {
     display: flex;
     align-items: center;
@@ -261,6 +287,8 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
     scroll-behavior: smooth;
+    height: 100%;
+    flex: 1;
 }
 
 .ticker-track-wrapper::-webkit-scrollbar {
@@ -274,6 +302,7 @@
     padding: 0;
     margin: 0;
     min-width: max-content;
+    will-change: transform;
 }
 
 .ticker-loading {
@@ -498,23 +527,180 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const scrollLeft = document.getElementById('ticker-scroll-left');
-    const scrollRight = document.getElementById('ticker-scroll-right');
-    const track = document.querySelector('.ticker-track-wrapper');
+
+window.TickerAnimation = {
+    isPlaying: false,
+    currentPosition: 0,
+    animationId: null,
+    scrollSpeed: 0.08, 
+    lastTime: Date.now(),
     
-    if (scrollLeft && track) {
-        scrollLeft.addEventListener('click', function() {
-            track.scrollBy({ left: -300, behavior: 'smooth' });
-        });
-    }
+    getUrlParam: function(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+    },
     
-    if (scrollRight && track) {
-        scrollRight.addEventListener('click', function() {
-            track.scrollBy({ left: 300, behavior: 'smooth' });
+    init: function() {
+        const trackWrapper = document.querySelector('.ticker-track-wrapper');
+        const track = document.querySelector('.ticker-track');
+        const playPauseBtn = document.getElementById('ticker-play-pause');
+        const scrollLeft = document.getElementById('ticker-scroll-left');
+        const scrollRight = document.getElementById('ticker-scroll-right');
+        
+        if (!track || !trackWrapper || !playPauseBtn) {
+            console.warn('Ticker elements not found');
+            return;
+        }
+        
+        const tkState = this.getUrlParam('tk');
+        if (tkState === 'pl') {
+            this.isPlaying = true;
+            playPauseBtn.classList.add('playing');
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            playPauseBtn.title = 'Pause auto-scroll';
+            this.lastTime = Date.now();
+            this.animate();
+        } else {
+
+            this.isPlaying = false;
+            playPauseBtn.classList.remove('playing');
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            playPauseBtn.title = 'Play auto-scroll';
+        }
+        
+
+        playPauseBtn.addEventListener('click', () => {
+            if (this.isPlaying) {
+                this.stop();
+            } else {
+                this.start();
+            }
         });
+        
+
+        trackWrapper.addEventListener('mouseenter', () => {
+            if (this.isPlaying) {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+        });
+        
+        trackWrapper.addEventListener('mouseleave', () => {
+            if (this.isPlaying) {
+                this.lastTime = Date.now();
+                this.animate();
+            }
+        });
+
+        scrollLeft.addEventListener('click', () => {
+            this.stop();
+            this.currentPosition = Math.max(0, this.currentPosition - 300);
+            track.style.transform = `translateX(-${this.currentPosition}px)`;
+        });
+        
+        scrollRight.addEventListener('click', () => {
+            this.stop();
+            const maxScroll = track.scrollWidth - trackWrapper.clientWidth;
+            this.currentPosition = Math.min(maxScroll, this.currentPosition + 300);
+            track.style.transform = `translateX(-${this.currentPosition}px)`;
+        });
+
+        const observer = new MutationObserver(() => {
+            const hasRealCards = document.querySelector('.ticker-card:not(.ticker-loading)');
+            if (hasRealCards && !this.isPlaying) {
+
+                const tkState = this.getUrlParam('tk');
+                if (tkState !== 'pa') {
+                    setTimeout(() => this.start(), 200);
+                }
+            }
+        });
+        
+        observer.observe(track, {
+            childList: true,
+            subtree: true
+        });
+    },
+    
+    animate: function() {
+        const track = document.querySelector('.ticker-track');
+        const trackWrapper = document.querySelector('.ticker-track-wrapper');
+        
+        if (!this.isPlaying || !track || !trackWrapper) {
+            this.animationId = null;
+            return;
+        }
+        
+        const currentTime = Date.now();
+        const elapsedTime = currentTime - this.lastTime;
+        this.lastTime = currentTime;
+        
+        const maxScroll = track.scrollWidth - trackWrapper.clientWidth;
+        
+        if (maxScroll > 0) {
+            this.currentPosition += this.scrollSpeed * elapsedTime;
+            
+
+            if (this.currentPosition >= maxScroll) {
+                this.currentPosition = 0;
+            }
+            
+            track.style.transform = `translateX(-${this.currentPosition}px)`;
+        }
+        
+        this.animationId = requestAnimationFrame(() => this.animate());
+    },
+    
+    start: function() {
+        if (this.isPlaying) return;
+        
+        const playPauseBtn = document.getElementById('ticker-play-pause');
+        this.isPlaying = true;
+        playPauseBtn.classList.add('playing');
+        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        playPauseBtn.title = 'Pause auto-scroll';
+
+        const url = new URL(window.location);
+        url.searchParams.set('tk', 'pl');
+        window.history.replaceState({ tk: 'pl' }, '', url);
+        
+        if (!this.animationId) {
+            this.lastTime = Date.now();
+            this.animate();
+        }
+    },
+    
+    stop: function() {
+        if (!this.isPlaying) return;
+        
+        const playPauseBtn = document.getElementById('ticker-play-pause');
+        this.isPlaying = false;
+        playPauseBtn.classList.remove('playing');
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        playPauseBtn.title = 'Play auto-scroll';
+        
+
+        const url = new URL(window.location);
+        url.searchParams.set('tk', 'pa');
+        window.history.replaceState({ tk: 'pa' }, '', url);
+        
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
     }
-});
+};
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.TickerAnimation.init();
+    });
+} else {
+    window.TickerAnimation.init();
+}
 </script>
 
 <script src="local_forecasts.js?v=1.4.0"></script>
@@ -615,9 +801,17 @@ $(document).ready(function () {
         let searchTimeout;
         $(document).on('keyup', '#location-search-input', function() {
             const input = this;
+            const searchText = $(input).val().toLowerCase().trim();
+            
+ 
+            if (searchText.length > 0) {
+                window.TickerAnimation.stop();
+            } else {
+                window.TickerAnimation.start();
+            }
+            
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(function() {
-                const searchText = $(input).val().toLowerCase().trim();
                 const $allCards = $('.ticker-track .ticker-card');
                 
                 if (searchText === '') {
@@ -634,7 +828,7 @@ $(document).ready(function () {
                         }
                     });
                 }
-            }, 150); // 150ms debounce
+            }, 150); 
         });
         
         $(document).on('change', '#species-filter', function() {
