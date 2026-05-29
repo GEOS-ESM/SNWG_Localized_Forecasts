@@ -1,109 +1,518 @@
+<header class="about-hero">
+  <div class="about-hero-inner container px-4 px-md-5">
+    <div class="row align-items-center gx-5">
+      <div class="col-lg-7">
+        <p class="about-eyebrow">SNWG Solution · NASA Earthdata</p>
+        <h1 class="about-title">Air Quality Sensors and Forecasts</h1>
+        <p class="about-lead">
+          This NASA SNWG solution expands current air quality networks, provides air quality forecast
+          products for select locations, and produces PM2.5 forecasts for U.S. embassies and
+          major cities worldwide.
+        </p>
+        <div class="about-hero-cta">
+          <a href="#home.html" class="btn-about-primary">Open Forecast Map</a>
+          <a href="https://www.earthdata.nasa.gov/data/projects/nsite/solutions/air-quality-sensors-forecasts"
+             target="_blank" rel="noopener" class="btn-about-ghost">
+            NASA Earthdata Page <i class="bi bi-box-arrow-up-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-block text-center">
+        <img src="parametres/cover_ozone_geos_cf.webp" alt="Global Air Quality Forecast"
+             class="img-fluid rounded-4 shadow-lg" />
+      </div>
+    </div>
+  </div>
+</header>
 
-    <header class="bg-dark py-5">
-      <div class="container px-5">
-        <div class="row gx-5 align-items-center justify-content-center">
-          <div class="col-lg-8 col-xl-7 col-xxl-6">
-            <div class="my-5 text-center text-xl-start text-white">
-              <h1 class="display-5 fw-bolder mb-2">Air Quality Forecasts and Distributed Pandora Sensors</h1>
-              <p class="lead fw-normal text-white-50 mb-4">
-                This NASA-backed initiative aims to improve the accuracy and availability of air quality data by combining Earth observations,
-                advanced modeling, and expanded ground-based sensor networks. A major part of the solution is the
-                <strong>GEOS-CF-based localized forecasting tool</strong>, which empowers localized air quality prediction capabilities.
-              </p>
-            </div>
+
+<nav class="about-section-nav" id="about-section-nav">
+  <div class="container d-flex gap-4">
+    <a href="javascript:void(0)" data-target="about-background">Background</a>
+    <a href="javascript:void(0)" data-target="about-status">Status</a>
+    <a href="javascript:void(0)" data-target="about-characteristics">Characteristics</a>
+    <a href="javascript:void(0)" data-target="about-resources">Resources</a>
+  </div>
+</nav>
+
+<script>
+(function() {
+  document.querySelectorAll('#about-section-nav a[data-target]').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var id = this.getAttribute('data-target');
+      var target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+})();
+</script>
+
+
+<section class="about-section" id="about-background">
+  <div class="container px-4 px-md-5">
+    <div class="row gx-5 align-items-start">
+      <div class="col-lg-4 mb-4 mb-lg-0">
+        <div class="about-section-label">
+          <i class="bi bi-journal-text"></i> Background
+        </div>
+      </div>
+      <div class="col-lg-8 about-prose">
+        <p>
+          Global-scale modeling of air quality and trace gases provides key information in
+          data-sparse regions of importance to federal agencies. Air quality forecasts are
+          necessary for health and safety decisions at U.S. Embassies in countries with poor
+          air quality. Air quality measurements (i.e., nitrogen dioxide — NO₂) are also needed
+          in agriculture and rural regions since current in situ networks are concentrated in
+          urban centers.
+        </p>
+        <p>
+          NASA's <strong>Global Modeling and Assimilation Office (GMAO)</strong> integrates data
+          from distributed Pandora sensors into the <strong>Goddard Earth Observing System –
+          Composition Forecast (GEOS-CF)</strong> model, using downscaling approaches for more
+          precise air quality forecasts at locations of interest. There is a multi-agency need to
+          improve the U.S. government's ability to detect and forecast crucial air quality
+          parameters in poorly sampled locations — both domestic and international.
+        </p>
+        <p>
+          NASA leads in the validation of satellites and models and is leveraging these
+          capabilities to meet these agency needs. This solution leverages and extends existing
+          NASA sensor networks and forecasting models, and develops new technology to provide more
+          efficient and accurate atmospheric composition forecasting.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="about-section about-section-alt" id="about-status">
+  <div class="container px-4 px-md-5">
+    <div class="row gx-5 align-items-start">
+      <div class="col-lg-4 mb-4 mb-lg-0">
+        <div class="about-section-label">
+          <i class="bi bi-activity"></i> Status
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div class="about-status-badge mb-4">
+          <span class="badge-dot"></span> Currently in Development — Some Data Available Now
+        </div>
+        <div class="about-prose">
+          <p>
+            Installation of Pandora sensors is ongoing for both domestic and embassy sites.
+            AERONET and Clarity sensors will also be installed at select embassy sites.
+          </p>
+          <ul class="about-check-list">
+            <li><i class="bi bi-check2-circle text-success"></i>
+              <strong>PM2.5 forecasts</strong> available for
+              <strong>+270 embassy locations</strong>, and <strong>141 Pandora sites</strong>.
+            </li>
+            <li><i class="bi bi-check2-circle text-success"></i>
+              <strong>NO2 forecasts</strong> currently available at 141 Pandora sites.
+            </li>
+            <li><i class="bi bi-hourglass-split text-warning"></i>
+              <strong>O3 forecasts</strong> currently being developed.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="about-section" id="about-characteristics">
+  <div class="container px-4 px-md-5">
+    <h2 class="about-section-heading mb-5">Solution Characteristics</h2>
+    <div class="row g-4">
+
+      <div class="col-md-4">
+        <div class="about-card h-100">
+          <div class="about-card-icon"><i class="bi bi-radar"></i></div>
+          <h3 class="about-card-title">Distributed Pandora Sensors</h3>
+          <div class="about-card-meta">
+            <span><i class="bi bi-calendar3"></i> Dependent on sensor installation</span>
+            <span><i class="bi bi-clock"></i> Hourly</span>
+            <span><i class="bi bi-pin-map"></i> 141 Pandora sites + 20 embassies + 10 agricultural sites (scalable)</span>
           </div>
-          <div class="col-xl-5 col-xxl-6 d-none d-xl-block text-center">
-            <img class="img-fluid rounded-3 my-5" src="parametres/nasa_snwg.jpeg" alt="Air Quality Illustration" />
+          <p class="about-card-desc">
+            Ground-based Pandora Spectrometer System, AERONET sensors, and Clarity sensors
+            measuring total column ozone, NO2, formaldehyde, and tropospheric profiles of NO2
+            and formaldehyde as well as surface PM2.5 concentrations.
+          </p>
+          <div class="about-card-formats">
+            <span>HDF5</span><span>Text files</span>
           </div>
         </div>
       </div>
-    </header>
 
-    <section class="py-5 bg-white">
-      <div class="container px-5">
-        <div class="row gx-5 align-items-center">
-          <div class="col-md-6 mb-4 mb-md-0">
-            <h2 class="fw-bolder mb-3">Why Air Quality Forecasting Matters</h2>
-            <p>
-              Poor air quality is a major problem impacting people’s health around the world, and is estimated to be responsible for millions of premature deaths each year. However, in many parts of the world, there is little information on what the air quality is now or will be for the next few hours or days. That lack of data makes it difficult for people to take informed actions to protect their health. This project uses data from NASA Pandora instruments (sensors which look up at the sky and can measure air pollutants) around the world and NASA models of the Earth’s atmosphere and its composition. We use machine learning to bring these data together to make forecasts for how the air quality is likely to change in the coming hours and days. This information is translated into the US Air Quality Index (AQI), which describes the possible health effects of exposure to this level of air quality. Using this information, people can make informed decisions about their daily activities to avoid some of the worst impacts of air pollution to their health.
-            </p>
+
+      <div class="col-md-4">
+        <div class="about-card h-100">
+          <div class="about-card-icon"><i class="bi bi-cpu"></i></div>
+          <h3 class="about-card-title">PM2.5, NO2, O3 Forecasts GEOS-CF Localized Forecasts</h3>
+          <div class="about-card-meta">
+            <span><i class="bi bi-calendar3"></i> Jan 2018 – Present</span>
+            <span><i class="bi bi-clock"></i> Hourly</span>
           </div>
-          <div class="col-md-6">
-            <img src="parametres/cover_ozone_geos_cf.webp" alt="Global Air Quality" class="img-fluid rounded-3 shadow-sm" />
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="py-5 bg-light" id="features">
-      <div class="container px-5 my-5">
-        <div class="row gx-5">
-          <div class="col-lg-4 mb-5 mb-lg-0">
-            <h2 class="fw-bolder mb-0">GEOS-CF Localized Forecasts</h2>
-            <p>A Lightweight Forecasting Tool based on NASA GMAO’s GEOS-CF model integrated with local observation data including OpenAQ.</p>
-          </div>
-          <div class="col-lg-8">
-            <div class="row gx-5 row-cols-1 row-cols-md-2">
-
-              <div class="col mb-5 h-100">
-                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3 d-flex align-items-center justify-content-center" style="height: 3rem; width: 3rem;">
-                  <i class="bi bi-broadcast-pin fs-4"></i>
-                </div>
-                <h3 class="h5">Aim and Scope</h3>
-                <ul class="list-group list-group-flush">
-                  <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Enable high-resolution, site-specific air quality forecasts.</li>
-                  <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Make GEOS-CF modeling outputs actionable and localized using real-time observations.</li>
-                  <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Provide an accessible online platform to train, deploy, and evaluate forecast models per location.</li>
-                </ul>
-              </div>
-
-              <div class="col mb-5 h-100">
-                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3 d-flex align-items-center justify-content-center" style="height: 3rem; width: 3rem;">
-                  <i class="bi bi-gear-fill fs-4"></i>
-                </div>
-                <h3 class="h5">Core Features</h3>
-                <ul class="list-group list-group-flush">
-                  <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Pretrained models:</strong> Use existing models without retraining for immediate forecasting.</li>
-                  <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Online training:</strong> Train and deploy models for specific locations in real time.</li>
-                  <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Configuration exploration:</strong> View and modify location-specific forecast settings.</li>
-                  <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Forecast visualization:</strong> Generate and export forecast plots using built-in tools.</li>
-                  <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Community contributions:</strong> Support for saving models and sharing local data.</li>
-                  <li class="list-group-item">
-                    <i class="bi bi-check2-circle text-success me-2"></i><strong>Custom forecast generation:</strong> Call a single function to create outputs in various formats:
-                    <ul class="mt-2 mb-0 ps-4">
-                      <li><i class="bi bi-file-earmark-spreadsheet me-2"></i>DataFrames</li>
-                      <li><i class="bi bi-bar-chart-line me-2"></i>Forecast plots</li>
-                      <li><i class="bi bi-puzzle-fill me-2"></i>SHAP (SHapley Additive exPlanations) values for uncertainty and feature impact analysis</li>
-                    </ul>
-                  </li>
-                </ul>
-              </div>
-
-              <div class="col mb-5 h-100">
-                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3 d-flex align-items-center justify-content-center" style="height: 3rem; width: 3rem;">
-                  <i class="bi bi-globe2 fs-4"></i>
-                </div>
-                <h3 class="h5">Complementary Components</h3>
-                <ul class="list-group list-group-flush">
-                  <li class="list-group-item"><i class="bi bi-geo-alt-fill me-2"></i><strong>Pandora Sensor Network Expansion:</strong> 20 new installations: 10 in rural U.S. areas and 10 at U.S. embassies in high-pollution regions.</li>
-                  <li class="list-group-item"><i class="bi bi-cloud-arrow-up-fill me-2"></i><strong>PM2.5 Forecasts via CARES:</strong> Machine learning + GEOS-FP + ground observations for forecasts up to 72 hours in advance.</li>
-                  <li class="list-group-item"><i class="bi bi-clock-history me-2"></i><strong>Historical Data Record:</strong> Supports long-term air quality trend analysis and satellite data validation.</li>
-                </ul>
-              </div>
-
-              <div class="col h-100">
-                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3 d-flex align-items-center justify-content-center" style="height: 3rem; width: 3rem;">
-                  <i class="bi bi-box-arrow-in-up-right fs-4"></i>
-                </div>
-                <h3 class="h5">Access and Integration</h3>
-                <ul class="list-group list-group-flush">
-                  <li class="list-group-item"><i class="bi bi-wifi me-2"></i><strong>Pandora data:</strong> Via the Pandonia Global Network (PGN).</li>
-                  <li class="list-group-item"><i class="bi bi-phone-fill me-2"></i><strong>PM2.5 forecasts:</strong> Through this website</li>
-                  <li class="list-group-item"><i class="bi bi-globe fs-5 me-2"></i><strong>GEOS-CF localized forecast tool:</strong> Accessible online for real-time training and forecasting.</li>
-                </ul>
-              </div>
-
-            </div>
+          <p class="about-card-desc">
+            Ground-based Pandora Spectrometer System and GEOS-CF model output providing total
+            column and surface ozone, nitrogen dioxide, and formaldehyde. Forecasts available
+            near-real-time; historical data available with 24-hour latency.
+          </p>
+          <div class="about-card-formats">
+            <span>JSON</span><span>Text files</span>
           </div>
         </div>
       </div>
-    </section>
+
+      <div class="col-md-4">
+        <div class="about-card h-100">
+          <div class="about-card-icon"><i class="bi bi-cloud-haze2"></i></div>
+          <h3 class="about-card-title">PM2.5 Forecasts (GEOS-FP CNN)</h3>
+          <div class="about-card-meta">
+            <span><i class="bi bi-calendar3"></i> May 2024 – present</span>
+            <span><i class="bi bi-clock"></i> 3-hourly, up to 72 h ahead</span>
+            <span><i class="bi bi-pin-map"></i> 270 embassies + 10,000+ cities</span>
+          </div>
+          <p class="about-card-desc">
+            GEOS-Forward Processing, VIIRS, and available PM2.5 measurements combined via
+            machine learning to deliver surface PM2.5 concentration and U.S. EPA-defined Air
+            Quality Index. Updated daily; ~2–4 hour latency dependent on GEOS-FP.
+          </p>
+          <div class="about-card-formats">
+            <span>ASCII</span><span>API</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="about-section" id="about-resources">
+  <div class="container px-4 px-md-5">
+    <h2 class="about-section-heading mb-5">Solution Resources</h2>
+    <div class="row g-4">
+
+      <div class="col-md-6 col-lg-3">
+        <div class="about-resource-card h-100">
+          <div class="about-resource-icon" style="background:#e8f4fd;color:#0a6eb4;">
+            <i class="bi bi-broadcast-pin"></i>
+          </div>
+          <h4>Pandora Station Data</h4>
+          <p>Access live and historical data from the Pandonia Global Network.</p>
+          <a href="https://blickv.hetzner.pandonia-global-network.org/" target="_blank" rel="noopener">
+            Visit PGN <i class="bi bi-arrow-right-short"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="about-resource-card h-100">
+          <div class="about-resource-icon" style="background:#eaf7ec;color:#1a8a3a;">
+            <i class="bi bi-sun"></i>
+          </div>
+          <h4>AERONET Data</h4>
+          <p>Aerosol Robotic Network data tool and map interface from NASA GSFC.</p>
+          <a href="https://aeronet.gsfc.nasa.gov/new_web/aeronet_map_tool/index.html" target="_blank" rel="noopener">
+            Visit AERONET <i class="bi bi-arrow-right-short"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="about-resource-card h-100">
+          <div class="about-resource-icon" style="background:#fdf3e7;color:#c47a1a;">
+            <i class="bi bi-bar-chart-line"></i>
+          </div>
+          <h4>PM2.5 Forecasts</h4>
+          <p>Air quality PM2.5 forecasts for embassies and cities via AERONET.</p>
+          <a href="https://aeronet.gsfc.nasa.gov/new_web/aqforecast" target="_blank" rel="noopener">
+            View Forecasts <i class="bi bi-arrow-right-short"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="about-resource-card h-100">
+          <div class="about-resource-icon" style="background:#f3eeff;color:#6c3fcf;">
+            <i class="bi bi-file-earmark-pdf"></i>
+          </div>
+          <h4>Fact Sheet &amp; Training</h4>
+          <p>Official SNWG solution fact sheet and training resource guide.</p>
+          <a href="https://earthdata.nasa.gov/s3fs-public/2025-09/Air%20Quality%20Sensors%20and%20Forecasts%209-19-25.pdf" target="_blank" rel="noopener">
+            Download PDF <i class="bi bi-arrow-right-short"></i>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="about-workshop mt-5">
+      <h3 class="about-workshop-title"><i class="bi bi-calendar-event me-2"></i>Workshops &amp; Open Meetings</h3>
+      <div class="table-responsive">
+        <table class="table about-table">
+          <thead>
+            <tr><th>Event</th><th>Description</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="https://www.pandonia-global-network.org/" target="_blank" rel="noopener">Pandonia Global Network 1st Workshop</a></td>
+              <td>The first workshop for the Pandonia Global Network (PGN) covering operation, algorithms, quality assessment, data processing, calibration, stations, data policy, and other topics.</td>
+              <td class="text-nowrap">Sep 17, 2019</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Earthdata link -->
+    <div class="about-earthdata-link mt-5">
+      <i class="bi bi-globe2"></i>
+      <div>
+        <strong>Learn more on NASA Earthdata</strong><br>
+        <a href="https://www.earthdata.nasa.gov/data/projects/nsite/solutions/air-quality-sensors-forecasts"
+           target="_blank" rel="noopener">
+          earthdata.nasa.gov → Air Quality Sensors and Forecasts
+          <i class="bi bi-box-arrow-up-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+
+.about-hero {
+  background: linear-gradient(135deg, #0b1a38 0%, #0d3268 60%, #1155a6 100%);
+  padding: 72px 0 64px;
+  color: #fff;
+}
+.about-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #7fbaff;
+  margin-bottom: 10px;
+}
+.about-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+.about-lead {
+  font-size: 1.05rem;
+  color: rgba(255,255,255,0.80);
+  max-width: 580px;
+  line-height: 1.65;
+  margin-bottom: 28px;
+}
+.about-hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-about-primary {
+  background: #1a8cff;
+  color: #fff;
+  border: none;
+  padding: 11px 26px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.btn-about-primary:hover { background: #0070e0; color: #fff; }
+.btn-about-ghost {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.btn-about-ghost:hover { border-color: #fff; background: rgba(255,255,255,0.07); color: #fff; }
+
+/* Section nav */
+.about-section-nav {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  background: #fff;
+  border-bottom: 1.5px solid #e8eaed;
+  padding: 0 16px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.about-section-nav .container { gap: 0 !important; }
+.about-section-nav a {
+  display: inline-block;
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  text-decoration: none;
+  border-bottom: 2.5px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.about-section-nav a:hover { color: #1a5cad; border-bottom-color: #1a5cad; }
+
+
+.about-section { padding: 72px 0; }
+.about-section-alt { background: #f7f9fc; }
+.about-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #1a5cad;
+  margin-bottom: 12px;
+}
+.about-section-heading {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0b1a38;
+  margin-bottom: 16px;
+}
+.about-prose { font-size: 15px; color: #333; line-height: 1.75; margin-bottom: 16px; }
+.about-check-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.about-check-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14.5px;
+  color: #333;
+  line-height: 1.55;
+}
+.about-check-list li i { flex-shrink: 0; margin-top: 2px; font-size: 15px; }
+
+
+.about-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #e8f5e9;
+  color: #1a7a34;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.badge-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #1a7a34;
+  animation: pulse-green 1.6s infinite;
+}
+@keyframes pulse-green {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.35); }
+}
+
+.about-card {
+  background: #fff;
+  border: 1.5px solid #e8eaed;
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  transition: box-shadow 0.2s;
+}
+.about-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.09); }
+.about-card-icon {
+  width: 44px; height: 44px;
+  background: #e8f0ff;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: #1a5cad;
+  margin-bottom: 14px;
+}
+.about-card-title { font-size: 15px; font-weight: 700; color: #0b1a38; margin-bottom: 10px; }
+.about-card-meta {
+  display: flex; flex-direction: column; gap: 4px;
+  margin-bottom: 12px;
+}
+.about-card-meta span {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #666;
+}
+.about-card-desc { font-size: 13.5px; color: #444; line-height: 1.6; margin-bottom: 14px; }
+.about-card-formats { display: flex; gap: 6px; flex-wrap: wrap; }
+.about-card-formats span {
+  background: #f0f4ff; color: #1a5cad;
+  border-radius: 5px; padding: 2px 10px;
+  font-size: 11px; font-weight: 600;
+}
+
+
+.about-stat-card {
+  background: #fff;
+  border: 1.5px solid #e8eaed;
+  border-radius: 12px;
+  padding: 16px 12px;
+  text-align: center;
+}
+.about-stat-number { display: block; font-size: 1.6rem; font-weight: 800; color: #1a5cad; }
+.about-stat-label { display: block; font-size: 11px; color: #666; line-height: 1.3; margin-top: 4px; }
+
+
+.about-resource-card {
+  background: #fff;
+  border: 1.5px solid #e8eaed;
+  border-radius: 14px;
+  padding: 24px 20px;
+  transition: box-shadow 0.2s;
+}
+.about-resource-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,0.08); }
+.about-resource-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+.about-resource-card h4 { font-size: 14px; font-weight: 700; color: #0b1a38; margin-bottom: 8px; }
+.about-resource-card p { font-size: 13px; color: #555; line-height: 1.55; margin-bottom: 14px; }
+.about-resource-card a {
+  font-size: 13px; font-weight: 600; color: #1a5cad; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 3px;
+}
+.about-resource-card a:hover { text-decoration: underline; }
+
+
+.about-workshop-title { font-size: 15px; font-weight: 700; color: #0b1a38; margin-bottom: 14px; }
+.about-table { font-size: 13.5px; border-collapse: separate; border-spacing: 0; }
+.about-table thead th { background: #f0f4ff; color: #1a5cad; font-weight: 700; border: none; }
+.about-table tbody td { color: #333; vertical-align: top; }
+.about-table a { color: #1a5cad; }
+
+
+.about-earthdata-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #f0f4ff;
+  border-left: 4px solid #1a5cad;
+  border-radius: 10px;
+  padding: 20px 22px;
+  font-size: 14px;
+  color: #333;
+}
+.about-earthdata-link i { font-size: 22px; color: #1a5cad; margin-top: 2px; flex-shrink: 0; }
+.about-earthdata-link a { color: #1a5cad; font-weight: 600; }
+</style>
