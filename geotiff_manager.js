@@ -1325,6 +1325,7 @@
     
     // floating
     function createFloatingButton() {
+        if (!document.body.classList.contains('home-page')) return;
         if (document.getElementById('geotiff-quick-btn')) return;
         
         const btn = document.createElement('button');
