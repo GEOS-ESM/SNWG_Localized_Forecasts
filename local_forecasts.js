@@ -1566,8 +1566,11 @@ function add_the_banner(site, param) {
             }
         }
 
-        // Display
-        const temperature = (typeof t10m === "number" && !isNaN(t10m)) ? Math.round(t10m - 273.15) : "--";
+        // Display — respect ?temp=f URL param
+        const _tempUnit = (new URLSearchParams(window.location.search).get('temp') || 'c').toLowerCase();
+        const _tempC = (typeof t10m === "number" && !isNaN(t10m)) ? Math.round(t10m - 273.15) : null;
+        const temperature = _tempC !== null ? (_tempUnit === 'f' ? Math.round(_tempC * 9 / 5 + 32) : _tempC) : "--";
+        const tempLabel = _tempUnit === 'f' ? '°F' : '°C';
         const humidity    = (typeof rh   === "number" && !isNaN(rh))   ? (rh  * 100).toFixed(0)     : "--";
 
         
@@ -1608,7 +1611,7 @@ function add_the_banner(site, param) {
                     }</div>
                     <div class="ticker-card-meta">
                         <span>${forecast.local_time ? forecast.local_time.substring(11, 16) : '--'}</span>
-                        <span>${temperature}°C</span>
+                        <span>${temperature}${tempLabel}</span>
                         <span>${humidity}%</span>
                     </div>
                 </div>
@@ -1852,7 +1855,7 @@ function readApiBaker(options = {}) {
                     masterData.master_observation_corrected.push(null);
                 }
                 const tVal = forecast.t10m ?? forecast.t ?? null;
-                masterData.master_t.push(tVal !== null ? Math.round((tVal - 273.15) * 10) / 10 : null);
+                masterData.master_t.push(tVal !== null ? Math.round(tVal - 273.15) : null);
                 masterData.master_rh.push(forecast.rh != null ? Math.round(forecast.rh <= 1 ? forecast.rh * 100 : forecast.rh) : null);
                 masterData.master_wind.push(forecast.wind_speed != null ? Math.round(forecast.wind_speed * 10) / 10 : null);
                 
@@ -2643,6 +2646,16 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     const rhData = masterData.master_rh || [];
     const windData = masterData.master_wind || [];
 
+
+    const urlTempUnit = (new URLSearchParams(window.location.search).get('temp') || 'c').toLowerCase();
+    const useFahrenheit = urlTempUnit === 'f';
+    const formatTemp = (tempC) => {
+        if (tempC == null) return null;
+        if (useFahrenheit) return Math.round(tempC * 9 / 5 + 32);
+        return Math.round(tempC);
+    };
+    const tempUnitLabel = useFahrenheit ? '°F' : '°C';
+
     // Cutoff
     const nowLocalMs = now.getTime();
     const cutoff72h = nowLocalMs + 72 * 3600 * 1000;
@@ -2672,7 +2685,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         const tempC = tData[i];
         const rh = rhData[i];
         const wind = windData[i];
-        return { dt, dtMs, dateStr, hourStr, aqi, isNow, isPast, isFuture72, tempC, rh, wind };
+        return { dt, dtMs, dateStr, hourStr, aqi, isNow, isPast, isFuture72, tempC: formatTemp(tempC), rh, wind };
     }).filter(f => f && (f.isNow || (!f.isPast && f.isFuture72)));
 
     const periodHours = { '6h': 6, '12h': 12, '18h': 18, '24h': 24, '48h': 48, '72h': 72 };
@@ -2703,7 +2716,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
             }
             const metHtml = (f.tempC != null || f.rh != null) ? `
                 <div class="card-met">
-                    ${f.tempC != null ? `<span class="card-met-t"><i class="bi bi-thermometer-half"></i>${f.tempC}°C</span>` : ''}
+                    ${f.tempC != null ? `<span class="card-met-t"><i class="bi bi-thermometer-half"></i>${f.tempC}${tempUnitLabel}</span>` : ''}
                     ${f.rh != null ? `<span class="card-met-rh"><i class="bi bi-droplet-half"></i>${f.rh}%</span>` : ''}
                 </div>` : '';
             return `${dateHeader}<div class="forecast-card${f.isNow ? ' forecast-card-now' : ''}">

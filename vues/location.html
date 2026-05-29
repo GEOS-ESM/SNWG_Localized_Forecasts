@@ -361,7 +361,7 @@
     gap: 4px;
     align-items: stretch;
 }
-/* Y-axis */
+
 .mini-barchart-yscale {
     position: relative;
     width: 28px;
@@ -378,7 +378,7 @@
     width: 100%;
     line-height: 1;
 }
-/* Chart area */
+
 .mini-barchart-area {
     flex: 1;
     position: relative;
@@ -427,7 +427,7 @@
     transition: opacity 0.2s;
 }
 .mini-bar-wrap:hover .mini-bar { opacity: 0.75; }
-/* Blinking dot on current bar */
+
 .mini-bar-blink {
     position: absolute;
     top: -7px;
@@ -443,12 +443,12 @@
     0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
     50%       { opacity: 0.3; transform: translateX(-50%) scale(0.7); }
 }
-/* Now bar border */
+
 .mini-bar-wrap.mini-bar-now .mini-bar {
     outline: 2px solid rgba(0,0,0,0.35);
     outline-offset: 1px;
 }
-/* X-axis label */
+
 .mini-bar-xlabel {
     position: absolute;
     bottom: -16px;
@@ -521,7 +521,7 @@
     letter-spacing: 0.2px;
 }
 
-/* Hide most elements by default */
+
 .plot_description,
 div#plot_pm25_aqi,
 .download_plot_data,
@@ -533,19 +533,18 @@ div#plot_pm25_aqi,
     display: none !important;
 }
 
-/* Show the window and tab navigation */
+
 .thewindow,
 ul#pills-tab,
 #pills-tab {
     display: block !important;
 }
 
-/* Hide inactive tab panes */
 .tab-pane {
     display: none !important;
 }
 
-/* Show active tab pane and its contents */
+
 .tab-pane.show.active {
     display: block !important;
 }
@@ -607,7 +606,7 @@ ul#pills-tab,
         observer.observe(locationNameElem, { childList: true, subtree: true, characterData: true });
     }
 
-    // Inject "AQI Scale" tab after plots are rendered
+
     function injectAqiScaleTab() {
         const tabsList = document.getElementById('pills-tab');
         const tabContent = document.getElementById('pills-tabContent');
@@ -729,7 +728,7 @@ ul#pills-tab,
         tabContent.appendChild(pane);
     }
 
-    // Wait for tabs to be injected, then add AQI Scale tab
+
     const aqiScaleObserver = new MutationObserver(() => {
         const tabsList = document.getElementById('pills-tab');
         if (tabsList && tabsList.querySelectorAll('.nav-item').length > 0) {

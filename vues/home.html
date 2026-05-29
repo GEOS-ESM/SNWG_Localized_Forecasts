@@ -2,88 +2,142 @@
     <div id='map'></div>
     <div id="map-hover-info" style="display:none; position:absolute; z-index:99999; pointer-events:none; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2); padding:8px; font-size:14px; min-width:120px;"></div>
     
-    <div id="map-controls-overlay" class="map-controls-panel collapsed">
-        <div class="controls-header">
-            <h3><i class="bi bi-gear-fill"></i> Map Controls</h3>
-            <button id="toggle-map-controls" class="btn-controls-toggle" title="Toggle Controls">
-                <i class="bi bi-chevron-left"></i>
+
+    <div id="map-controls-overlay" class="map-settings-panel collapsed">
+        <div class="msp-header">
+            <div class="msp-header-left">
+                <i class="bi bi-sliders"></i>
+                <span>Settings</span>
+            </div>
+            <button id="toggle-map-controls" class="msp-close-btn" title="Close">
+                <i class="bi bi-x"></i>
             </button>
         </div>
-        
-        <div class="controls-body">
-            <div class="control-section">
-                <h4><i class="bi bi-eye"></i> Display Options</h4>
-                <div class="control-group">
-                    <label class="control-label">
-                        <input type="checkbox" id="show-markers" checked>
-                        <span>Show Markers</span>
-                    </label>
-                    <label class="control-label">
-                        <input type="checkbox" id="show-labels" checked>
-                        <span>Show Labels</span>
-                    </label>
-                    <label class="control-label">
-                        <input type="checkbox" id="show-clusters">
-                        <span>Enable Clustering</span>
-                    </label>
-                    <label class="control-label">
-                        <input type="checkbox" id="show-banners">
-                        <span>Show Location Banners</span>
-                    </label>
+
+        <div class="msp-body">
+
+
+            <div class="msp-section-title">
+                <i class="bi bi-bell"></i> Display
+            </div>
+
+            <div class="msp-row">
+                <div class="msp-row-label">
+                    <span>Show Markers</span>
+                </div>
+                <label class="msp-toggle">
+                    <input type="checkbox" id="show-markers" checked>
+                    <span class="msp-toggle-track"></span>
+                </label>
+            </div>
+
+            <div class="msp-row">
+                <div class="msp-row-label">
+                    <span>Show Labels</span>
+                </div>
+                <label class="msp-toggle">
+                    <input type="checkbox" id="show-labels" checked>
+                    <span class="msp-toggle-track"></span>
+                </label>
+            </div>
+
+            <div class="msp-row">
+                <div class="msp-row-label">
+                    <span>Enable Clustering</span>
+                </div>
+                <label class="msp-toggle">
+                    <input type="checkbox" id="show-clusters">
+                    <span class="msp-toggle-track"></span>
+                </label>
+            </div>
+
+            <div class="msp-row">
+                <div class="msp-row-label">
+                    <span>Pause Banner</span>
+                    <small>Auto-scroll ticker</small>
+                </div>
+                <label class="msp-toggle">
+                    <input type="checkbox" id="setting-pause-banner">
+                    <span class="msp-toggle-track"></span>
+                </label>
+            </div>
+
+            <div class="msp-divider"></div>
+
+            <!-- Appearance -->
+            <div class="msp-section-title">
+                <i class="bi bi-palette"></i> Appearance &amp; Theme
+            </div>
+
+            <div class="msp-row">
+                <div class="msp-row-label">
+                    <span>Base Map</span>
+                </div>
+                <select id="map-style" class="msp-select">
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                    <option value="voyager" selected>Voyager (default)</option>
+                    <option value="osm">OpenStreetMap</option>
+                    <option value="satellite">Satellite</option>
+                </select>
+            </div>
+
+            <div class="msp-row">
+                <div class="msp-row-label">
+                    <span>Temperature unit</span>
+                </div>
+                <div class="msp-seg" id="temp-unit-seg">
+                    <button class="msp-seg-btn active" data-val="c">°C</button>
+                    <button class="msp-seg-btn" data-val="f">°F</button>
                 </div>
             </div>
 
-            <div class="control-section">
-                <h4><i class="bi bi-map"></i> Map Style</h4>
-                <div class="control-group">
-                    <label for="map-style">Base Map:</label>
-                    <select id="map-style" class="control-select">
-                        <option value="dark">Dark Matter</option>
-                        <option value="light">Light</option>
-                        <option value="voyager" selected>Voyager</option>
-                        <option value="osm">OpenStreetMap</option>
-                        <option value="satellite">Satellite (ESRI)</option>
-                    </select>
+            <div class="msp-row msp-row-slider">
+                <div class="msp-row-label">
+                    <span>Marker size</span>
+                    <span id="marker-size-value" class="msp-val-badge">32</span>
                 </div>
+                <input type="range" id="marker-size" min="16" max="48" value="32" class="msp-range">
             </div>
 
-            <div class="control-section">
-                <h4><i class="bi bi-collection"></i> Marker Grouping</h4>
-                <div class="control-group">
-                    <label for="cluster-radius">Cluster Radius:</label>
-                    <input type="range" id="cluster-radius" min="20" max="150" value="100" class="control-range">
-                    <span id="cluster-radius-value" class="range-value">100px</span>
+            <div class="msp-row msp-row-slider">
+                <div class="msp-row-label">
+                    <span>Marker opacity</span>
+                    <span id="marker-opacity-value" class="msp-val-badge">0.7</span>
                 </div>
-                <div class="control-group">
-                    <label for="marker-size">Marker Size:</label>
-                    <input type="range" id="marker-size" min="16" max="48" value="32" class="control-range">
-                    <span id="marker-size-value" class="range-value">32px</span>
-                </div>
-                <div class="control-group">
-                    <label for="marker-opacity">Marker Opacity:</label>
-                    <input type="range" id="marker-opacity" min="0.3" max="1" step="0.1" value="0.7" class="control-range">
-                    <span id="marker-opacity-value" class="range-value">0.7</span>
-                </div>
+                <input type="range" id="marker-opacity" min="0.3" max="1" step="0.1" value="0.7" class="msp-range">
             </div>
 
-            <div class="control-section">
-                <h4><i class="bi bi-zoom-in"></i> View Controls</h4>
-                <div class="control-group">
-                    <button id="reset-view" class="control-btn">
-                        <i class="bi bi-arrow-counterclockwise"></i> Reset View
-                    </button>
-                    <button id="fit-bounds" class="control-btn">
-                        <i class="bi bi-aspect-ratio"></i> Fit All Markers
-                    </button>
-                </div>
+            <div class="msp-divider"></div>
+
+            <!-- View -->
+            <div class="msp-section-title">
+                <i class="bi bi-zoom-in"></i> View
             </div>
-            
+
+            <div class="msp-row msp-row-slider">
+                <div class="msp-row-label">
+                    <span>Cluster radius</span>
+                    <span id="cluster-radius-value" class="msp-val-badge">100</span>
+                </div>
+                <input type="range" id="cluster-radius" min="20" max="150" value="100" class="msp-range">
+            </div>
+
+            <div class="msp-actions">
+                <button id="reset-view" class="msp-action-btn">
+                    <i class="bi bi-arrow-counterclockwise"></i> Reset View
+                </button>
+                <button id="fit-bounds" class="msp-action-btn">
+                    <i class="bi bi-bounding-box"></i> Fit Markers
+                </button>
+            </div>
+
             <div id="geotiff-controls-container"></div>
         </div>
     </div>
 
-    <button id="map-controls-toggle-btn" title="Show Map Controls">
-        <i class="bi bi-gear-fill"></i>
+    <button id="map-controls-toggle-btn" title="Map Settings">
+        <i class="bi bi-sliders"></i>
     </button>
     
 
@@ -138,6 +192,225 @@
 </div>
 
 <style>
+.map-settings-panel {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 9000;
+    width: 300px;
+    max-height: calc(100vh - 360px);
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: opacity 0.2s, transform 0.2s;
+}
+.map-settings-panel.collapsed {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px) scale(0.97);
+}
+.msp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 12px;
+    border-bottom: 1.5px solid #f0f0f0;
+}
+.msp-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+.msp-header-left i { color: #5b6bff; font-size: 17px; }
+.msp-close-btn {
+    background: #f5f5f5;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #555;
+    font-size: 16px;
+    transition: background 0.15s;
+}
+.msp-close-btn:hover { background: #eaeaea; }
+.msp-body {
+    padding: 8px 0 16px;
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.msp-section-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #090953;
+    padding: 12px 18px 4px;
+}
+.msp-section-title i { font-size: 13px; }
+.msp-divider {
+    height: 1.5px;
+    background: #f0f0f0;
+    margin: 10px 18px;
+}
+.msp-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    gap: 10px;
+}
+.msp-row-slider {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+}
+.msp-row-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.msp-row-label span { font-size: 14px; color: #1a1a1a; font-weight: 500; }
+.msp-row-label small { font-size: 11px; color: #999; }
+.msp-row-slider .msp-row-label {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.msp-val-badge {
+    font-size: 11px;
+    color: #888;
+    background: #f3f3f3;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-weight: 600;
+}
+.msp-toggle { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; }
+.msp-toggle input { opacity: 0; width: 0; height: 0; }
+.msp-toggle-track {
+    position: absolute; inset: 0;
+    background: #e0e0e0;
+    border-radius: 13px;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+.msp-toggle-track::before {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    left: 3px; top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    transition: transform 0.2s;
+}
+.msp-toggle input:checked + .msp-toggle-track { background: #0b3d91; }
+.msp-toggle input:checked + .msp-toggle-track::before { transform: translateX(20px); }
+.msp-seg {
+    display: flex;
+    background: #f0f0f0;
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+}
+.msp-seg-btn {
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.msp-seg-btn.active {
+    background: #fff;
+    color: #1a1a1a;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+}
+
+.msp-select {
+    appearance: none;
+    background: #f5f5f5;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 28px 6px 10px;
+    font-size: 12px;
+    color: #555;
+    font-weight: 500;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+}
+.msp-select:focus { outline: none; }
+/* Range */
+.msp-range {
+    width: 100%;
+    accent-color: #5b6bff;
+    height: 4px;
+    cursor: pointer;
+}
+
+.msp-actions {
+    display: flex;
+    gap: 8px;
+    padding: 6px 18px 0;
+}
+.msp-action-btn {
+    flex: 1;
+    background: #f5f5f5;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #444;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+.msp-action-btn:hover { background: #eaeaea; }
+
+#map-controls-toggle-btn {
+    position: absolute;
+    top: 133px;
+    right: 12px;
+    z-index: 8999;
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #444;
+    font-size: 17px;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+#map-controls-toggle-btn:hover { background: #f5f5f5; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
+
 .locations-ticker-banner {
     position: fixed;
     bottom: 50px;
@@ -838,9 +1111,47 @@ $(document).ready(function () {
         
 
         $('#toggle-map-controls, #map-controls-toggle-btn').on('click', function() {
-            $('#map-controls-overlay').toggleClass('collapsed');
+            const $panel = $('#map-controls-overlay');
+            $panel.toggleClass('collapsed');
+            // Show/hide the gear button based on panel state
+            $('#map-controls-toggle-btn').toggle($panel.hasClass('collapsed'));
         });
-        
+
+        // Init settings panel state from URL
+        (function initSettingsFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+
+            // Temperature unit
+            const tempUnit = params.get('temp') || 'c';
+            $('#temp-unit-seg .msp-seg-btn').each(function() {
+                $(this).toggleClass('active', $(this).data('val') === tempUnit);
+            });
+
+            // Pause banner
+            const tkState = params.get('tk');
+            if (tkState === 'pa') {
+                $('#setting-pause-banner').prop('checked', true);
+            }
+        })();
+
+        // Temperature unit segmented control
+        $('#temp-unit-seg').on('click', '.msp-seg-btn', function() {
+            $('#temp-unit-seg .msp-seg-btn').removeClass('active');
+            $(this).addClass('active');
+            const unit = $(this).data('val');
+            const url = new URL(window.location);
+            url.searchParams.set('temp', unit);
+            window.history.replaceState({}, '', url);
+        });
+
+        // Pause banner toggle
+        $('#setting-pause-banner').on('change', function() {
+            if ($(this).is(':checked')) {
+                window.TickerAnimation && window.TickerAnimation.stop();
+            } else {
+                window.TickerAnimation && window.TickerAnimation.start();
+            }
+        });
 
         $('#show-markers').on('change', function() {
             if (window.currentMarkers) {
@@ -867,21 +1178,6 @@ $(document).ready(function () {
             });
         });
         
-        $('#show-banners').on('change', function() {
-            console.log('Show banners checkbox changed:', $(this).is(':checked'));
-            const showBanners = $(this).is(':checked');
-            const $banner = $('.locations-container.snwg-banner');
-            
-            console.log('Banner element found:', $banner.length);
-            
-            if (showBanners) {
-                console.log('Showing banner...');
-                $banner.removeClass('hidden');
-            } else {
-                console.log('Hiding banner...');
-                $banner.addClass('hidden');
-            }
-        });
         
         $('#show-clusters').on('change', function() {
             const enableClustering = $(this).is(':checked');
@@ -965,7 +1261,7 @@ $(document).ready(function () {
         
         $('#cluster-radius').on('input', function() {
             const value = $(this).val();
-            $('#cluster-radius-value').text(value + 'px');
+            $('#cluster-radius-value').text(value);
             
             if ($('#show-clusters').is(':checked') && window.currentForecastData) {
                 const geojson = sitesArrayToGeoJSON(window.currentForecastData);
@@ -997,7 +1293,7 @@ $(document).ready(function () {
         
         $('#marker-size').on('input', function() {
             const value = $(this).val();
-            $('#marker-size-value').text(value + 'px');
+            $('#marker-size-value').text(value);
             
             $('.marker-container > div').css({
                 'width': value + 'px',
