@@ -234,7 +234,7 @@
         isVisible: true,
         legendVisible: true,
         availableLayers: [],
-        activeColormap: null,  // null = use pollutant default; string = override e.g. 'viridis'
+        activeColormap: null,  
         allAddedLayers: []
     };
 
@@ -433,9 +433,6 @@
     }
 
 
-    // ============================================
-    // LEAFLET CANVAS RENDERER FOR GEOTIFF
-    // ============================================
 
     const CanvasGeoTIFFLayer = L.Layer.extend({
 
@@ -446,10 +443,9 @@
             this.minValue   = options.minValue   || 0;
             this.maxValue   = options.maxValue   || 100;
             this.opacity    = options.opacity    !== undefined ? options.opacity : 1;
-            this._dataCanvas = null; // offscreen Mercator-projected buffer
+            this._dataCanvas = null;
         },
 
-        // ------------------------------------------------------------------
         onAdd: function(map) {
             this._map = map;
 
@@ -477,33 +473,28 @@
             this._map = null;
         },
 
-        // ------------------------------------------------------------------
-        // Smooth CSS zoom animation — mirrors L.ImageOverlay._animateZoom exactly
+      
         _animateZoom: function(e) {
             if (!this._map || !this._rasterBounds) return;
             const scale  = this._map.getZoomScale(e.zoom);
-            // _latLngBoundsToNewLayerBounds gives us the projected rect at the
-            // target zoom; .min is the top-left (NW) in layer-point space.
+          
             const offset = this._map._latLngBoundsToNewLayerBounds(
                 this._rasterBounds, e.zoom, e.center
             ).min;
             L.DomUtil.setTransform(this._canvas, offset, scale);
         },
 
-        // Reposition + resize overlay canvas to match the viewport, then paint
+
         _redraw: function() {
             if (!this._map || !this._canvas) return;
 
             const size    = this._map.getSize();
             const topLeft = this._map.containerPointToLayerPoint([0, 0]);
 
-            // Reset any CSS transform left over from the zoom animation
             L.DomUtil.setTransform(this._canvas, topLeft, 1);
 
             this._canvas.width  = size.x;
             this._canvas.height = size.y;
-
-            // Snapshot raster geographic bounds for _animateZoom
             const gr = this.georaster;
             this._rasterBounds = L.latLngBounds(
                 [Math.max(-85.051128, gr.ymin), gr.xmin],
@@ -513,15 +504,13 @@
             this._draw();
         },
 
-        // ------------------------------------------------------------------
-        // Paint the pre-built offscreen buffer onto the visible canvas
+
         _draw: function() {
             if (!this._dataCanvas || !this._map) return;
 
             const ctx = this._ctx;
             ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
-            // Where does the raster sit on screen right now?
             const safeYMax = Math.min(85.051128, this.georaster.ymax);
             const safeYMin = Math.max(-85.051128, this.georaster.ymin);
             const nw = this._map.latLngToContainerPoint(L.latLng(safeYMax, this.georaster.xmin));
@@ -539,9 +528,6 @@
             ctx.restore();
         },
 
-        // ------------------------------------------------------------------
-        // Build a Mercator-reprojected offscreen canvas once from the raw data.
-        // X is equirectangular (linear), Y is warped from geographic→Mercator.
         _buildDataCanvas: function() {
             const gr = this.georaster;
             if (!gr) return;
@@ -550,7 +536,6 @@
                 const srcW = gr.width;
                 const srcH = gr.height;
 
-                // ── 1. Flatten raw band data ────────────────────────────────
                 let raw = null;
                 let isFlat = false;
                 if (gr.data   && gr.data[0])   { raw = gr.data[0];   isFlat = true; }
@@ -568,7 +553,6 @@
                     }
                 }
 
-                // ── 2. Map every source pixel → RGBA ───────────────────────
                 const noData   = gr.noDataValue;
                 const srcRGBA  = new Uint8ClampedArray(srcW * srcH * 4);
                 for (let i = 0; i < flat.length; i++) {
@@ -581,16 +565,16 @@
                     srcRGBA[i*4+3] = c[3];
                 }
 
-                // ── 3. Compute Mercator extent ──────────────────────────────
+
                 const safeYMax = Math.min(85.051128, gr.ymax);
                 const safeYMin = Math.max(-85.051128, gr.ymin);
                 const proj     = L.Projection.SphericalMercator;
                 const pNW      = proj.project(L.latLng(safeYMax, gr.xmin));
                 const pSE      = proj.project(L.latLng(safeYMin, gr.xmax));
-                const mercW    = pSE.x - pNW.x;   // always positive (east > west)
-                const mercH    = pNW.y - pSE.y;   // always positive (north > south in Mercator Y-up)
+                const mercW    = pSE.x - pNW.x;   
+                const mercH    = pNW.y - pSE.y;  
 
-                // Destination canvas: same pixel width as source, height warped
+
                 const dstW = srcW;
                 const dstH = Math.max(1, Math.min(4096, Math.round(dstW * mercH / mercW)));
 
@@ -601,13 +585,12 @@
                 const img  = octx.createImageData(dstW, dstH);
                 const dst  = img.data;
 
-                // ── 4. For each destination pixel inverse-project → source ──
+
                 for (let dy = 0; dy < dstH; dy++) {
-                    // Mercator Y (Y-up), interpolated across the extent
+
                     const mY  = pNW.y - (dy / dstH) * mercH;
                     const lat = proj.unproject(L.point(0, mY)).lat;
 
-                    // Fractional source row (clamped)
                     const syF = ((gr.ymax - lat) / (gr.ymax - gr.ymin)) * srcH - 0.5;
                     const sy0 = Math.floor(syF);
                     const sy1 = Math.min(sy0 + 1, srcH - 1);
@@ -1168,19 +1151,16 @@
         }
     }
 
-    // ============================================================
-    //  ANIMATION CONTROLLER
-    //  Preloads N days of TIFs, swaps offscreen canvas per frame
-    // ============================================================
+
     const AnimationController = {
-        frames:      [],   // [{ layer meta } + { _dataCanvas, date, label }]
+        frames:      [],   
         currentIdx:  0,
         playing:     false,
         _timer:      null,
-        speed:       800,  // ms per frame
+        speed:       800,  
         _pollutant:  null,
 
-        // Build frame list for a given pollutant centred on today
+
         _buildFrameList: function(pollutant) {
             const pool = state.availableLayers
                 .filter(l => l.pollutant === pollutant && l.type === 'geotiff')
@@ -1188,7 +1168,6 @@
 
             if (pool.length === 0) return [];
 
-            // Pick window: up to 3 days before today through 4 days after
             const today   = new Date().toISOString().split('T')[0];
             const cutFrom = new Date(today); cutFrom.setDate(cutFrom.getDate() - 3);
             const cutTo   = new Date(today); cutTo.setDate(cutTo.getDate()   + 4);
@@ -1197,7 +1176,6 @@
             return pool.filter(l => l.date >= fmt(cutFrom) && l.date <= fmt(cutTo));
         },
 
-        // Preload all frames: fetch + parse + build offscreen canvas
         preload: async function(pollutant) {
             if (this.playing) this.pause();
             this.frames     = [];
@@ -1673,8 +1651,12 @@
             if (!isNaN(lat) && !isNaN(lng) && !isNaN(zoom)) {
                 map.setView([lat, lng], zoom);
                 console.log(`Restored map state: lat=${lat}, lng=${lng}, zoom=${zoom}`);
+                return;
             }
         }
+
+        // Default view when no URL params
+        map.setView([0.0104, -9.3164], 3);
     }
 
 
@@ -2070,7 +2052,6 @@
 
         // Animation controls
         document.getElementById('anim-load-btn').addEventListener('click', async function() {
-            // Use currently loaded pollutant, fallback to pm25
             const pollutant = state.currentLayerName ?
                 (state.currentLayerName.match(/no2|pm25|o3|co|so2/i) || ['pm25'])[0].toLowerCase() : 'pm25';
             const ok = await AnimationController.preload(pollutant);

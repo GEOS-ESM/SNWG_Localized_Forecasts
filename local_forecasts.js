@@ -459,12 +459,12 @@ function create_map(sites, param) {
         
         $('#map').html('');
         
-        var center_point = [-1.9297706, 30.1272444];
+        var center_point = [0.0104, -9.3164];
         
         // Initialize
         map = L.map('map', {
             center: center_point,
-            zoom: 2,
+            zoom: 3,
             minZoom: 1,
             maxZoom: 10,
             worldCopyJump: false,
