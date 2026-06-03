@@ -126,12 +126,97 @@
             // molmol
             // range
             molmol: [
-                { value: 0,    color: [68,  1,  84, 180] },   // purple
-                { value: 2e-9, color: [59, 82, 139, 180] },   // background
-                { value: 1e-8, color: [33,145, 140, 180] },   // urban
-                { value: 5e-8, color: [94,201,  98, 180] },   // moderate
-                { value: 1e-7, color: [253,231,  37, 180] },  // high
-                { value: 3e-7, color: [253,231,  37, 180] }   // max
+                { value: 0,    color: [68,  1,  84, 180] },
+                { value: 2e-9, color: [59, 82, 139, 180] },
+                { value: 1e-8, color: [33,145, 140, 180] },
+                { value: 5e-8, color: [94,201,  98, 180] },
+                { value: 1e-7, color: [253,231,  37, 180] },
+                { value: 3e-7, color: [253,231,  37, 180] }
+            ],
+
+            // ── Perceptual colormaps (0–1 normalized stops) ──────────────────
+            viridis: [
+                { value: 0.00, color: [ 68,   1,  84, 200] },
+                { value: 0.10, color: [ 72,  35, 116, 200] },
+                { value: 0.20, color: [ 64,  67, 135, 200] },
+                { value: 0.30, color: [ 52,  94, 141, 200] },
+                { value: 0.40, color: [ 41, 120, 142, 200] },
+                { value: 0.50, color: [ 32, 144, 140, 200] },
+                { value: 0.60, color: [ 34, 167, 132, 200] },
+                { value: 0.70, color: [ 64, 190, 115, 200] },
+                { value: 0.80, color: [121, 209,  81, 200] },
+                { value: 0.90, color: [189, 222,  38, 200] },
+                { value: 1.00, color: [253, 231,  37, 200] }
+            ],
+            plasma: [
+                { value: 0.00, color: [ 13,   8, 135, 200] },
+                { value: 0.10, color: [ 75,   3, 161, 200] },
+                { value: 0.20, color: [125,   3, 168, 200] },
+                { value: 0.30, color: [168,  34, 150, 200] },
+                { value: 0.40, color: [203,  70, 121, 200] },
+                { value: 0.50, color: [229, 107,  93, 200] },
+                { value: 0.60, color: [248, 148,  65, 200] },
+                { value: 0.70, color: [253, 187,  48, 200] },
+                { value: 0.80, color: [244, 223,  54, 200] },
+                { value: 0.90, color: [234, 248,  97, 200] },
+                { value: 1.00, color: [240, 249,  33, 200] }
+            ],
+            magma: [
+                { value: 0.00, color: [  0,   0,   4, 200] },
+                { value: 0.10, color: [ 28,  16,  68, 200] },
+                { value: 0.20, color: [ 79,  18, 123, 200] },
+                { value: 0.30, color: [129,  37, 129, 200] },
+                { value: 0.40, color: [181,  54, 122, 200] },
+                { value: 0.50, color: [229,  80, 100, 200] },
+                { value: 0.60, color: [251, 135,  97, 200] },
+                { value: 0.70, color: [254, 194, 135, 200] },
+                { value: 0.80, color: [252, 233, 191, 200] },
+                { value: 0.90, color: [251, 252, 191, 200] },
+                { value: 1.00, color: [252, 253, 191, 200] }
+            ],
+            inferno: [
+                { value: 0.00, color: [  0,   0,   4, 200] },
+                { value: 0.10, color: [ 31,  12,  72, 200] },
+                { value: 0.20, color: [ 85,  15, 109, 200] },
+                { value: 0.30, color: [139,  34,  82, 200] },
+                { value: 0.40, color: [185,  57,  52, 200] },
+                { value: 0.50, color: [221,  94,  32, 200] },
+                { value: 0.60, color: [244, 136,  25, 200] },
+                { value: 0.70, color: [252, 182,  48, 200] },
+                { value: 0.80, color: [249, 228, 106, 200] },
+                { value: 0.90, color: [247, 252, 126, 200] },
+                { value: 1.00, color: [252, 255, 164, 200] }
+            ],
+            turbo: [
+                { value: 0.00, color: [ 48,  18,  59, 200] },
+                { value: 0.10, color: [ 50, 104, 200, 200] },
+                { value: 0.20, color: [ 28, 163, 228, 200] },
+                { value: 0.30, color: [ 30, 206, 183, 200] },
+                { value: 0.40, color: [ 80, 226, 107, 200] },
+                { value: 0.50, color: [167, 228,  68, 200] },
+                { value: 0.60, color: [224, 200,  55, 200] },
+                { value: 0.70, color: [251, 154,  37, 200] },
+                { value: 0.80, color: [236,  92,  26, 200] },
+                { value: 0.90, color: [196,  37,  18, 200] },
+                { value: 1.00, color: [122,   4,   3, 200] }
+            ],
+            coolwarm: [
+                { value: 0.00, color: [ 59,  76, 192, 200] },
+                { value: 0.20, color: [106, 137, 247, 200] },
+                { value: 0.40, color: [169, 193, 254, 200] },
+                { value: 0.50, color: [221, 221, 221, 200] },
+                { value: 0.60, color: [254, 178, 153, 200] },
+                { value: 0.80, color: [237,  96,  83, 200] },
+                { value: 1.00, color: [180,   4,  38, 200] }
+            ],
+            aqi: [
+                { value: 0.00, color: [  0, 228,   0, 200] }, // Good
+                { value: 0.17, color: [255, 255,   0, 200] }, // Moderate
+                { value: 0.33, color: [255, 126,   0, 200] }, // Unhealthy for sensitive
+                { value: 0.50, color: [255,   0,   0, 200] }, // Unhealthy
+                { value: 0.67, color: [143,  63, 151, 200] }, // Very unhealthy
+                { value: 0.83, color: [126,   0,  35, 200] }, // Hazardous
+                { value: 1.00, color: [ 80,   0,  20, 200] }  // Extreme
             ]
         },
         
@@ -149,7 +234,7 @@
         isVisible: true,
         legendVisible: true,
         availableLayers: [],
-
+        activeColormap: null,  // null = use pollutant default; string = override e.g. 'viridis'
         allAddedLayers: []
     };
 
@@ -187,14 +272,43 @@
     }
 
     function getColorScale(pollutant, unit) {
-        // unit
-        // scale
+        // Colormap override takes priority
+        if (state.activeColormap && CONFIG.colorScales[state.activeColormap]) {
+            const cs = CONFIG.colorScales[state.activeColormap];
+            // Re-express stops as absolute values using georaster min/max if available
+            if (state.georaster) {
+                const mn = state.georaster.mins[0];
+                const mx = state.georaster.maxs[0];
+                return cs.map(s => ({ value: mn + s.value * (mx - mn), color: s.color }));
+            }
+            return cs;
+        }
         const isMolMol = unit && (unit.toLowerCase().includes('mol/mol') || unit.toLowerCase() === 'mol mol-1');
         if (isMolMol && (pollutant === 'no2' || pollutant === 'o3' || pollutant === 'co' || pollutant === 'so2')) {
             return CONFIG.colorScales.molmol;
         }
         const key = (pollutant || 'default').toLowerCase();
         return CONFIG.colorScales[key] || CONFIG.colorScales.default;
+    }
+
+    // Rebuild current layer with a new colormap
+    function setColormap(name) {
+        state.activeColormap = name || null;
+        if (state.currentLayer && state.georaster) {
+            const pollutant = state.currentLayerName ? 
+                (state.currentLayerName.match(/no2|pm25|o3|co|so2/i) || ['no2'])[0].toLowerCase() : 'no2';
+            const colorScale = getColorScale(pollutant, null);
+            state.currentLayer.colorScale = colorScale;
+            state.currentLayer.minValue   = state.georaster.mins[0];
+            state.currentLayer.maxValue   = state.georaster.maxs[0];
+            state.currentLayer._buildDataCanvas();
+            state.currentLayer._redraw();
+        }
+        // Sync all colormap selectors
+        ['geotiff-colormap-select', 'geotiff-floating-colormap'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = name || '';
+        });
     }
 
     function showLoading(message = 'Loading GEOS-CF ...') {
@@ -318,6 +432,261 @@
         return layers;
     }
 
+
+    // ============================================
+    // LEAFLET CANVAS RENDERER FOR GEOTIFF
+    // ============================================
+
+    const CanvasGeoTIFFLayer = L.Layer.extend({
+
+        initialize: function(options) {
+            L.setOptions(this, options);
+            this.georaster  = options.georaster;
+            this.colorScale = options.colorScale || [];
+            this.minValue   = options.minValue   || 0;
+            this.maxValue   = options.maxValue   || 100;
+            this.opacity    = options.opacity    !== undefined ? options.opacity : 1;
+            this._dataCanvas = null; // offscreen Mercator-projected buffer
+        },
+
+        // ------------------------------------------------------------------
+        onAdd: function(map) {
+            this._map = map;
+
+            const pane = map.getPane(this.options.pane || 'overlayPane');
+            this._canvas = L.DomUtil.create('canvas', 'leaflet-geotiff-canvas', pane);
+            this._canvas.style.cssText = 'position:absolute;pointer-events:none;';
+            this._ctx = this._canvas.getContext('2d', { alpha: true });
+
+            map.on('moveend zoomend resize', this._redraw, this);
+            if (map.options.zoomAnimation && L.Browser.any3d) {
+                map.on('zoomanim', this._animateZoom, this);
+            }
+
+            // Build the offscreen buffer once, then draw
+            this._buildDataCanvas();
+            this._redraw();
+        },
+
+        onRemove: function(map) {
+            L.DomUtil.remove(this._canvas);
+            map.off('moveend zoomend resize', this._redraw, this);
+            if (map.options.zoomAnimation && L.Browser.any3d) {
+                map.off('zoomanim', this._animateZoom, this);
+            }
+            this._map = null;
+        },
+
+        // ------------------------------------------------------------------
+        // Smooth CSS zoom animation — mirrors L.ImageOverlay._animateZoom exactly
+        _animateZoom: function(e) {
+            if (!this._map || !this._rasterBounds) return;
+            const scale  = this._map.getZoomScale(e.zoom);
+            // _latLngBoundsToNewLayerBounds gives us the projected rect at the
+            // target zoom; .min is the top-left (NW) in layer-point space.
+            const offset = this._map._latLngBoundsToNewLayerBounds(
+                this._rasterBounds, e.zoom, e.center
+            ).min;
+            L.DomUtil.setTransform(this._canvas, offset, scale);
+        },
+
+        // Reposition + resize overlay canvas to match the viewport, then paint
+        _redraw: function() {
+            if (!this._map || !this._canvas) return;
+
+            const size    = this._map.getSize();
+            const topLeft = this._map.containerPointToLayerPoint([0, 0]);
+
+            // Reset any CSS transform left over from the zoom animation
+            L.DomUtil.setTransform(this._canvas, topLeft, 1);
+
+            this._canvas.width  = size.x;
+            this._canvas.height = size.y;
+
+            // Snapshot raster geographic bounds for _animateZoom
+            const gr = this.georaster;
+            this._rasterBounds = L.latLngBounds(
+                [Math.max(-85.051128, gr.ymin), gr.xmin],
+                [Math.min( 85.051128, gr.ymax), gr.xmax]
+            );
+
+            this._draw();
+        },
+
+        // ------------------------------------------------------------------
+        // Paint the pre-built offscreen buffer onto the visible canvas
+        _draw: function() {
+            if (!this._dataCanvas || !this._map) return;
+
+            const ctx = this._ctx;
+            ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
+            // Where does the raster sit on screen right now?
+            const safeYMax = Math.min(85.051128, this.georaster.ymax);
+            const safeYMin = Math.max(-85.051128, this.georaster.ymin);
+            const nw = this._map.latLngToContainerPoint(L.latLng(safeYMax, this.georaster.xmin));
+            const se = this._map.latLngToContainerPoint(L.latLng(safeYMin, this.georaster.xmax));
+
+            const w = se.x - nw.x;
+            const h = se.y - nw.y;
+            if (w <= 0 || h <= 0) return;
+
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(this._dataCanvas, nw.x, nw.y, w, h);
+            ctx.restore();
+        },
+
+        // ------------------------------------------------------------------
+        // Build a Mercator-reprojected offscreen canvas once from the raw data.
+        // X is equirectangular (linear), Y is warped from geographic→Mercator.
+        _buildDataCanvas: function() {
+            const gr = this.georaster;
+            if (!gr) return;
+
+            try {
+                const srcW = gr.width;
+                const srcH = gr.height;
+
+                // ── 1. Flatten raw band data ────────────────────────────────
+                let raw = null;
+                let isFlat = false;
+                if (gr.data   && gr.data[0])   { raw = gr.data[0];   isFlat = true; }
+                else if (gr.values && gr.values[0]) { raw = gr.values[0]; }
+                if (!raw) { console.warn('CanvasGeoTIFFLayer: no band data found'); return; }
+
+                const flat = new Float32Array(srcW * srcH);
+                if (isFlat) {
+                    flat.set(raw);
+                } else {
+                    let i = 0;
+                    for (let y = 0; y < srcH; y++) {
+                        const row = raw[y];
+                        for (let x = 0; x < srcW; x++) flat[i++] = row ? row[x] : NaN;
+                    }
+                }
+
+                // ── 2. Map every source pixel → RGBA ───────────────────────
+                const noData   = gr.noDataValue;
+                const srcRGBA  = new Uint8ClampedArray(srcW * srcH * 4);
+                for (let i = 0; i < flat.length; i++) {
+                    const v = flat[i];
+                    if (v === noData || isNaN(v)) { srcRGBA[i*4+3] = 0; continue; }
+                    const c = this._colorAt(v);
+                    srcRGBA[i*4]   = c[0];
+                    srcRGBA[i*4+1] = c[1];
+                    srcRGBA[i*4+2] = c[2];
+                    srcRGBA[i*4+3] = c[3];
+                }
+
+                // ── 3. Compute Mercator extent ──────────────────────────────
+                const safeYMax = Math.min(85.051128, gr.ymax);
+                const safeYMin = Math.max(-85.051128, gr.ymin);
+                const proj     = L.Projection.SphericalMercator;
+                const pNW      = proj.project(L.latLng(safeYMax, gr.xmin));
+                const pSE      = proj.project(L.latLng(safeYMin, gr.xmax));
+                const mercW    = pSE.x - pNW.x;   // always positive (east > west)
+                const mercH    = pNW.y - pSE.y;   // always positive (north > south in Mercator Y-up)
+
+                // Destination canvas: same pixel width as source, height warped
+                const dstW = srcW;
+                const dstH = Math.max(1, Math.min(4096, Math.round(dstW * mercH / mercW)));
+
+                const offscreen = document.createElement('canvas');
+                offscreen.width  = dstW;
+                offscreen.height = dstH;
+                const octx = offscreen.getContext('2d');
+                const img  = octx.createImageData(dstW, dstH);
+                const dst  = img.data;
+
+                // ── 4. For each destination pixel inverse-project → source ──
+                for (let dy = 0; dy < dstH; dy++) {
+                    // Mercator Y (Y-up), interpolated across the extent
+                    const mY  = pNW.y - (dy / dstH) * mercH;
+                    const lat = proj.unproject(L.point(0, mY)).lat;
+
+                    // Fractional source row (clamped)
+                    const syF = ((gr.ymax - lat) / (gr.ymax - gr.ymin)) * srcH - 0.5;
+                    const sy0 = Math.floor(syF);
+                    const sy1 = Math.min(sy0 + 1, srcH - 1);
+                    if (sy0 < 0 || sy0 >= srcH) continue;
+                    const fy  = syF - sy0;
+
+                    for (let dx = 0; dx < dstW; dx++) {
+                        const sxF = (dx / dstW) * srcW - 0.5;
+                        const sx0 = Math.floor(sxF);
+                        const sx1 = Math.min(sx0 + 1, srcW - 1);
+                        if (sx0 < 0 || sx0 >= srcW) continue;
+                        const fx  = sxF - sx0;
+
+                        const di   = (dy * dstW + dx) * 4;
+                        const i00  = (sy0 * srcW + sx0) * 4;
+                        const i10  = (sy0 * srcW + sx1) * 4;
+                        const i01  = (sy1 * srcW + sx0) * 4;
+                        const i11  = (sy1 * srcW + sx1) * 4;
+
+                        // Bilinear blend
+                        for (let c = 0; c < 4; c++) {
+                            const top = srcRGBA[i00+c] * (1-fx) + srcRGBA[i10+c] * fx;
+                            const bot = srcRGBA[i01+c] * (1-fx) + srcRGBA[i11+c] * fx;
+                            dst[di+c] = top * (1-fy) + bot * fy;
+                        }
+                    }
+                }
+
+                octx.putImageData(img, 0, 0);
+                this._dataCanvas = offscreen;
+                console.log(`CanvasGeoTIFFLayer: buffer ready ${dstW}×${dstH}`);
+
+            } catch(e) {
+                console.error('CanvasGeoTIFFLayer._buildDataCanvas error:', e);
+            }
+        },
+
+        // ------------------------------------------------------------------
+        _colorAt: function(value) {
+            const cs  = this.colorScale;
+            const mn  = this.minValue;
+            const mx  = this.maxValue;
+            if (!cs || cs.length === 0) return [128, 128, 128, 180];
+            const t = Math.max(0, Math.min(1, (value - mn) / (mx - mn)));
+            for (let i = 0; i < cs.length - 1; i++) {
+                const a  = cs[i],   b  = cs[i+1];
+                const ta = (a.value - mn) / (mx - mn);
+                const tb = (b.value - mn) / (mx - mn);
+                if (t >= ta && t <= tb) {
+                    const f = (t - ta) / (tb - ta);
+                    return [
+                        Math.round(a.color[0] * (1-f) + b.color[0] * f),
+                        Math.round(a.color[1] * (1-f) + b.color[1] * f),
+                        Math.round(a.color[2] * (1-f) + b.color[2] * f),
+                        Math.round(a.color[3] * (1-f) + b.color[3] * f)
+                    ];
+                }
+            }
+            return cs[cs.length - 1].color;
+        },
+
+        // ------------------------------------------------------------------
+        setOpacity: function(opacity) {
+            this.opacity = opacity;
+            this._draw();
+        },
+
+        render: function() {
+            this._redraw();
+        },
+
+        getBounds: function() {
+            if (!this.georaster) return null;
+            return L.latLngBounds(
+                [this.georaster.ymin, this.georaster.xmin],
+                [this.georaster.ymax, this.georaster.xmax]
+            );
+        }
+    });
 
     async function loadGeoTIFF(filePath, options = {}) {
         const map = window.currentMap;
@@ -499,50 +868,14 @@
             }
 
             // layer
-            const layerOptions = {
+            const layer = new CanvasGeoTIFFLayer({
                 georaster: georaster,
                 opacity: opacity,
-                resolution: 256,
-                pane: 'geotiffPane',
-                debugLevel: 0,
-                pixelValuesToColorFn: function(values) {
-
-                    if (values.length >= 3) {
-
-                        const r = values[0];
-                        const g = values[1];
-                        const b = values[2];
-                        const a = values.length >= 4 ? values[3] / 255 : 1;
-                        
-                        if ((r === null || r === undefined) || (g === null || g === undefined) || (b === null || b === undefined)) {
-                            return null; 
-                        }
-                        
-                        return `rgba(${r}, ${g}, ${b}, ${a})`;
-                    } else {
-
-                        const value = values[0];
-                        
-
-                        if (value === null || value === undefined || isNaN(value) || value === georaster.noDataValue) {
-                            return null; 
-                        }
-                        
-                        const color = interpolateColor(value, colorScale, minValue, maxValue);
-                        return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3] / 255})`;
-                    }
-                }
-            };
-            
-
-            if (typeof proj4 !== 'undefined' && georaster.projection !== 4326 && georaster.projection !== '4326') {
-                console.log('Adding proj4 to layer options (projection is not 4326)');
-                layerOptions.proj4 = proj4;
-            } else if (georaster.projection === 4326 || georaster.projection === '4326') {
-                console.log('Skipping proj4 for EPSG:4326 data (native Leaflet projection)');
-            }
-            
-            const layer = new GeoRasterLayer(layerOptions);
+                colorScale: colorScale,
+                minValue: minValue,
+                maxValue: maxValue,
+                pane: 'geotiffPane'
+            });
 
             if (addToMap) {
                 state.currentLayer = layer;
@@ -835,6 +1168,234 @@
         }
     }
 
+    // ============================================================
+    //  ANIMATION CONTROLLER
+    //  Preloads N days of TIFs, swaps offscreen canvas per frame
+    // ============================================================
+    const AnimationController = {
+        frames:      [],   // [{ layer meta } + { _dataCanvas, date, label }]
+        currentIdx:  0,
+        playing:     false,
+        _timer:      null,
+        speed:       800,  // ms per frame
+        _pollutant:  null,
+
+        // Build frame list for a given pollutant centred on today
+        _buildFrameList: function(pollutant) {
+            const pool = state.availableLayers
+                .filter(l => l.pollutant === pollutant && l.type === 'geotiff')
+                .sort((a, b) => a.date.localeCompare(b.date));
+
+            if (pool.length === 0) return [];
+
+            // Pick window: up to 3 days before today through 4 days after
+            const today   = new Date().toISOString().split('T')[0];
+            const cutFrom = new Date(today); cutFrom.setDate(cutFrom.getDate() - 3);
+            const cutTo   = new Date(today); cutTo.setDate(cutTo.getDate()   + 4);
+            const fmt = d => d.toISOString().split('T')[0];
+
+            return pool.filter(l => l.date >= fmt(cutFrom) && l.date <= fmt(cutTo));
+        },
+
+        // Preload all frames: fetch + parse + build offscreen canvas
+        preload: async function(pollutant) {
+            if (this.playing) this.pause();
+            this.frames     = [];
+            this.currentIdx = 0;
+            this._pollutant = pollutant;
+
+            const list = this._buildFrameList(pollutant);
+            if (list.length === 0) {
+                showNotification('No frames found for animation', 'error');
+                return false;
+            }
+
+            this._setProgress(0, list.length);
+            this._updateUI('loading');
+
+            const colorScale = getColorScale(pollutant, null);
+
+            // Fetch + parse all in parallel, then build canvases
+            const results = await Promise.allSettled(
+                list.map(async (meta, i) => {
+                    const resp = await fetch(meta.path);
+                    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                    const buf  = await resp.arrayBuffer();
+                    const gr   = await parseGeoraster(buf);
+
+                    // Fix projection
+                    if ((gr.projection === 32767 || !gr.projection) &&
+                        gr.xmin >= -180.5 && gr.xmax <= 180.5) {
+                        gr.projection = 4326;
+                    }
+
+                    // Build offscreen buffer using a temporary layer instance
+                    const tmpLayer = new CanvasGeoTIFFLayer({
+                        georaster:  gr,
+                        colorScale: colorScale,
+                        minValue:   gr.mins[0],
+                        maxValue:   gr.maxs[0],
+                        opacity:    state.layerOpacity
+                    });
+                    // Attach map so CRS projection works
+                    tmpLayer._map = window.currentMap;
+                    tmpLayer._buildDataCanvas();
+
+                    this._setProgress(i + 1, list.length);
+                    return { meta, _dataCanvas: tmpLayer._dataCanvas, georaster: gr };
+                })
+            );
+
+            this.frames = results
+                .filter(r => r.status === 'fulfilled' && r.value._dataCanvas)
+                .map(r => r.value);
+
+            if (this.frames.length === 0) {
+                showNotification('Failed to preload animation frames', 'error');
+                this._updateUI('idle');
+                return false;
+            }
+
+            console.log(`AnimationController: ${this.frames.length} frames ready`);
+            this._updateUI('ready');
+            this._renderFrame(0);
+            return true;
+        },
+
+        _renderFrame: function(idx) {
+            if (!this.frames[idx]) return;
+            this.currentIdx = idx;
+            const frame = this.frames[idx];
+
+            if (state.currentLayer) {
+                // Ensure the layer's georaster min/max matches this frame
+                state.currentLayer.minValue   = frame.georaster.mins[0];
+                state.currentLayer.maxValue   = frame.georaster.maxs[0];
+                state.currentLayer._dataCanvas = frame._dataCanvas;
+                state.currentLayer._draw();
+            }
+
+            // Date overlay
+            this._showDateLabel(frame.meta.date);
+
+            // Update scrubber
+            const scrubber = document.getElementById('anim-scrubber');
+            if (scrubber) scrubber.value = idx;
+
+            // Update date in panel
+            const dateEl = document.getElementById('anim-date-label');
+            if (dateEl) dateEl.textContent = frame.meta.date;
+
+            // Sync layer dropdown
+            ['geotiff-floating-select', 'geotiff-layer-select'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = frame.meta.path;
+            });
+        },
+
+        play: function() {
+            if (this.frames.length === 0) return;
+            this.playing = true;
+            this._updateUI('playing');
+            this._timer = setInterval(() => {
+                const next = (this.currentIdx + 1) % this.frames.length;
+                this._renderFrame(next);
+            }, this.speed);
+        },
+
+        pause: function() {
+            this.playing = false;
+            clearInterval(this._timer);
+            this._timer = null;
+            this._updateUI('paused');
+        },
+
+        step: function(delta) {
+            if (this.playing) this.pause();
+            const next = Math.max(0, Math.min(this.frames.length - 1, this.currentIdx + delta));
+            this._renderFrame(next);
+        },
+
+        setSpeed: function(ms) {
+            this.speed = ms;
+            if (this.playing) { this.pause(); this.play(); }
+        },
+
+        setFrame: function(idx) {
+            if (this.playing) this.pause();
+            this._renderFrame(idx);
+        },
+
+        _showDateLabel: function(dateStr) {
+            let el = document.getElementById('map-anim-date');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'map-anim-date';
+                el.className = 'map-anim-date';
+                const mapEl = document.getElementById('map');
+                if (mapEl) mapEl.appendChild(el);
+            }
+            // Mark today / forecast / past
+            const today = new Date().toISOString().split('T')[0];
+            el.className = 'map-anim-date ' + (dateStr > today ? 'forecast' : dateStr === today ? 'today' : 'past');
+            el.textContent = dateStr;
+            el.style.display = 'block';
+        },
+
+        _hideDateLabel: function() {
+            const el = document.getElementById('map-anim-date');
+            if (el) el.style.display = 'none';
+        },
+
+        _setProgress: function(done, total) {
+            const bar  = document.getElementById('anim-progress-bar');
+            const text = document.getElementById('anim-progress-text');
+            if (bar)  bar.style.width  = `${Math.round((done / total) * 100)}%`;
+            if (text) text.textContent = done < total ? `Loading ${done}/${total}…` : `${total} frames ready`;
+        },
+
+        _updateUI: function(mode) {
+            const playBtn  = document.getElementById('anim-play-btn');
+            const loadBtn  = document.getElementById('anim-load-btn');
+            const controls = document.getElementById('anim-controls');
+            const progress = document.getElementById('anim-progress');
+            if (!playBtn) return;
+
+            if (mode === 'loading') {
+                if (loadBtn)  loadBtn.disabled = true;
+                if (controls) controls.style.display = 'none';
+                if (progress) progress.style.display = 'block';
+            } else if (mode === 'ready' || mode === 'paused') {
+                if (loadBtn)  loadBtn.disabled = false;
+                if (controls) controls.style.display = 'flex';
+                if (progress) progress.style.display = 'none';
+                if (playBtn)  playBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+                // Set scrubber max
+                const scrubber = document.getElementById('anim-scrubber');
+                if (scrubber) {
+                    scrubber.max   = this.frames.length - 1;
+                    scrubber.value = this.currentIdx;
+                }
+            } else if (mode === 'playing') {
+                if (playBtn) playBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+            } else if (mode === 'idle') {
+                if (loadBtn)  loadBtn.disabled = false;
+                if (controls) controls.style.display = 'none';
+                if (progress) progress.style.display = 'none';
+            }
+        },
+
+        stop: function() {
+            this.pause();
+            this.frames     = [];
+            this.currentIdx = 0;
+            this._hideDateLabel();
+            this._updateUI('idle');
+            const text = document.getElementById('anim-progress-text');
+            if (text) text.textContent = '';
+        }
+    };
+
     function createControlPanel(containerId = 'geotiff-controls-container') {
         console.log('Creating GeoTIFF control panel...');
         
@@ -878,6 +1439,20 @@
                     </select>
                 </div>
                 
+                <div class="control-group">
+                    <label for="geotiff-colormap-select">Colormap:</label>
+                    <select id="geotiff-colormap-select" class="control-select">
+                        <option value="">── Pollutant Default ──</option>
+                        <option value="aqi">AQI (Green → Red)</option>
+                        <option value="viridis">Viridis</option>
+                        <option value="plasma">Plasma</option>
+                        <option value="magma">Magma</option>
+                        <option value="inferno">Inferno</option>
+                        <option value="turbo">Turbo</option>
+                        <option value="coolwarm">Cool–Warm</option>
+                    </select>
+                </div>
+
                 <div class="control-group">
                     <label class="control-label">
                         <input type="checkbox" id="geotiff-visibility" checked>
@@ -988,6 +1563,15 @@
                         zoom: window.currentMap.getZoom()
                     } : null);
                 }
+            });
+        }
+
+        // colormap
+        const colormapSelect = document.getElementById('geotiff-colormap-select');
+        if (colormapSelect) {
+            colormapSelect.value = state.activeColormap || '';
+            colormapSelect.addEventListener('change', function() {
+                setColormap(this.value || null);
             });
         }
 
@@ -1374,6 +1958,19 @@
                     ${layerOptions}
                 </select>
                 <div class="floating-controls">
+                    <label style="flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:10px;">
+                        <span style="color:#9ca3af;font-size:12px;">Colormap:</span>
+                        <select id="geotiff-floating-colormap" class="floating-select" style="margin-bottom:0;">
+                            <option value="">── Pollutant Default ──</option>
+                            <option value="aqi">AQI (Green → Red)</option>
+                            <option value="viridis">Viridis</option>
+                            <option value="plasma">Plasma</option>
+                            <option value="magma">Magma</option>
+                            <option value="inferno">Inferno</option>
+                            <option value="turbo">Turbo</option>
+                            <option value="coolwarm">Cool–Warm</option>
+                        </select>
+                    </label>
                     <label>
                         <span>Opacity:</span>
                         <input type="range" id="geotiff-floating-opacity" min="0" max="1" step="0.1" value="${state.layerOpacity}">
@@ -1383,6 +1980,36 @@
                 <button id="geotiff-floating-remove" class="floating-remove-btn">
                     <i class="bi bi-x-circle"></i> Remove Layer
                 </button>
+
+                <!-- ── Animation ── -->
+                <div class="anim-section">
+                    <div class="anim-header">
+                        <i class="bi bi-film"></i> Animation
+                        <span id="anim-date-label" class="anim-date-badge"></span>
+                    </div>
+                    <div id="anim-progress" style="display:none;">
+                        <div class="anim-progress-track"><div id="anim-progress-bar" class="anim-progress-bar"></div></div>
+                        <span id="anim-progress-text" class="anim-progress-text"></span>
+                    </div>
+                    <button id="anim-load-btn" class="anim-load-btn">
+                        <i class="bi bi-arrow-repeat"></i> Load 7-day frames
+                    </button>
+                    <div id="anim-controls" style="display:none;">
+                        <div class="anim-transport">
+                            <button id="anim-prev-btn"  class="anim-btn" title="Previous"><i class="bi bi-skip-start-fill"></i></button>
+                            <button id="anim-play-btn"  class="anim-btn anim-btn-main" title="Play / Pause"><i class="bi bi-play-fill"></i></button>
+                            <button id="anim-next-btn"  class="anim-btn" title="Next"><i class="bi bi-skip-end-fill"></i></button>
+                            <button id="anim-stop-btn"  class="anim-btn anim-btn-stop" title="Stop"><i class="bi bi-stop-fill"></i></button>
+                        </div>
+                        <input type="range" id="anim-scrubber" class="anim-scrubber" min="0" max="6" value="0" step="1">
+                        <div class="anim-speed">
+                            <span>Speed:</span>
+                            <button class="anim-speed-btn" data-ms="1200">Slow</button>
+                            <button class="anim-speed-btn active" data-ms="800">Med</button>
+                            <button class="anim-speed-btn" data-ms="400">Fast</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
         
@@ -1417,6 +2044,14 @@
             }
         });
         
+        const floatingColormap = document.getElementById('geotiff-floating-colormap');
+        if (floatingColormap) {
+            floatingColormap.value = state.activeColormap || '';
+            floatingColormap.addEventListener('change', function() {
+                setColormap(this.value || null);
+            });
+        }
+
         const floatingOpacity = document.getElementById('geotiff-floating-opacity');
         const floatingOpacityVal = document.getElementById('geotiff-floating-opacity-val');
         floatingOpacity.addEventListener('input', function() {
@@ -1427,9 +2062,48 @@
         
         const floatingRemove = document.getElementById('geotiff-floating-remove');
         floatingRemove.addEventListener('click', function() {
+            AnimationController.stop();
             removeCurrentLayer();
             hideLegend();
             floatingSelect.value = '';
+        });
+
+        // Animation controls
+        document.getElementById('anim-load-btn').addEventListener('click', async function() {
+            // Use currently loaded pollutant, fallback to pm25
+            const pollutant = state.currentLayerName ?
+                (state.currentLayerName.match(/no2|pm25|o3|co|so2/i) || ['pm25'])[0].toLowerCase() : 'pm25';
+            const ok = await AnimationController.preload(pollutant);
+            if (ok) showNotification(`Animation ready: ${AnimationController.frames.length} frames`, 'success');
+        });
+
+        document.getElementById('anim-play-btn').addEventListener('click', function() {
+            if (AnimationController.playing) AnimationController.pause();
+            else AnimationController.play();
+        });
+
+        document.getElementById('anim-prev-btn').addEventListener('click', function() {
+            AnimationController.step(-1);
+        });
+
+        document.getElementById('anim-next-btn').addEventListener('click', function() {
+            AnimationController.step(1);
+        });
+
+        document.getElementById('anim-stop-btn').addEventListener('click', function() {
+            AnimationController.stop();
+        });
+
+        document.getElementById('anim-scrubber').addEventListener('input', function() {
+            AnimationController.setFrame(parseInt(this.value));
+        });
+
+        document.querySelectorAll('.anim-speed-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.anim-speed-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                AnimationController.setSpeed(parseInt(this.dataset.ms));
+            });
         });
     }
 
@@ -1901,6 +2575,143 @@
             .floating-remove-btn:hover {
                 background: rgba(239, 68, 68, 1);
             }
+
+            /* ── Animation section ── */
+            .anim-section {
+                margin-top: 12px;
+                border-top: 1px solid rgba(255,255,255,0.1);
+                padding-top: 12px;
+            }
+            .anim-header {
+                color: rgba(255,255,255,0.85);
+                font-size: 12px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+            .anim-date-badge {
+                margin-left: auto;
+                font-size: 11px;
+                color: #60a5fa;
+                font-weight: 500;
+            }
+            .anim-load-btn {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid rgba(96,165,250,0.5);
+                border-radius: 6px;
+                background: rgba(96,165,250,0.12);
+                color: #60a5fa;
+                font-size: 12px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                transition: all 0.2s;
+                margin-bottom: 8px;
+            }
+            .anim-load-btn:hover { background: rgba(96,165,250,0.22); }
+            .anim-load-btn:disabled { opacity: 0.45; cursor: default; }
+            .anim-progress-track {
+                height: 4px;
+                background: rgba(255,255,255,0.1);
+                border-radius: 2px;
+                overflow: hidden;
+                margin-bottom: 4px;
+            }
+            .anim-progress-bar {
+                height: 100%;
+                background: #60a5fa;
+                width: 0%;
+                transition: width 0.2s;
+                border-radius: 2px;
+            }
+            .anim-progress-text {
+                font-size: 10px;
+                color: rgba(255,255,255,0.5);
+                display: block;
+                text-align: center;
+                margin-bottom: 8px;
+            }
+            .anim-transport {
+                display: flex;
+                gap: 4px;
+                justify-content: center;
+                margin-bottom: 8px;
+            }
+            .anim-btn {
+                width: 34px;
+                height: 34px;
+                border: none;
+                border-radius: 6px;
+                background: rgba(255,255,255,0.08);
+                color: #fff;
+                font-size: 14px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.15s;
+            }
+            .anim-btn:hover { background: rgba(255,255,255,0.16); }
+            .anim-btn-main { background: rgba(96,165,250,0.25); color: #60a5fa; flex: 1; }
+            .anim-btn-main:hover { background: rgba(96,165,250,0.4); }
+            .anim-btn-stop { background: rgba(239,68,68,0.15); color: #f87171; }
+            .anim-btn-stop:hover { background: rgba(239,68,68,0.3); }
+            .anim-scrubber {
+                width: 100%;
+                margin-bottom: 8px;
+                accent-color: #60a5fa;
+                cursor: pointer;
+            }
+            .anim-speed {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 11px;
+                color: rgba(255,255,255,0.45);
+            }
+            .anim-speed-btn {
+                padding: 2px 7px;
+                border: 1px solid rgba(255,255,255,0.15);
+                border-radius: 4px;
+                background: transparent;
+                color: rgba(255,255,255,0.5);
+                font-size: 11px;
+                cursor: pointer;
+                transition: all 0.15s;
+            }
+            .anim-speed-btn.active,
+            .anim-speed-btn:hover {
+                border-color: #60a5fa;
+                color: #60a5fa;
+                background: rgba(96,165,250,0.1);
+            }
+
+            /* ── Map date overlay ── */
+            .map-anim-date {
+                position: absolute;
+                top: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 4px 14px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                z-index: 800;
+                pointer-events: none;
+                background: rgba(0,0,0,0.65);
+                color: #fff;
+                backdrop-filter: blur(4px);
+                display: none;
+            }
+            .map-anim-date.today  { background: rgba(96,165,250,0.8); }
+            .map-anim-date.forecast { background: rgba(251,146,60,0.8); }
+            .map-anim-date.past   { background: rgba(0,0,0,0.65); }
             
             /* mobile */
             @media (max-width: 768px) {
@@ -2004,7 +2815,11 @@
         
         // utils
         getColorScale,
-        interpolateColor
+        interpolateColor,
+        setColormap,
+
+        // animation
+        animation: AnimationController
     };
 
     // export
