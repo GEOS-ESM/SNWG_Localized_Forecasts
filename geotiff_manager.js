@@ -234,7 +234,8 @@
         isVisible: true,
         legendVisible: true,
         availableLayers: [],
-        activeColormap: null,  
+        activeColormap: null,
+        activeBasemap:  'voyager',
         allAddedLayers: []
     };
 
@@ -1124,10 +1125,32 @@
                 <span class="legend-footer-item"><strong>NASA/ ESA Pandora</strong> <span class="legend-meta">Historical, Real-time · Site Specific
 </span></span>
                 <span class="legend-footer-sep">|</span>
-                <span class="legend-footer-item"><strong>Date</strong> ${displayDate}</span>
+                <span class="legend-footer-item legend-footer-date-item">
+                    <strong>Date</strong> <span id="legend-current-date">${displayDate}</span>
+                    <button class="legend-layers-btn" title="Open Layers Panel"><i class="bi bi-layers-fill"></i></button>
+                </span>
             </div>
             </div>
         `;
+
+        // Layers
+        const lLayersBtn = legend.querySelector('.legend-layers-btn');
+        if (lLayersBtn) {
+            lLayersBtn.addEventListener('click', () => {
+                let panel = document.getElementById('geotiff-floating-panel');
+                if (!panel) {
+                    createFloatingPanel();
+                } else {
+                    panel.style.display = 'flex';
+                }
+                setTimeout(() => {
+                    const layersTab = document.querySelector('.fp-tab[data-tab="layers"]');
+                    if (layersTab) layersTab.click();
+                }, 50);
+                const quickBtn = document.getElementById('geotiff-quick-btn');
+                if (quickBtn) quickBtn.style.display = 'none';
+            });
+        }
 
         legend.style.display = state.legendVisible ? 'block' : 'none';
     }
@@ -1153,12 +1176,13 @@
 
 
     const AnimationController = {
-        frames:      [],   
-        currentIdx:  0,
-        playing:     false,
-        _timer:      null,
-        speed:       800,  
-        _pollutant:  null,
+        frames:         [],
+        currentIdx:     0,
+        playing:        false,
+        _timer:         null,
+        speed:          800,
+        _pollutant:     null,
+        _lastSyncedDate: null,
 
 
         _buildFrameList: function(pollutant) {
@@ -1253,22 +1277,25 @@
                 state.currentLayer._draw();
             }
 
-            // Date overlay
             this._showDateLabel(frame.meta.date);
 
-            // Update scrubber
             const scrubber = document.getElementById('anim-scrubber');
             if (scrubber) scrubber.value = idx;
 
-            // Update date in panel
             const dateEl = document.getElementById('anim-date-label');
             if (dateEl) dateEl.textContent = frame.meta.date;
 
-            // Sync layer dropdown
+            const legendDate = document.getElementById('legend-current-date');
+            if (legendDate) legendDate.textContent = frame.meta.date;
+
+            _patchURLParam('dt', frame.meta.date);
+
             ['geotiff-floating-select', 'geotiff-layer-select'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = frame.meta.path;
             });
+
+            this._syncForecastsToDate(frame.meta.date);
         },
 
         play: function() {
@@ -1304,6 +1331,85 @@
             this._renderFrame(idx);
         },
 
+        _syncMarkersAndBanners: function(sitesData) {
+            if (typeof sitesArrayToGeoJSON === 'function' && typeof updateMapMarkers === 'function') {
+                try {
+                    window.__geotiffAnimating = true;
+                    updateMapMarkers(sitesArrayToGeoJSON(sitesData));
+                } catch(e) {}
+                finally { window.__geotiffAnimating = false; }
+            }
+            sitesData.forEach(site => {
+                const forecast = site.current_forecast;
+                if (!forecast) return;
+                const raw = forecast.overall_aqi != null ? forecast.overall_aqi
+                          : (typeof getAqiFromForecast === 'function' ? getAqiFromForecast(forecast, site.species) : null);
+                if (raw == null || raw === 'N/A') return;
+                const aqi = parseInt(raw);
+                if (isNaN(aqi)) return;
+                const cls = aqi <= 50 ? 'good' : aqi <= 100 ? 'moderate' :
+                            aqi <= 150 ? 'unhealthy-sensitive' : aqi <= 200 ? 'unhealthy' :
+                            aqi <= 300 ? 'very-unhealthy' : 'hazardous';
+                const nameAttr = site.location_name.replace(/ /g, '-');
+                const $card = $(`.ticker-card[location_name="${nameAttr}"]`);
+                if ($card.length) {
+                    $card.find('.ticker-card-aqi').text(aqi).attr('class', `ticker-card-aqi ${cls}`);
+                    if (forecast.local_time) {
+                        $card.find('.ticker-card-meta span:first').text(forecast.local_time.substring(11, 16));
+                    }
+                }
+            });
+        },
+
+        _syncForecastsToDate: async function(dateStr) {
+            if (!window.currentForecastData || !window.currentForecastData.length) return;
+            if (this._lastSyncedDate === dateStr) return;
+            this._lastSyncedDate = dateStr;
+
+            const [year, month, day] = dateStr.split('-');
+
+            const hasFullSeries = window.currentForecastData.every(site => {
+                const f = Array.isArray(site.precomputed_forecasts) ? site.precomputed_forecasts : [];
+                return f.length > 2;
+            });
+
+            if (hasFullSeries) {
+                const updatedSites = window.currentForecastData.map(site => {
+                    const forecasts = site.precomputed_forecasts;
+                    let best = null, bestDiff = Infinity;
+                    for (const f of forecasts) {
+                        if (!f.local_time || !f.local_time.startsWith(dateStr)) continue;
+                        const h = parseInt(f.local_time.substring(11, 13));
+                        const d = Math.abs(h - 12);
+                        if (d < bestDiff) { bestDiff = d; best = f; }
+                    }
+                    return best ? { ...site, current_forecast: best } : site;
+                });
+                this._syncMarkersAndBanners(updatedSites);
+                return;
+            }
+
+            const cacheKey = `__anim_snap_${year}${month}${day}09__`;
+            let snapshot = window[cacheKey];
+            if (!snapshot) {
+                try {
+                    const url = `https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/hourly_forecasts/${year}-${month}-${day}_09.json`;
+                    const resp = await fetch(url);
+                    if (resp.ok) { snapshot = await resp.json(); window[cacheKey] = snapshot; }
+                } catch(e) { /* ignore — keep current markers */ }
+            }
+            if (!snapshot || !snapshot.sites) return;
+
+            const snapMap = {};
+            snapshot.sites.forEach(s => { snapMap[s.location_name] = s; });
+
+            const updatedSites = window.currentForecastData.map(site => {
+                const s = snapMap[site.location_name];
+                return s ? { ...site, current_forecast: s } : site;
+            });
+            this._syncMarkersAndBanners(updatedSites);
+        },
+
         _showDateLabel: function(dateStr) {
             let el = document.getElementById('map-anim-date');
             if (!el) {
@@ -1313,7 +1419,6 @@
                 const mapEl = document.getElementById('map');
                 if (mapEl) mapEl.appendChild(el);
             }
-            // Mark today / forecast / past
             const today = new Date().toISOString().split('T')[0];
             el.className = 'map-anim-date ' + (dateStr > today ? 'forecast' : dateStr === today ? 'today' : 'past');
             el.textContent = dateStr;
@@ -1347,15 +1452,14 @@
                 if (loadBtn)  loadBtn.disabled = false;
                 if (controls) controls.style.display = 'flex';
                 if (progress) progress.style.display = 'none';
-                if (playBtn)  playBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
-                // Set scrubber max
+                if (playBtn)  playBtn.innerHTML = '&#9654;';
                 const scrubber = document.getElementById('anim-scrubber');
                 if (scrubber) {
                     scrubber.max   = this.frames.length - 1;
                     scrubber.value = this.currentIdx;
                 }
             } else if (mode === 'playing') {
-                if (playBtn) playBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+                if (playBtn) playBtn.innerHTML = '&#9646;&#9646;';
             } else if (mode === 'idle') {
                 if (loadBtn)  loadBtn.disabled = false;
                 if (controls) controls.style.display = 'none';
@@ -1367,10 +1471,15 @@
             this.pause();
             this.frames     = [];
             this.currentIdx = 0;
+            this._lastSyncedDate = null;
             this._hideDateLabel();
             this._updateUI('idle');
             const text = document.getElementById('anim-progress-text');
             if (text) text.textContent = '';
+            _patchURLParam('dt', null);
+            if (window.currentForecastData && typeof sitesArrayToGeoJSON === 'function' && typeof updateMapMarkers === 'function') {
+                try { updateMapMarkers(sitesArrayToGeoJSON(window.currentForecastData)); } catch(e) {}
+            }
         }
     };
 
@@ -1404,7 +1513,7 @@
 
         container.innerHTML = `
             <div class="control-section geotiff-control-section">
-                <h4><i class="bi bi-layers"></i> Raster Layers</h4>
+                <h4><i class="bi bi-layers"></i> Layers</h4>
                 <div class="geotiff-meta-info">
                     <span><i class="bi bi-calendar3"></i> ${utcDateStr} ${utcTimeStr} UTC</span>
                     <span><i class="bi bi-database"></i> Source: NASA GMAO</span>
@@ -1608,16 +1717,22 @@
     function getURLParams() {
         const params = new URLSearchParams(window.location.search);
         return {
-            r: params.get('r'),
-            lt: params.get('lt'),
-            lg: params.get('lg'),
-            z: params.get('z')
+            r:   params.get('r'),
+            lt:  params.get('lt'),
+            lg:  params.get('lg'),
+            z:   params.get('z'),
+            cm:  params.get('cm'),   // colormap id ('' = default)
+            bm:  params.get('bm'),   // basemap id
+            op:  params.get('op'),   // opacity 0-1
+            vis: params.get('vis'),  // layer visibility '0'|'1'
+            leg: params.get('leg'),  // legend visibility '0'|'1'
+            dt:  params.get('dt'),   // animation date YYYY-MM-DD
         };
     }
 
-    function updateURLParams(tifPath, mapState) {
+    function updateURLParams(tifPath, mapState, settings) {
         const params = new URLSearchParams(window.location.search);
-        
+
         if (tifPath) {
             const m = tifPath.match(/geos_cf_([A-Z0-9]+)_RH35_(\d{4})(\d{2})(\d{2})/) ||
                       tifPath.match(/geos_cf_([A-Z0-9]+)_(\d{4})(\d{2})(\d{2})/);
@@ -1629,13 +1744,36 @@
                 params.set('r', tifPath);
             }
         }
-        
+
         if (mapState) {
-            if (mapState.lat !== undefined) params.set('lt', mapState.lat.toFixed(4));
-            if (mapState.lng !== undefined) params.set('lg', mapState.lng.toFixed(4));
-            if (mapState.zoom !== undefined) params.set('z', mapState.zoom);
+            if (mapState.lat  !== undefined) params.set('lt', mapState.lat.toFixed(4));
+            if (mapState.lng  !== undefined) params.set('lg', mapState.lng.toFixed(4));
+            if (mapState.zoom !== undefined) params.set('z',  mapState.zoom);
         }
-        
+
+        // settings snapshot (always pull from live state when not supplied)
+        const s = settings || {};
+        const cm = 'cm' in s ? s.cm : (state.activeColormap || '');
+        const bm = 'bm' in s ? s.bm : (state.activeBasemap  || 'voyager');
+        const op = 'op' in s ? s.op : state.layerOpacity;
+        const vis = 'vis' in s ? s.vis : (state.isVisible     ? '1' : '0');
+        const leg = 'leg' in s ? s.leg : (state.legendVisible ? '1' : '0');
+
+        if (cm)  params.set('cm',  cm);  else params.delete('cm');
+        params.set('bm',  bm);
+        params.set('op',  parseFloat(op).toFixed(2));
+        params.set('vis', vis);
+        params.set('leg', leg);
+
+        const newURL = window.location.pathname + '?' + params.toString();
+        window.history.replaceState({ path: newURL }, '', newURL);
+    }
+
+    // Persist a single setting key without touching others
+    function _patchURLParam(key, value) {
+        const params = new URLSearchParams(window.location.search);
+        if (value === null || value === undefined) params.delete(key);
+        else params.set(key, value);
         const newURL = window.location.pathname + '?' + params.toString();
         window.history.replaceState({ path: newURL }, '', newURL);
     }
@@ -1660,17 +1798,78 @@
     }
 
 
+    // Restore colormap / basemap / opacity / visibility / legend from URL
+    function restoreSettings() {
+        const p = getURLParams();
+
+        // ── Opacity ───────────────────────────────────────────────────────────
+        if (p.op !== null) {
+            const op = parseFloat(p.op);
+            if (!isNaN(op)) {
+                state.layerOpacity = Math.max(0, Math.min(1, op));
+                const sl = document.getElementById('geotiff-floating-opacity');
+                const vl = document.getElementById('geotiff-floating-opacity-val');
+                if (sl) sl.value = state.layerOpacity;
+                if (vl) vl.textContent = state.layerOpacity.toFixed(2);
+            }
+        }
+
+        // ── Colormap ──────────────────────────────────────────────────────────
+        if (p.cm !== null) {
+            setColormap(p.cm || null);
+        }
+
+        // ── Visibility ────────────────────────────────────────────────────────
+        if (p.vis === '0' && state.isVisible) {
+            toggleLayerVisibility();
+            const cb = document.getElementById('fp-visibility');
+            if (cb) cb.checked = false;
+        }
+
+        // ── Legend ────────────────────────────────────────────────────────────
+        if (p.leg === '0' && state.legendVisible) {
+            toggleLegend();
+            const cb = document.getElementById('fp-legend-visibility');
+            if (cb) cb.checked = false;
+        }
+
+        // ── Basemap ───────────────────────────────────────────────────────────
+        if (p.bm) {
+            state.activeBasemap = p.bm;
+            const _basemapDefs = {
+                voyager:   { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',         opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
+                dark:      { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',                    opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
+                positron:  { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',                   opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
+                osm:       { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',                               opts: { attribution: '© OpenStreetMap', subdomains: 'abc', maxZoom: 19 } },
+                satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', opts: { attribution: '© Esri', maxZoom: 19 } },
+                topo:      { url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',             opts: { attribution: '© Stamen', subdomains: 'abcd', maxZoom: 18 } },
+                none:      { url: null, opts: {} }
+            };
+            const def = _basemapDefs[p.bm];
+            const map = window.currentMap;
+            if (def && map) {
+                if (window.currentTileLayer) map.removeLayer(window.currentTileLayer);
+                if (def.url) window.currentTileLayer = L.tileLayer(def.url, def.opts).addTo(map);
+                else window.currentTileLayer = null;
+            }
+            // Sync panel cards 
+            document.querySelectorAll('.bm-card').forEach(c => {
+                c.classList.toggle('active', c.dataset.id === p.bm);
+            });
+        }
+    }
+
     function selectDefaultLayer(pollutant) {
         const todayUTC = new Date().toISOString().split('T')[0]; // date
         const pool = state.availableLayers.filter(l => l.pollutant === pollutant);
 
         if (pool.length === 0) return null;
 
-        // 1. Today, non-test
+        // 1. Today
         const todayLayer = pool.find(l => !l.test && l.date === todayUTC);
         if (todayLayer) return todayLayer;
 
-        // 2. Most-recent non-test 
+        // recent
         const nonTest = pool.filter(l => !l.test && l.date).sort((a, b) => b.date.localeCompare(a.date));
         if (nonTest.length > 0) return nonTest[0];
 
@@ -1791,23 +1990,24 @@
         // restore
         if (window.currentMap) {
             restoreMapState(window.currentMap);
-            
-            // debounce
+            restoreSettings();   // colormap, basemap, opacity, visibility, legend
+
+            // debounce map-move → URL
             let urlUpdateTimeout = null;
             const updateURLOnMapChange = () => {
                 if (urlUpdateTimeout) clearTimeout(urlUpdateTimeout);
                 urlUpdateTimeout = setTimeout(() => {
-                    if (state.currentLayer) {
-                        updateURLParams(state.currentLayer.path || state.currentLayerName, {
-                            lat: window.currentMap.getCenter().lat,
-                            lng: window.currentMap.getCenter().lng,
+                    updateURLParams(
+                        state.currentLayer ? (state.currentLayer.path || state.currentLayerName) : null,
+                        {
+                            lat:  window.currentMap.getCenter().lat,
+                            lng:  window.currentMap.getCenter().lng,
                             zoom: window.currentMap.getZoom()
-                        });
-                    }
+                        }
+                    );
                 }, 300);
             };
-            
-            // update
+
             window.currentMap.on('moveend', updateURLOnMapChange);
             window.currentMap.on('zoomend', updateURLOnMapChange);
         }
@@ -1893,24 +2093,24 @@
     function createFloatingButton() {
         if (!document.body.classList.contains('home-page')) return;
         if (document.getElementById('geotiff-quick-btn')) return;
-        
+
         const btn = document.createElement('button');
         btn.id = 'geotiff-quick-btn';
         btn.className = 'geotiff-quick-btn';
-        btn.title = 'Raster Layers';
-        btn.innerHTML = '<i class="bi bi-layers-half"></i>';
-        
+        btn.title = 'Map Layers';
+        btn.innerHTML = '<i class="bi bi-layers"></i>';
+
         btn.addEventListener('click', () => {
-            // toggle
             let panel = document.getElementById('geotiff-floating-panel');
             if (panel) {
-                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+                panel.style.display = 'flex';
+                btn.style.display = 'none';
             } else {
                 createFloatingPanel();
+                btn.style.display = 'none';
             }
         });
-        
-        // container
+
         const mapContainer = document.getElementById('map');
         if (mapContainer) {
             mapContainer.parentElement.appendChild(btn);
@@ -1924,74 +2124,193 @@
         const panel = document.createElement('div');
         panel.id = 'geotiff-floating-panel';
         panel.className = 'geotiff-floating-panel';
-        
-        let layerOptions = '<option value="">-- Select Layer --</option>';
+
+        let layerOptions = '<option value="">── Select Layer ──</option>';
         state.availableLayers.forEach(layer => {
             layerOptions += `<option value="${layer.path}" data-type="${layer.type}" data-pollutant="${layer.pollutant}" data-unit="${layer.unit || ''}">${layer.name}</option>`;
         });
+
+        const colormaps = [
+            { id: '', name: 'Pollutant Default', gradient: 'linear-gradient(to right,#440154,#3b5289,#21908c,#5dc962,#fde725)' },
+            { id: 'aqi', name: 'AQI', gradient: 'linear-gradient(to right,#00e400,#ffff00,#ff7e00,#ff0000,#8f3f97,#7e0023)' },
+            { id: 'viridis', name: 'Viridis', gradient: 'linear-gradient(to right,#440154,#31688e,#21908c,#35b779,#fde725)' },
+            { id: 'plasma', name: 'Plasma', gradient: 'linear-gradient(to right,#0d0887,#b12a90,#e16462,#fca636,#f0f921)' },
+            { id: 'magma', name: 'Magma', gradient: 'linear-gradient(to right,#000004,#4f127b,#b5367a,#fc8961,#fcfdbf)' },
+            { id: 'inferno', name: 'Inferno', gradient: 'linear-gradient(to right,#000004,#550f6d,#ba3655,#f98c09,#fcffa4)' },
+            { id: 'turbo', name: 'Turbo', gradient: 'linear-gradient(to right,#30123b,#3261d3,#1ecbb7,#a7e444,#fb9a25,#7a0403)' },
+            { id: 'coolwarm', name: 'Cool–Warm', gradient: 'linear-gradient(to right,#3b4cc0,#a9c1fe,#dddddd,#fdb2a1,#b40426)' },
+        ];
+
+        const basemaps = [
+            { id: 'voyager',   name: 'Voyager',       abbr: 'VOY' },
+            { id: 'dark',      name: 'Dark Matter',   abbr: 'DRK' },
+            { id: 'positron',  name: 'Positron',      abbr: 'LGT' },
+            { id: 'osm',       name: 'OpenStreetMap', abbr: 'OSM' },
+            { id: 'satellite', name: 'Satellite',     abbr: 'SAT' },
+            { id: 'topo',      name: 'Terrain',       abbr: 'TRN' },
+            { id: 'none',      name: 'No Basemap',    abbr: 'OFF' },
+        ];
+
+        const colormapHTML = colormaps.map(cm => `
+            <div class="cm-swatch fp-row ${cm.id === (state.activeColormap || '') ? 'active' : ''}" data-id="${cm.id}">
+                <div class="cm-bar" style="background:${cm.gradient}"></div>
+                <span class="fp-row-title" style="flex:1;padding-left:10px;font-size:13px;">${cm.name}</span>
+                <span class="cm-check fp-row-value">${cm.id === (state.activeColormap || '') ? '\u2713' : ''}</span>
+            </div>`).join('');
+
+        const basemapHTML = basemaps.map((bm, i) => `
+            <div class="bm-card fp-row ${i === 0 ? 'active' : ''}" data-id="${bm.id}">
+                <span class="bm-abbr">${bm.abbr}</span>
+                <span class="fp-row-title" style="flex:1;padding-left:10px;font-size:13px;">${bm.name}</span>
+                <span class="bm-check fp-row-value">${i === 0 ? '\u2713' : ''}</span>
+            </div>`).join('');
         
         panel.innerHTML = `
-            <div class="floating-panel-header">
-                <span><i class="bi bi-layers-half"></i> Raster Layers</span>
-                <button class="floating-panel-close" onclick="document.getElementById('geotiff-floating-panel').style.display='none'">×</button>
+            <div class="fp-header">
+                <span class="fp-header-title">Map Layers</span>
+                <button class="fp-close" id="fp-close-btn" title="Close">&times;</button>
             </div>
-            <div class="floating-panel-body">
-                <select id="geotiff-floating-select" class="floating-select">
-                    ${layerOptions}
-                </select>
-                <div class="floating-controls">
-                    <label style="flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:10px;">
-                        <span style="color:#9ca3af;font-size:12px;">Colormap:</span>
-                        <select id="geotiff-floating-colormap" class="floating-select" style="margin-bottom:0;">
-                            <option value="">── Pollutant Default ──</option>
-                            <option value="aqi">AQI (Green → Red)</option>
-                            <option value="viridis">Viridis</option>
-                            <option value="plasma">Plasma</option>
-                            <option value="magma">Magma</option>
-                            <option value="inferno">Inferno</option>
-                            <option value="turbo">Turbo</option>
-                            <option value="coolwarm">Cool–Warm</option>
-                        </select>
-                    </label>
-                    <label>
-                        <span>Opacity:</span>
-                        <input type="range" id="geotiff-floating-opacity" min="0" max="1" step="0.1" value="${state.layerOpacity}">
-                        <span id="geotiff-floating-opacity-val">${state.layerOpacity}</span>
-                    </label>
-                </div>
-                <button id="geotiff-floating-remove" class="floating-remove-btn">
-                    <i class="bi bi-x-circle"></i> Remove Layer
-                </button>
+            <div class="fp-tabs">
+                <button class="fp-tab active" data-tab="layers">Layers</button>
+                <button class="fp-tab" data-tab="colors">Colors</button>
+                <button class="fp-tab" data-tab="animate">Animate</button>
+                <button class="fp-tab" data-tab="basemap">Basemap</button>
+            </div>
+            <div class="fp-body">
 
-                <!-- ── Animation ── -->
-                <div class="anim-section">
-                    <div class="anim-header">
-                        <i class="bi bi-film"></i> Animation
-                        <span id="anim-date-label" class="anim-date-badge"></span>
+                <!-- LAYERS -->
+                <div class="fp-section active" id="fp-tab-layers">
+
+                    <p class="fp-group-label">DATA LAYER</p>
+                    <div class="fp-card">
+                        <div class="fp-row">
+                            <div class="fp-row-text">
+                                <span class="fp-row-title">Layer</span>
+                            </div>
+                        </div>
+                        <div class="fp-row fp-row-select">
+                            <select id="geotiff-floating-select" class="fp-select">${layerOptions}</select>
+                        </div>
                     </div>
-                    <div id="anim-progress" style="display:none;">
+
+                    <p class="fp-group-label">DISPLAY</p>
+                    <div class="fp-card">
+                        <div class="fp-row">
+                            <div class="fp-row-text">
+                                <span class="fp-row-title">Show Layer</span>
+                            </div>
+                            <label class="fp-ios-toggle">
+                                <input type="checkbox" id="fp-visibility" checked>
+                                <span class="fp-ios-track"></span>
+                            </label>
+                        </div>
+                        <div class="fp-row">
+                            <div class="fp-row-text">
+                                <span class="fp-row-title">Show Legend</span>
+                            </div>
+                            <label class="fp-ios-toggle">
+                                <input type="checkbox" id="fp-legend-visibility" checked>
+                                <span class="fp-ios-track"></span>
+                            </label>
+                        </div>
+                        <div class="fp-row">
+                            <div class="fp-row-text">
+                                <span class="fp-row-title">Opacity</span>
+                                <span class="fp-row-sub">Layer transparency</span>
+                            </div>
+                            <span id="geotiff-floating-opacity-val" class="fp-row-badge">${state.layerOpacity}</span>
+                        </div>
+                        <div class="fp-row fp-row-slider">
+                            <input type="range" id="geotiff-floating-opacity" class="fp-slider" min="0" max="1" step="0.05" value="${state.layerOpacity}">
+                        </div>
+                    </div>
+
+                    <p class="fp-group-label">SOURCE</p>
+                    <div class="fp-card">
+                        <div class="fp-row">
+                            <div class="fp-row-text">
+                                <span class="fp-row-title">NASA GEOS-CF</span>
+                                <span class="fp-row-sub">Global Modeling and Assimilation Office</span>
+                            </div>
+                        </div>
+                        <div class="fp-row">
+                            <div class="fp-row-text">
+                                <span class="fp-row-title">Coverage</span>
+                                <span class="fp-row-sub">Global &middot; Daily</span>
+                            </div>
+                            <span class="fp-row-value">&minus;3 to +4 days</span>
+                        </div>
+                    </div>
+
+                    <button id="geotiff-floating-remove" class="fp-btn-danger">Remove Layer</button>
+                </div>
+
+                <!-- COLORS -->
+                <div class="fp-section" id="fp-tab-colors">
+                    <p class="fp-group-label">COLORMAP</p>
+                    <div class="fp-card" id="fp-cm-grid">${colormapHTML}</div>
+                    <p class="fp-group-label">QUICK SELECT</p>
+                    <div class="fp-card">
+                        <div class="fp-row fp-row-select">
+                            <select id="geotiff-floating-colormap" class="fp-select">
+                                ${colormaps.map(cm => `<option value="${cm.id}">${cm.name}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANIMATE -->
+                <div class="fp-section" id="fp-tab-animate">
+                    <p class="fp-group-label">TIME SERIES</p>
+                    <div class="fp-card">
+                        <div class="fp-row">
+                            <div class="fp-row-text">
+                                <span class="fp-row-title">Range</span>
+                                <span class="fp-row-sub">3 days past &rarr; 4 days forecast</span>
+                            </div>
+                            <span id="anim-date-label" class="fp-row-badge"></span>
+                        </div>
+                    </div>
+                    <div id="anim-progress" style="display:none; margin-bottom:12px;">
                         <div class="anim-progress-track"><div id="anim-progress-bar" class="anim-progress-bar"></div></div>
                         <span id="anim-progress-text" class="anim-progress-text"></span>
                     </div>
-                    <button id="anim-load-btn" class="anim-load-btn">
-                        <i class="bi bi-arrow-repeat"></i> Load 7-day frames
-                    </button>
-                    <div id="anim-controls" style="display:none;">
-                        <div class="anim-transport">
-                            <button id="anim-prev-btn"  class="anim-btn" title="Previous"><i class="bi bi-skip-start-fill"></i></button>
-                            <button id="anim-play-btn"  class="anim-btn anim-btn-main" title="Play / Pause"><i class="bi bi-play-fill"></i></button>
-                            <button id="anim-next-btn"  class="anim-btn" title="Next"><i class="bi bi-skip-end-fill"></i></button>
-                            <button id="anim-stop-btn"  class="anim-btn anim-btn-stop" title="Stop"><i class="bi bi-stop-fill"></i></button>
+                    <button id="anim-load-btn" class="fp-btn-primary">Animate</button>
+                    <div id="anim-controls" style="display:none; flex-direction:column; gap:14px; margin-top:16px;">
+                        <div class="fp-card" style="padding:4px 4px;">
+                            <div class="anim-transport">
+                                <button id="anim-prev-btn" class="anim-btn" title="Step back">&#9664;&#9664;</button>
+                                <button id="anim-play-btn" class="anim-btn anim-btn-main" title="Play / Pause">&#9654;</button>
+                                <button id="anim-next-btn" class="anim-btn" title="Step forward">&#9654;&#9654;</button>
+                                <button id="anim-stop-btn" class="anim-btn anim-btn-stop" title="Stop">&#9632;</button>
+                            </div>
                         </div>
-                        <input type="range" id="anim-scrubber" class="anim-scrubber" min="0" max="6" value="0" step="1">
-                        <div class="anim-speed">
-                            <span>Speed:</span>
-                            <button class="anim-speed-btn" data-ms="1200">Slow</button>
-                            <button class="anim-speed-btn active" data-ms="800">Med</button>
-                            <button class="anim-speed-btn" data-ms="400">Fast</button>
+                        <div class="fp-card" style="padding:12px 16px;">
+                            <div class="fp-row">
+                                <span class="fp-row-title" style="font-size:13px;">Scrub</span>
+                            </div>
+                            <input type="range" id="anim-scrubber" class="fp-slider" min="0" max="6" value="0" step="1">
+                        </div>
+                        <p class="fp-group-label">PLAYBACK SPEED</p>
+                        <div class="fp-card">
+                            <div class="fp-row">
+                                <div class="fp-seg" id="anim-speed-group">
+                                    <button class="fp-seg-btn" data-ms="1600">Slow</button>
+                                    <button class="fp-seg-btn active" data-ms="800">Med</button>
+                                    <button class="fp-seg-btn" data-ms="350">Fast</button>
+                                    <button class="fp-seg-btn" data-ms="140">Max</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- BASEMAP -->
+                <div class="fp-section" id="fp-tab-basemap">
+                    <p class="fp-group-label">BASE MAP</p>
+                    <div class="fp-card" id="fp-bm-grid">${basemapHTML}</div>
+                </div>
+
             </div>
         `;
         
@@ -2001,87 +2320,145 @@
         } else {
             document.body.appendChild(panel);
         }
-        
-        // events
+
+        // ── Tab switching ──
+        panel.querySelectorAll('.fp-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                panel.querySelectorAll('.fp-tab').forEach(t => t.classList.remove('active'));
+                panel.querySelectorAll('.fp-section').forEach(s => s.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('fp-tab-' + this.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ── Close ──
+        document.getElementById('fp-close-btn').addEventListener('click', () => {
+            panel.style.display = 'none';
+            const btn = document.getElementById('geotiff-quick-btn');
+            if (btn) btn.style.display = 'flex';
+        });
+
+        // ── Layer select ──
         const floatingSelect = document.getElementById('geotiff-floating-select');
         floatingSelect.addEventListener('change', async function() {
             const selectedOption = this.options[this.selectedIndex];
             const path = this.value;
-            
-            if (!path) {
-                removeCurrentLayer();
-                hideLegend();
-                return;
-            }
-            
+            if (!path) { removeCurrentLayer(); hideLegend(); return; }
             const type = selectedOption.dataset.type;
             const pollutant = selectedOption.dataset.pollutant;
             const unit = selectedOption.dataset.unit;
             const name = selectedOption.textContent;
-            
             if (type === 'geotiff' || type === 'tiff') {
                 await loadGeoTIFF(path, { pollutant, name, unit });
             } else if (type === 'pmtiles') {
                 await loadPMTiles(path, { pollutant, name });
             }
         });
-        
-        const floatingColormap = document.getElementById('geotiff-floating-colormap');
-        if (floatingColormap) {
-            floatingColormap.value = state.activeColormap || '';
-            floatingColormap.addEventListener('change', function() {
-                setColormap(this.value || null);
-            });
-        }
 
+        // ── Opacity ──
         const floatingOpacity = document.getElementById('geotiff-floating-opacity');
         const floatingOpacityVal = document.getElementById('geotiff-floating-opacity-val');
         floatingOpacity.addEventListener('input', function() {
             const opacity = parseFloat(this.value);
             setLayerOpacity(opacity);
-            floatingOpacityVal.textContent = opacity.toFixed(1);
+            floatingOpacityVal.textContent = opacity.toFixed(2);
+            _patchURLParam('op', opacity.toFixed(2));
         });
-        
-        const floatingRemove = document.getElementById('geotiff-floating-remove');
-        floatingRemove.addEventListener('click', function() {
+
+        // ── Visibility toggles ──
+        document.getElementById('fp-visibility').addEventListener('change', function() {
+            if (this.checked !== state.isVisible) toggleLayerVisibility();
+            _patchURLParam('vis', state.isVisible ? '1' : '0');
+        });
+        document.getElementById('fp-legend-visibility').addEventListener('change', function() {
+            if (this.checked !== state.legendVisible) toggleLegend();
+            _patchURLParam('leg', state.legendVisible ? '1' : '0');
+        });
+
+        // ── Remove ──
+        document.getElementById('geotiff-floating-remove').addEventListener('click', function() {
             AnimationController.stop();
             removeCurrentLayer();
             hideLegend();
             floatingSelect.value = '';
         });
 
-        // Animation controls
+        // ── Colormap swatches ──
+        panel.querySelectorAll('.cm-swatch').forEach(swatch => {
+            swatch.addEventListener('click', function() {
+                panel.querySelectorAll('.cm-swatch').forEach(s => s.classList.remove('active'));
+                this.classList.add('active');
+                const id = this.dataset.id;
+                setColormap(id || null);
+                const sel = document.getElementById('geotiff-floating-colormap');
+                if (sel) sel.value = id;
+                _patchURLParam('cm', id || null);
+            });
+        });
+
+        // ── Colormap dropdown ──
+        const floatingColormap = document.getElementById('geotiff-floating-colormap');
+        if (floatingColormap) {
+            floatingColormap.value = state.activeColormap || '';
+            floatingColormap.addEventListener('change', function() {
+                setColormap(this.value || null);
+                panel.querySelectorAll('.cm-swatch').forEach(s => {
+                    s.classList.toggle('active', s.dataset.id === (this.value || ''));
+                });
+                _patchURLParam('cm', this.value || null);
+            });
+        }
+
+        // ── Basemap cards ──
+        const _basemapDefs = {
+            voyager:   { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',         opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
+            dark:      { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',                    opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
+            positron:  { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',                   opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
+            osm:       { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',                               opts: { attribution: '© OpenStreetMap', subdomains: 'abc', maxZoom: 19 } },
+            satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', opts: { attribution: '© Esri', maxZoom: 19 } },
+            topo:      { url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',             opts: { attribution: '© Stamen', subdomains: 'abcd', maxZoom: 18 } },
+            none:      { url: null, opts: {} }
+        };
+        panel.querySelectorAll('.bm-card').forEach(card => {
+            card.addEventListener('click', function() {
+                panel.querySelectorAll('.bm-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                const bmId = this.dataset.id;
+                state.activeBasemap = bmId;
+                const def = _basemapDefs[bmId];
+                if (!def) return;
+                const map = window.currentMap;
+                if (!map) return;
+                if (window.currentTileLayer) map.removeLayer(window.currentTileLayer);
+                if (def.url) {
+                    window.currentTileLayer = L.tileLayer(def.url, def.opts).addTo(map);
+                } else {
+                    window.currentTileLayer = null;
+                }
+                _patchURLParam('bm', bmId);
+            });
+        });
+
+        // ── Animation controls ──
         document.getElementById('anim-load-btn').addEventListener('click', async function() {
             const pollutant = state.currentLayerName ?
                 (state.currentLayerName.match(/no2|pm25|o3|co|so2/i) || ['pm25'])[0].toLowerCase() : 'pm25';
             const ok = await AnimationController.preload(pollutant);
             if (ok) showNotification(`Animation ready: ${AnimationController.frames.length} frames`, 'success');
         });
-
         document.getElementById('anim-play-btn').addEventListener('click', function() {
             if (AnimationController.playing) AnimationController.pause();
             else AnimationController.play();
         });
-
-        document.getElementById('anim-prev-btn').addEventListener('click', function() {
-            AnimationController.step(-1);
-        });
-
-        document.getElementById('anim-next-btn').addEventListener('click', function() {
-            AnimationController.step(1);
-        });
-
-        document.getElementById('anim-stop-btn').addEventListener('click', function() {
-            AnimationController.stop();
-        });
-
+        document.getElementById('anim-prev-btn').addEventListener('click', () => AnimationController.step(-1));
+        document.getElementById('anim-next-btn').addEventListener('click', () => AnimationController.step(1));
+        document.getElementById('anim-stop-btn').addEventListener('click', () => AnimationController.stop());
         document.getElementById('anim-scrubber').addEventListener('input', function() {
             AnimationController.setFrame(parseInt(this.value));
         });
-
-        document.querySelectorAll('.anim-speed-btn').forEach(btn => {
+        panel.querySelectorAll('.fp-seg-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                document.querySelectorAll('.anim-speed-btn').forEach(b => b.classList.remove('active'));
+                panel.querySelectorAll('.fp-seg-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 AnimationController.setSpeed(parseInt(this.dataset.ms));
             });
@@ -2252,6 +2629,32 @@
                 color: rgba(255,255,255,0.65);
                 font-size: 9px;
                 margin-left: 4px;
+            }
+            .legend-footer-date-item {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .legend-layers-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px;
+                height: 20px;
+                border: 1px solid rgba(255,255,255,0.25);
+                border-radius: 4px;
+                background: rgba(255,255,255,0.1);
+                color: rgba(255,255,255,0.85);
+                font-size: 11px;
+                cursor: pointer;
+                padding: 0;
+                transition: background 0.15s, border-color 0.15s;
+                vertical-align: middle;
+            }
+            .legend-layers-btn:hover {
+                background: rgba(255,255,255,0.22);
+                border-color: rgba(255,255,255,0.5);
+                color: #fff;
             }
 
             
@@ -2430,270 +2833,425 @@
                 letter-spacing: 0.2px;
             }
             
-            /* button */
+            /* ── Toggle button (matches map-controls-toggle-btn) ── */
             .geotiff-quick-btn {
                 position: absolute;
-                top: 180px;
-                left: 10px;
-                width: 40px;
-                height: 40px;
+                top: 181px;
+                left: 8px;
+                width: 44px;
+                height: 44px;
+                background: rgba(30, 30, 30, 0.95);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
                 border-radius: 8px;
-                background: rgba(29, 161, 242, 0.9);
-                border: none;
-                color: #fff;
-                font-size: 18px;
-                cursor: pointer;
-                z-index: 1000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-                transition: all 0.2s ease;
-            }
-            
-            .geotiff-quick-btn:hover {
-                background: rgba(29, 161, 242, 1);
-                transform: scale(1.05);
-            }
-            
-            /* panel */
-            .geotiff-floating-panel {
-                position: absolute;
-                top: 230px;
-                left: 10px;
-                width: 280px;
-                background: rgba(26, 26, 46, 0.95);
-                border-radius: 12px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-                z-index: 1001;
-                overflow: hidden;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            }
-            
-            .floating-panel-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 12px 15px;
-                background: rgba(29, 161, 242, 0.2);
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                color: #fff;
-                font-weight: 600;
-                font-size: 14px;
-            }
-            
-            .floating-panel-header i {
-                margin-right: 8px;
-            }
-            
-            .floating-panel-close {
-                background: none;
-                border: none;
                 color: #fff;
                 font-size: 20px;
                 cursor: pointer;
-                padding: 0;
-                line-height: 1;
-                opacity: 0.7;
-            }
-            
-            .floating-panel-close:hover {
-                opacity: 1;
-            }
-            
-            .floating-panel-body {
-                padding: 15px;
-            }
-            
-            .floating-select {
-                width: 100%;
-                padding: 10px;
-                border-radius: 6px;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                background: rgba(0, 0, 0, 0.3);
-                color: #fff;
-                font-size: 13px;
-                margin-bottom: 12px;
-            }
-            
-            .floating-select option {
-                background: #1a1a2e;
-                color: #fff;
-            }
-            
-            .floating-controls {
-                margin-bottom: 12px;
-            }
-            
-            .floating-controls label {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                color: #9ca3af;
-                font-size: 13px;
-            }
-            
-            .floating-controls input[type="range"] {
-                flex: 1;
-            }
-            
-            .floating-remove-btn {
-                width: 100%;
-                padding: 10px;
-                border: none;
-                border-radius: 6px;
-                background: rgba(239, 68, 68, 0.8);
-                color: #fff;
-                font-size: 13px;
-                cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 6px;
-                transition: background 0.2s;
+                z-index: 1000;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+                transition: all 0.2s ease;
+                padding: 0;
             }
-            
-            .floating-remove-btn:hover {
-                background: rgba(239, 68, 68, 1);
+            .geotiff-quick-btn:hover { background: rgba(40, 40, 40, 0.95); transform: scale(1.05); }
+
+            /* ── Panel shell ── */
+            .geotiff-floating-panel {
+                position: absolute;
+                top: 0; left: 0;
+                width: 30%;
+                min-width: 300px;
+                max-width: 420px;
+                height: 100%;
+                background: #f5f6fa;
+                z-index: 1001;
+                display: flex;
+                flex-direction: column;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+                box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+                overflow: hidden;
+                color: #1a1a2e;
             }
 
-            /* ── Animation section ── */
-            .anim-section {
-                margin-top: 12px;
-                border-top: 1px solid rgba(255,255,255,0.1);
-                padding-top: 12px;
-            }
-            .anim-header {
-                color: rgba(255,255,255,0.85);
-                font-size: 12px;
-                font-weight: 600;
+            /* header */
+            .fp-header {
                 display: flex;
+                justify-content: space-between;
                 align-items: center;
-                gap: 6px;
-                margin-bottom: 10px;
+                padding: 18px 20px 16px;
+                background: #fff;
+                border-bottom: 1px solid #e5e7eb;
+                flex-shrink: 0;
             }
-            .anim-date-badge {
-                margin-left: auto;
-                font-size: 11px;
-                color: #60a5fa;
-                font-weight: 500;
+            .fp-header-title {
+                font-size: 18px;
+                font-weight: 700;
+                color: #1a1a2e;
+                letter-spacing: -0.3px;
             }
-            .anim-load-btn {
-                width: 100%;
-                padding: 8px;
-                border: 1px solid rgba(96,165,250,0.5);
-                border-radius: 6px;
-                background: rgba(96,165,250,0.12);
-                color: #60a5fa;
-                font-size: 12px;
+            .fp-close {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                border: none;
+                background: #e5e7eb;
+                color: #6b7280;
+                font-size: 18px;
                 cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 6px;
-                transition: all 0.2s;
-                margin-bottom: 8px;
+                line-height: 1;
+                transition: background 0.15s, color 0.15s;
+                padding: 0;
             }
-            .anim-load-btn:hover { background: rgba(96,165,250,0.22); }
-            .anim-load-btn:disabled { opacity: 0.45; cursor: default; }
+            .fp-close:hover { background: #d1d5db; color: #1a1a2e; }
+
+            /* tabs */
+            .fp-tabs {
+                display: flex;
+                background: #fff;
+                border-bottom: 1px solid #e5e7eb;
+                flex-shrink: 0;
+            }
+            .fp-tab {
+                flex: 1;
+                padding: 12px 4px 10px;
+                border: none;
+                border-bottom: 2px solid transparent;
+                background: transparent;
+                color: #9ca3af;
+                font-family: inherit;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.15s;
+            }
+            .fp-tab:hover { color: #374151; }
+            .fp-tab.active { color: #1e3a5f; border-bottom-color: #1e3a5f; }
+
+            /* scrollable body */
+            .fp-body {
+                flex: 1;
+                overflow-y: auto;
+                padding: 16px 14px;
+                scrollbar-width: thin;
+                scrollbar-color: #d1d5db #f5f6fa;
+            }
+            .fp-body::-webkit-scrollbar { width: 4px; }
+            .fp-body::-webkit-scrollbar-track { background: transparent; }
+            .fp-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+
+            /* sections */
+            .fp-section { display: none; flex-direction: column; }
+            .fp-section.active { display: flex; }
+
+            /* group label (like "DISPLAY", "APPEARANCE & THEME") */
+            .fp-group-label {
+                font-size: 11px;
+                font-weight: 600;
+                color: #6b7280;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+                margin: 16px 4px 6px;
+                padding: 0;
+            }
+            .fp-group-label:first-child { margin-top: 0; }
+
+            /* card (white grouped section) */
+            .fp-card {
+                background: #fff;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            }
+
+            /* row inside card */
+            .fp-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 13px 16px;
+                border-bottom: 1px solid #f0f0f5;
+                min-height: 52px;
+            }
+            .fp-row:last-child { border-bottom: none; }
+            .fp-row-text {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                flex: 1;
+            }
+            .fp-row-title {
+                font-size: 15px;
+                font-weight: 500;
+                color: #1a1a2e;
+                line-height: 1.3;
+            }
+            .fp-row-sub {
+                font-size: 12px;
+                color: #9ca3af;
+                font-weight: 400;
+                margin-top: 1px;
+            }
+            .fp-row-value {
+                font-size: 13px;
+                color: #9ca3af;
+                font-weight: 500;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+            .fp-row-badge {
+                background: #f0f0f5;
+                color: #374151;
+                padding: 3px 10px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+            .fp-row-select { padding: 8px 12px; min-height: auto; }
+            .fp-row-slider { padding: 4px 16px 12px; min-height: auto; border-bottom: none; }
+
+            /* iOS toggle */
+            .fp-ios-toggle { cursor: pointer; flex-shrink: 0; }
+            .fp-ios-toggle input { display: none; }
+            .fp-ios-track {
+                display: block;
+                width: 51px;
+                height: 31px;
+                border-radius: 16px;
+                background: #d1d5db;
+                position: relative;
+                transition: background 0.2s;
+            }
+            .fp-ios-track::after {
+                content: '';
+                position: absolute;
+                width: 27px;
+                height: 27px;
+                border-radius: 50%;
+                background: #fff;
+                top: 2px;
+                left: 2px;
+                transition: transform 0.2s;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
+            .fp-ios-toggle input:checked + .fp-ios-track { background: #1e3a5f; }
+            .fp-ios-toggle input:checked + .fp-ios-track::after { transform: translateX(20px); }
+
+            /* select */
+            .fp-select {
+                width: 100%;
+                padding: 9px 32px 9px 12px;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                background: #f5f6fa;
+                color: #1a1a2e;
+                font-family: inherit;
+                font-size: 13px;
+                cursor: pointer;
+                transition: border-color 0.15s;
+                appearance: none;
+                -webkit-appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 10px center;
+                background-color: #f5f6fa;
+            }
+            .fp-select:hover { border-color: #9ca3af; }
+            .fp-select:focus { outline: 2px solid #1e3a5f; outline-offset: 0; border-color: #1e3a5f; }
+            .fp-select option { background: #fff; color: #1a1a2e; }
+
+            /* slider */
+            .fp-slider {
+                width: 100%;
+                accent-color: #1e3a5f;
+                cursor: pointer;
+                height: 4px;
+                margin-top: 4px;
+            }
+
+            /* segmented control (speed buttons) */
+            .fp-seg {
+                display: flex;
+                flex: 1;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                overflow: hidden;
+                background: #f5f6fa;
+            }
+            .fp-seg-btn {
+                flex: 1;
+                padding: 8px 4px;
+                border: none;
+                border-right: 1px solid #e5e7eb;
+                background: transparent;
+                color: #6b7280;
+                font-family: inherit;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.12s;
+            }
+            .fp-seg-btn:last-child { border-right: none; }
+            .fp-seg-btn:hover { background: #e5e7eb; color: #374151; }
+            .fp-seg-btn.active { background: #1e3a5f; color: #fff; }
+
+            /* primary button */
+            .fp-btn-primary {
+                width: 100%;
+                padding: 13px 16px;
+                border: none;
+                border-radius: 12px;
+                background: #1e3a5f;
+                color: #fff;
+                font-family: inherit;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.15s;
+                margin-top: 16px;
+            }
+            .fp-btn-primary:hover { background: #162d4a; }
+            .fp-btn-primary:disabled { background: #d1d5db; cursor: default; }
+
+            /* danger button */
+            .fp-btn-danger {
+                width: 100%;
+                padding: 13px 16px;
+                border: 1.5px solid #ef4444;
+                border-radius: 12px;
+                background: transparent;
+                color: #ef4444;
+                font-family: inherit;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.15s;
+                margin-top: 16px;
+            }
+            .fp-btn-danger:hover { background: #ef4444; color: #fff; }
+
+            /* colormap rows */
+            .cm-swatch { cursor: pointer; }
+            .cm-swatch.active { background: #eef2ff; }
+            .cm-swatch .cm-bar {
+                width: 48px;
+                height: 24px;
+                border-radius: 4px;
+                flex-shrink: 0;
+            }
+            .cm-swatch .cm-check { color: #1e3a5f; font-weight: 700; }
+
+            /* basemap rows */
+            .bm-card { cursor: pointer; }
+            .bm-card.active { background: #eef2ff; }
+            .bm-abbr {
+                width: 40px;
+                height: 28px;
+                border-radius: 6px;
+                background: #f0f0f5;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: 0.5px;
+                color: #6b7280;
+                font-family: 'SF Mono', 'Courier New', monospace;
+                flex-shrink: 0;
+                border: 1px solid #e5e7eb;
+            }
+            .bm-card.active .bm-abbr { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+            .bm-card .bm-check { color: #1e3a5f; font-weight: 700; }
+
+            /* animation controls */
             .anim-progress-track {
                 height: 4px;
-                background: rgba(255,255,255,0.1);
+                background: #e5e7eb;
                 border-radius: 2px;
-                overflow: hidden;
-                margin-bottom: 4px;
+                margin-bottom: 6px;
             }
             .anim-progress-bar {
                 height: 100%;
-                background: #60a5fa;
+                background: #1e3a5f;
                 width: 0%;
-                transition: width 0.2s;
                 border-radius: 2px;
+                transition: width 0.25s;
             }
             .anim-progress-text {
-                font-size: 10px;
-                color: rgba(255,255,255,0.5);
+                font-size: 11px;
+                color: #9ca3af;
                 display: block;
                 text-align: center;
                 margin-bottom: 8px;
             }
             .anim-transport {
                 display: flex;
-                gap: 4px;
-                justify-content: center;
-                margin-bottom: 8px;
+                gap: 6px;
+                padding: 8px;
             }
             .anim-btn {
-                width: 34px;
-                height: 34px;
-                border: none;
-                border-radius: 6px;
-                background: rgba(255,255,255,0.08);
-                color: #fff;
+                height: 42px;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                background: #f5f6fa;
+                color: #374151;
                 font-size: 14px;
                 cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: background 0.15s;
+                padding: 0 12px;
+                transition: all 0.12s;
+                font-family: inherit;
             }
-            .anim-btn:hover { background: rgba(255,255,255,0.16); }
-            .anim-btn-main { background: rgba(96,165,250,0.25); color: #60a5fa; flex: 1; }
-            .anim-btn-main:hover { background: rgba(96,165,250,0.4); }
-            .anim-btn-stop { background: rgba(239,68,68,0.15); color: #f87171; }
-            .anim-btn-stop:hover { background: rgba(239,68,68,0.3); }
-            .anim-scrubber {
-                width: 100%;
-                margin-bottom: 8px;
-                accent-color: #60a5fa;
-                cursor: pointer;
+            .anim-btn:hover { background: #e5e7eb; color: #1a1a2e; }
+            .anim-btn-main {
+                flex: 1;
+                background: #1e3a5f;
+                border-color: #1e3a5f;
+                color: #fff;
+                font-size: 16px;
+                border-radius: 10px;
             }
-            .anim-speed {
-                display: flex;
-                align-items: center;
-                gap: 4px;
-                font-size: 11px;
-                color: rgba(255,255,255,0.45);
+            .anim-btn-main:hover { background: #162d4a; }
+            .anim-btn-stop {
+                background: #fff5f5;
+                border-color: #fca5a5;
+                color: #ef4444;
             }
-            .anim-speed-btn {
-                padding: 2px 7px;
-                border: 1px solid rgba(255,255,255,0.15);
-                border-radius: 4px;
-                background: transparent;
-                color: rgba(255,255,255,0.5);
-                font-size: 11px;
-                cursor: pointer;
-                transition: all 0.15s;
-            }
-            .anim-speed-btn.active,
-            .anim-speed-btn:hover {
-                border-color: #60a5fa;
-                color: #60a5fa;
-                background: rgba(96,165,250,0.1);
-            }
+            .anim-btn-stop:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
+            .anim-scrubber { width: 100%; accent-color: #1e3a5f; cursor: pointer; }
 
-            /* ── Map date overlay ── */
+            /* map date overlay */
             .map-anim-date {
                 position: absolute;
                 top: 10px;
                 left: 50%;
                 transform: translateX(-50%);
-                padding: 4px 14px;
+                padding: 6px 18px;
                 border-radius: 20px;
+                font-family: inherit;
                 font-size: 13px;
                 font-weight: 700;
-                letter-spacing: 0.5px;
+                letter-spacing: 0.3px;
                 z-index: 800;
                 pointer-events: none;
-                background: rgba(0,0,0,0.65);
+                background: #1e3a5f;
                 color: #fff;
-                backdrop-filter: blur(4px);
                 display: none;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             }
-            .map-anim-date.today  { background: rgba(96,165,250,0.8); }
-            .map-anim-date.forecast { background: rgba(251,146,60,0.8); }
-            .map-anim-date.past   { background: rgba(0,0,0,0.65); }
-            
+            .map-anim-date.today    { background: #1e3a5f; }
+            .map-anim-date.forecast { background: #ef4444; }
+            .map-anim-date.past     { background: #6b7280; }
+
+
             /* mobile */
             @media (max-width: 768px) {
                 .geotiff-legend {

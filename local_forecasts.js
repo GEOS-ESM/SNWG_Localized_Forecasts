@@ -80,7 +80,6 @@ $(document).ready(function() {
             });
             
             if (page === 'home.html') {
-                // Home
                 $('body').removeClass('about-page').addClass('home-page');
                 $('body, html').css({
                     'overflow': 'hidden',
@@ -89,19 +88,16 @@ $(document).ready(function() {
                 
                 setTimeout(() => {
                     if (window.currentMap) {
-                        // Resize
                         window.currentMap.invalidateSize();
                     }
                 }, 100);
             } else if (page === 'about.html') {
-                // About
                 $('body').removeClass('home-page').addClass('about-page');
                 $('body, html').css({
                     'overflow': 'auto',
                     'height': 'auto'
                 });
             } else {
-                // Default
                 $('body').removeClass('home-page').addClass('about-page');
                 $('body, html').css({
                     'overflow': 'auto',
@@ -434,15 +430,12 @@ function get_open_aq_observations(site_id, param) {
 
 function create_map(sites, param) {
 
-    // Validation
     let map = window.currentMap;
     const mapContainer = document.getElementById('map');
     
-    // Recreate
     const needsRecreate = !map || !mapContainer || (map._container !== mapContainer);
     
     if (needsRecreate) {
-        // Cleanup
         if (window.currentMap) {
             try {
                 window.currentMap.remove();
@@ -452,7 +445,6 @@ function create_map(sites, param) {
             window.currentMap = null;
         }
         
-        // Markers
         if (window.currentMarkers) {
             window.currentMarkers = null;
         }
@@ -461,7 +453,6 @@ function create_map(sites, param) {
         
         var center_point = [0.0104, -9.3164];
         
-        // Initialize
         map = L.map('map', {
             center: center_point,
             zoom: 3,
@@ -472,7 +463,6 @@ function create_map(sites, param) {
             maxBoundsViscosity: 1.0
         });
         
-        // Tiles
         window.currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             subdomains: 'abcd',
@@ -480,17 +470,14 @@ function create_map(sites, param) {
             noWrap: false
         }).addTo(map);
         
-        // References
         window.currentMap = map;
         window.currentMarkers = L.layerGroup();
         map.addLayer(window.currentMarkers);
         
-        // Hover
         window.hoverDiv = document.getElementById('map-hover-info');
         
         console.log('Map created/recreated successfully');
     } else {
-        // Resize
         map.invalidateSize();
     }
 
@@ -513,7 +500,6 @@ function create_map(sites, param) {
         mapVisible = !mapVisible;
     });
 
-    // Markers
     if (sites && sites.features && sites.features.length > 0) {
         updateLeafletMarkers(map, sites);
     }
@@ -531,12 +517,11 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
 
                 let aqi = "--";
 
-                // Use overall_aqi from JSON file exclusively for all locations
+                // overall
                 if (matchingForecast && typeof matchingForecast === "object") {
                     if (matchingForecast.overall_aqi !== undefined && matchingForecast.overall_aqi !== null && !isNaN(matchingForecast.overall_aqi)) {
                         aqi = matchingForecast.overall_aqi;
                     } else if (site.forecasted_value !== undefined && site.forecasted_value !== null && site.forecasted_value !== "N/A") {
-                        // Fallback to precomputed value if available
                         aqi = site.forecasted_value;
                     }
                 } else if (site.forecasted_value !== undefined && site.forecasted_value !== null && site.forecasted_value !== "N/A") {
@@ -629,7 +614,6 @@ function generateSmallAqiBox(aqiValue, pollutant) {
     `;
 }
 
-// Cache
 window.siteDataCache = window.siteDataCache || {};
 
 /**
@@ -683,7 +667,6 @@ function getCurrentForecast(siteData, timezone) {
     }
     const now = new Date();
     
-    // Timezone
     const formatter = new Intl.DateTimeFormat('en-US', {
         timeZone: timezone,
         year: 'numeric',
@@ -701,7 +684,6 @@ function getCurrentForecast(siteData, timezone) {
     
     const currentHour = parseInt(partMap.hour);
     
-    // DoS-PM25
     const isDosMissionPm25 = siteData.species === 'pm25' && 
                              !siteData.observation_source &&
                              siteData.forecasts.some(f => {
@@ -737,10 +719,8 @@ function getCurrentForecast(siteData, timezone) {
             }
         }
     } else {
-        // Hourly
         const currentLocalHour = `${partMap.year}-${partMap.month}-${partMap.day} ${String(currentHour).padStart(2, '0')}:00:00`;
         
-        // Match
         for (const forecast of siteData.forecasts) {
             if (!forecast.local_time) continue;
             if (forecast.local_time.substring(0, 13) + ':00:00' === currentLocalHour) {
@@ -748,7 +728,6 @@ function getCurrentForecast(siteData, timezone) {
             }
         }
         
-        // Closest
         for (const forecast of siteData.forecasts) {
             if (!forecast.local_time) continue;
             const forecastHour = parseInt(forecast.local_time.substring(11, 13));
@@ -781,7 +760,6 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
         .then(siteIndex => {
             console.log("Selected source:", selectedSource);
             
-            // Filter
             const filteredIndices = siteIndex.filter(site => {
                 if (!Array.isArray(site.sources)) return false;
                 const siteSources = site.sources.map(s => s.toLowerCase());
@@ -795,10 +773,8 @@ function readCompressedJsonAndAddBanners(fileUrl, selectedSource) {
 
             console.log(`Found ${filteredIndices.length} sites for source: ${selectedSource}`);
             
-            // Clear
             $(".ticker-track").empty();
             
-            // Skeletons
             const skeletonCount = Math.min(12, filteredIndices.length);
             for (let i = 0; i < skeletonCount; i++) {
                 const skeleton = `
@@ -948,7 +924,6 @@ function getAqiFromForecast(forecast, selected) {
 }
 
 function processHourlySnapshotOptimized(hourlySnapshot, filteredIndices) {
-    // Lookup
     const snapshotMap = {};
     hourlySnapshot.sites.forEach(site => {
         snapshotMap[site.location_name] = site;
@@ -1049,7 +1024,6 @@ function loadIndividualSitesOptimized(filteredIndices, selectedSource) {
         }
         
         Promise.all(batch.map(indexEntry => {
-            // Cache
             const cacheKey = `${indexEntry.location_name}.json`;
             const cached = window.siteDataCache[cacheKey];
             if (cached && (Date.now() - cached.timestamp < 300000)) {
@@ -1063,7 +1037,6 @@ function loadIndividualSitesOptimized(filteredIndices, selectedSource) {
                 .then(text => {
                     const sanitizedText = text.replace(/NaN/g, 'null');
                     const data = JSON.parse(sanitizedText);
-                    // Store
                     window.siteDataCache[cacheKey] = {
                         data: data,
                         timestamp: Date.now()
@@ -1144,13 +1117,11 @@ function loadIndividualSitesOptimized(filteredIndices, selectedSource) {
 function finalizeSitesLoadingOptimized(filteredSites) {
     window.currentForecastData = filteredSites;
     const geojson = sitesArrayToGeoJSON(filteredSites);
-    // Update
     updateMapMarkers(geojson);
     hideLoadingDiv();
 }
 
 function processHourlySnapshot(hourlySnapshot, filteredIndices) {
-    // Lookup
     const snapshotMap = {};
     hourlySnapshot.sites.forEach(site => {
         snapshotMap[site.location_name] = site;
@@ -1164,7 +1135,6 @@ function processHourlySnapshot(hourlySnapshot, filteredIndices) {
             const snapshotData = snapshotMap[indexEntry.location_name];
             if (!snapshotData) continue;
             
-            // Species
             const selected = (indexEntry.species || snapshotData.species || "no2").toLowerCase();
             const isPm25 = selected === "pm25" || selected === "pm2.5";
             
@@ -1314,13 +1284,11 @@ function finalizeSitesLoading(filteredSites) {
     window.currentForecastData = filteredSites;
     const geojson = sitesArrayToGeoJSON(filteredSites);
     
-    // Layer
     const mapEl = document.getElementById('map');
     const mapReady = window.currentMap && mapEl && window.currentMap._container === mapEl;
     if (mapReady) {
         updateMapMarkers(geojson);
     } else {
-        // Create
         create_map(geojson);
     }
     hideLoadingDiv();
@@ -1333,20 +1301,19 @@ function updateLeafletMarkers(map, geojson) {
         console.error('Marker cluster not initialized');
         return;
     }
-    
-    // Loading
-    if (map && map.getContainer()) {
+
+    const isAnimSync = !!window.__geotiffAnimating;
+
+    if (!isAnimSync && map && map.getContainer()) {
         const container = map.getContainer();
         container.style.opacity = '0.6';
         container.style.pointerEvents = 'none';
     }
     
-    // Clear
     markerCluster.clearLayers();
     
     const hoverDiv = window.hoverDiv;
     
-    // GeoJSON
     geojson.features.forEach((feature, index) => {
         const coords = feature.geometry.coordinates;
         const props = feature.properties;
@@ -1356,7 +1323,6 @@ function updateLeafletMarkers(map, geojson) {
 
         const aqiColor = props.aqi_color || '#9e9e9e';
         
-        // Icon
         const icon = L.divIcon({
             className: 'custom-marker-icon',
             html: `
@@ -1383,10 +1349,8 @@ function updateLeafletMarkers(map, geojson) {
         
         const marker = L.marker(latlng, { icon: icon });
         
-        // Properties
         marker.featureProperties = props;
         
-        // Hover
         marker.on('mouseover', function(e) {
             const markerEl = e.target.getElement();
             if (markerEl) {
@@ -1432,7 +1396,6 @@ function updateLeafletMarkers(map, geojson) {
             }
         });
         
-        // Click
         marker.on('click', function(e) {
             const props = e.target.featureProperties;
             const location_id = props.location_id;
@@ -1476,15 +1439,16 @@ function updateLeafletMarkers(map, geojson) {
     });
     
     console.log(`Updated ${geojson.features.length} Leaflet markers`);
-    
-    // Complete
-    setTimeout(() => {
-        if (map && map.getContainer()) {
-            const container = map.getContainer();
-            container.style.opacity = '1';
-            container.style.pointerEvents = 'auto';
-        }
-    }, 300);
+
+    if (!isAnimSync) {
+        setTimeout(() => {
+            if (map && map.getContainer()) {
+                const container = map.getContainer();
+                container.style.opacity = '1';
+                container.style.pointerEvents = 'auto';
+            }
+        }, 300);
+    }
 }
 
 function updateMapMarkers(geojson) {
@@ -1566,7 +1530,7 @@ function add_the_banner(site, param) {
             }
         }
 
-        // Display — respect ?temp=f URL param
+        // display
         const _tempUnit = (new URLSearchParams(window.location.search).get('temp') || 'c').toLowerCase();
         const _tempC = (typeof t10m === "number" && !isNaN(t10m)) ? Math.round(t10m - 273.15) : null;
         const temperature = _tempC !== null ? (_tempUnit === 'f' ? Math.round(_tempC * 9 / 5 + 32) : _tempC) : "--";
@@ -1743,7 +1707,6 @@ function readApiBaker(options = {}) {
     fetch(fileUrl)
         .then(response => {
             if (!response.ok) {
-                // Fallback
                 const fallbackUrl = `https://smce-geos-cf-public.s3.us-west-2.amazonaws.com/snwg_forecast_working_files/precomputed/all_dts/${locationWithHyphen}.json?version=${new Date().getTime()}`;
                 return fetch(fallbackUrl).then(fallbackResponse => {
                     if (!fallbackResponse.ok) throw new Error('Network response was not ok');
@@ -1929,7 +1892,7 @@ function readApiBaker(options = {}) {
                     columns: [
                         { column: "master_predicted", name: "Estimated NO₂", color: "#1565C0", width: 2 }
                     ],
-                    // NAAQS annual standard: 53 ppb NO2
+                    // naaqs
                     naaqsValue: 53,
                     naaqsLabel: "NAAQS Annual Standard (53 ppbv NO₂)",
                     displayAQI: false,
@@ -1948,7 +1911,7 @@ function readApiBaker(options = {}) {
                     columns: [
                         { column: "master_pm25_conc_cnn", name: "PM2.5", color: "#2E7D32", width: 2 }
                     ],
-                    // NAAQS annual standard: 9 µg/m³ PM2.5 (2024 update)
+                    // naaqs
                     naaqsValue: 9,
                     naaqsLabel: "NAAQS Annual Standard (9 μg/m³ PM2.5)",
                     displayAQI: false,
@@ -2006,7 +1969,7 @@ function readApiBaker(options = {}) {
                                 ? "Source: NASA Pandora"
                                 : "Source: NASA SNWG bias-corrected forecast (Pandora data unavailable)",
                         columns,
-                        // NAAQS annual standard: 53 ppb NO2
+                        // naaqs
                         naaqsValue: 53,
                         naaqsLabel: "NAAQS Annual Standard (53 ppbv NO₂)",
                         displayAQI: false,
@@ -2534,7 +2497,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         return { year: base.getUTCFullYear().toString(), month: pad(base.getUTCMonth()+1), day: pad(base.getUTCDate()), hour: h };
     };
 
-    // AQI array based on param
+    // aqi
     let aqiData = [], pollutantLabel = 'NO₂';
     const hasOverallAqi = masterData.master_overall_aqi && masterData.master_overall_aqi.some(v => v != null);
     if (requestedParam && requestedParam.toLowerCase().includes('pm25')) {
@@ -2552,13 +2515,13 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
             if (datetimes[i] && datetimes[i].slice(0, 13) === localHourStr && aqiData[i] != null)
                 return Math.round(aqiData[i]);
         }
-        // Nearest within ±3h by comparing the hour integer in the string
+        // nearest
         const targetH = parseInt(localHourStr.slice(11, 13));
         const targetDate = localHourStr.slice(0, 10);
         let bi = -1, bd = Infinity;
         for (let i = 0; i < datetimes.length; i++) {
             if (!datetimes[i] || aqiData[i] == null) continue;
-            // Only check same or adjacent date
+            // adjacent
             const dtDate = datetimes[i].slice(0, 10);
             if (dtDate !== targetDate) continue;
             const dtH = parseInt(datetimes[i].slice(11, 13));
@@ -3333,7 +3296,7 @@ function readAirNow(options = {}) {
                     const observationValue = forecast.value || null;
                     masterData.master_observation.push(observationValue);
 
-                    // Use overall_aqi from JSON if available, otherwise calculate from observation
+                    // overall
                     const aqiValue = (forecast.overall_aqi !== undefined && forecast.overall_aqi !== null) ? forecast.overall_aqi : calculateAqiForPm25(observationValue);
                     masterData.master_aqi.push(aqiValue);
                 });
@@ -3814,9 +3777,9 @@ function draw_plot(
                 return getAqiBarColor(value, param, alpha);
             });
         } else {
-            // Use the column's defined color, falling back to the default blue
+            // color
             const baseColor = color || '#2196f3';
-            // Convert hex to rgba for the faded (future) variant
+            // rgba
             const hexToRgba = (hex, alpha) => {
                 const h = hex.replace('#', '');
                 const bigint = parseInt(h.length === 3
@@ -3885,7 +3848,7 @@ function draw_plot(
     });
 
 
-    // NAAQS reference line as a dedicated trace (shows in legend)
+    // naaqs
     if (naaqsValue !== null && naaqsValue !== undefined) {
         traces.push({
             type: 'scatter',
@@ -4501,7 +4464,7 @@ function openForecastsWindow(options = {}) {
         obsSrcFinal = 's3';
     }
 
-    // Store for download filename
+    // filename
     window._lastOpenedLocationName = location_name.replace(/[_-]/g, ' ').trim();
 
     if (isModal) {
