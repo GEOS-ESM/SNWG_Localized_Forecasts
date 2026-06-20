@@ -2265,8 +2265,8 @@
                     <div class="fp-card">
                         <div class="fp-row">
                             <div class="fp-row-text">
-                                <span class="fp-row-title">Range</span>
-                                <span class="fp-row-sub">3 days past &rarr; 4 days forecast</span>
+                                <span class="fp-row-title">GEOS-CF Forecast</span>
+                                <span class="fp-row-sub">GEOS-CF Forecast</span>
                             </div>
                             <span id="anim-date-label" class="fp-row-badge"></span>
                         </div>
