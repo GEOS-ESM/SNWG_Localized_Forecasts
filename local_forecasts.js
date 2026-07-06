@@ -1917,7 +1917,8 @@ function readApiBaker(options = {}) {
                     displayAQI: false,
                     displayMetrics: false,
                     enableAqiColors: false, 
-                    sourceColumn: "master_pm25source"
+                    sourceColumn: "master_pm25source",
+                    param_text: "PM2.5 Concentration",
                 },
                 {
                     id: "plot_o3_conc",
@@ -2031,7 +2032,8 @@ function readApiBaker(options = {}) {
                     displayAQI: false,
                     displayMetrics: false,
                     enableAqiColors: true,
-                    sourceColumn: "master_pm25source"
+                    sourceColumn: "master_pm25source",
+                    param_text: "PM2.5 AQI",
                 },
                 {
                     id: "plot_o3_aqi",
@@ -2338,7 +2340,8 @@ function readApiBaker(options = {}) {
                         plot.naaqsValue ?? null,
                         plot.naaqsLabel ?? '',
                         plot.sourceColumn ?? null,
-                        plot.additionalColumns ?? null
+                        plot.additionalColumns ?? null,
+                        plot.param_text ?? null,
                     );
                 } else {
                     console.error(`No DOM element with id '${plot.id}' exists on the page.`);
@@ -3745,7 +3748,8 @@ function draw_plot(
     naaqsValue = null,
     naaqsLabel = '',
     sourceColumn = null,
-    additionalColumns = null
+    additionalColumns = null,
+    param_text = null
 ) {
 
     const datetime_data = combined_dataset["master_datetime"];
@@ -3821,7 +3825,7 @@ function draw_plot(
             hovertemplate: (() => {
                 if (sourceColumn && sourceData.length > 0) {
                     return '<b>%{x}</b><br>' +
-                           'AQI: %{y}<br>' +
+                           param_text + ': %{y}<br>' +
                            'Source: <b>%{customdata[0]}</b><br>' +
                            '<extra></extra>';
                 } else if (additionalColumns && additionalColumns.length > 0) {
