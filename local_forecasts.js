@@ -1909,14 +1909,15 @@ function readApiBaker(options = {}) {
                     tabId: "tab_pm25",
                     description: "Source: NASA GEOS-CF PM2.5 Concentration Forecast",
                     columns: [
-                        { column: "master_pm25_conc_cnn", name: "PM2.5", color: "#2E7D32", width: 2 }
+                        { column: "master_pm25_conc_cnn", name: "PM2.5", color: "#732905", width: 2 }
                     ],
                     // naaqs
                     naaqsValue: 9,
                     naaqsLabel: "NAAQS Annual Standard (9 μg/m³ PM2.5)",
                     displayAQI: false,
                     displayMetrics: false,
-                    enableAqiColors: false 
+                    enableAqiColors: false, 
+                    sourceColumn: "master_pm25source"
                 },
                 {
                     id: "plot_o3_conc",
