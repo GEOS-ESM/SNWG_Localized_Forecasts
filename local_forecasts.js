@@ -3811,7 +3811,10 @@ function draw_plot(
             mode: plotType === "bar" ? undefined : "lines",
             connectgaps: plotType === "bar" ? undefined : false,
             x: cleanedData.master_datetime,
-            y: cleanedData[column],
+            y: cleanedData[column].map(v => {
+                const num = Number(v);
+                return Number.isFinite(num) ? num.toFixed(2) : v; 
+            }),
             line: plotType === "bar" ? undefined : {
                 color: enableAqiColors ? barColors[0] : lineColor,
                 width: width || 1,
