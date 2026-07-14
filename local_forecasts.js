@@ -2035,6 +2035,7 @@ function readApiBaker(options = {}) {
                     enableAqiColors: true,
                     sourceColumn: "master_pm25source",
                     param_text: "PM2.5 AQI",
+                    enableAqiColors: true
                 },
                 {
                     id: "plot_o3_aqi",
@@ -3797,7 +3798,7 @@ function draw_plot(
             if (sourceColumn && sourceData.length > 0 && colorBySource) {
                 const groups = {};
                 cleanedData.master_datetime.forEach((dt, i) => {
-                    const src = sourceData[i] || 'Unknown';
+                    const src = sourceData[i] || 'GEOS-CF';
                     if (!groups[src]) groups[src] = [];
                     groups[src].push(i);
                 });
