@@ -463,10 +463,10 @@ function create_map(sites, param) {
             maxBoundsViscosity: 1.0
         });
         
-        window.currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 20,
+        // Esri World Imagery — keyless. (CARTO basemaps now require an API key.)
+        window.currentTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+            maxZoom: 19,
             noWrap: false
         }).addTo(map);
         
@@ -1934,7 +1934,8 @@ function readApiBaker(options = {}) {
                     ],
 
                     naaqsValue: 70,
-                    naaqsLabel: "NAAQS 8-hr Standard (70 ppbv O₃)",                    displayAQI: false,
+                    naaqsLabel: "NAAQS 8-hr Standard (70 ppbv O₃)",                    
+                    displayAQI: false,
                     displayMetrics: false,
                     enableAqiColors: false 
                 },
@@ -1956,7 +1957,7 @@ function readApiBaker(options = {}) {
                     return {
                         id: "plot_pandora",
                         title: hasPandora && hasCorrected
-                            ? "Pandora NO<sub>2</sub> Observations (with corrected fallback)"
+                            ? "Pandora NO<sub>2</sub> Observations"
                             : hasPandora
                                 ? "Pandora NO<sub>2</sub> Observations"
                                 : "NO<sub>2</sub> Observations (Bias-Corrected Forecast)",

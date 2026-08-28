@@ -235,8 +235,21 @@
         legendVisible: true,
         availableLayers: [],
         activeColormap: null,
-        activeBasemap:  'voyager',
+        activeBasemap:  'satellite',
         allAddedLayers: []
+    };
+
+    // Basemap tile sources — all keyless / free to use (Esri ArcGIS Online
+    // public services + OpenStreetMap). CARTO and Stamen were removed because
+    // they now require an API key.
+    const BASEMAPS = {
+        voyager:   { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',            opts: { attribution: 'Tiles &copy; Esri', maxZoom: 19 } },
+        dark:      { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', opts: { attribution: 'Tiles &copy; Esri', maxZoom: 16 } },
+        positron:  { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',opts: { attribution: 'Tiles &copy; Esri', maxZoom: 16 } },
+        osm:       { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',                                                         opts: { attribution: '&copy; OpenStreetMap contributors', subdomains: 'abc', maxZoom: 19 } },
+        satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',              opts: { attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community', maxZoom: 19 } },
+        topo:      { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',             opts: { attribution: 'Tiles &copy; Esri', maxZoom: 19 } },
+        none:      { url: null, opts: {} }
     };
 
 
@@ -1754,7 +1767,7 @@
         // settings snapshot (always pull from live state when not supplied)
         const s = settings || {};
         const cm = 'cm' in s ? s.cm : (state.activeColormap || '');
-        const bm = 'bm' in s ? s.bm : (state.activeBasemap  || 'voyager');
+        const bm = 'bm' in s ? s.bm : (state.activeBasemap  || 'satellite');
         const op = 'op' in s ? s.op : state.layerOpacity;
         const vis = 'vis' in s ? s.vis : (state.isVisible     ? '1' : '0');
         const leg = 'leg' in s ? s.leg : (state.legendVisible ? '1' : '0');
@@ -1836,16 +1849,7 @@
         // ── Basemap ───────────────────────────────────────────────────────────
         if (p.bm) {
             state.activeBasemap = p.bm;
-            const _basemapDefs = {
-                voyager:   { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',         opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
-                dark:      { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',                    opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
-                positron:  { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',                   opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
-                osm:       { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',                               opts: { attribution: '© OpenStreetMap', subdomains: 'abc', maxZoom: 19 } },
-                satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', opts: { attribution: '© Esri', maxZoom: 19 } },
-                topo:      { url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',             opts: { attribution: '© Stamen', subdomains: 'abcd', maxZoom: 18 } },
-                none:      { url: null, opts: {} }
-            };
-            const def = _basemapDefs[p.bm];
+            const def = BASEMAPS[p.bm];
             const map = window.currentMap;
             if (def && map) {
                 if (window.currentTileLayer) map.removeLayer(window.currentTileLayer);
@@ -2142,12 +2146,12 @@
         ];
 
         const basemaps = [
-            { id: 'voyager',   name: 'Voyager',       abbr: 'VOY' },
-            { id: 'dark',      name: 'Dark Matter',   abbr: 'DRK' },
-            { id: 'positron',  name: 'Positron',      abbr: 'LGT' },
-            { id: 'osm',       name: 'OpenStreetMap', abbr: 'OSM' },
             { id: 'satellite', name: 'Satellite',     abbr: 'SAT' },
-            { id: 'topo',      name: 'Terrain',       abbr: 'TRN' },
+            { id: 'voyager',   name: 'Streets',       abbr: 'STR' },
+            { id: 'positron',  name: 'Light Gray',    abbr: 'LGT' },
+            { id: 'dark',      name: 'Dark Gray',     abbr: 'DRK' },
+            { id: 'topo',      name: 'Topographic',   abbr: 'TOP' },
+            { id: 'osm',       name: 'OpenStreetMap', abbr: 'OSM' },
             { id: 'none',      name: 'No Basemap',    abbr: 'OFF' },
         ];
 
@@ -2158,11 +2162,12 @@
                 <span class="cm-check fp-row-value">${cm.id === (state.activeColormap || '') ? '\u2713' : ''}</span>
             </div>`).join('');
 
-        const basemapHTML = basemaps.map((bm, i) => `
-            <div class="bm-card fp-row ${i === 0 ? 'active' : ''}" data-id="${bm.id}">
+        const _activeBm = state.activeBasemap || 'satellite';
+        const basemapHTML = basemaps.map((bm) => `
+            <div class="bm-card fp-row ${bm.id === _activeBm ? 'active' : ''}" data-id="${bm.id}">
                 <span class="bm-abbr">${bm.abbr}</span>
                 <span class="fp-row-title" style="flex:1;padding-left:10px;font-size:13px;">${bm.name}</span>
-                <span class="bm-check fp-row-value">${i === 0 ? '\u2713' : ''}</span>
+                <span class="bm-check fp-row-value">${bm.id === _activeBm ? '\u2713' : ''}</span>
             </div>`).join('');
         
         panel.innerHTML = `
@@ -2410,22 +2415,13 @@
         }
 
         // ── Basemap cards ──
-        const _basemapDefs = {
-            voyager:   { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',         opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
-            dark:      { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',                    opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
-            positron:  { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',                   opts: { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20 } },
-            osm:       { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',                               opts: { attribution: '© OpenStreetMap', subdomains: 'abc', maxZoom: 19 } },
-            satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', opts: { attribution: '© Esri', maxZoom: 19 } },
-            topo:      { url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',             opts: { attribution: '© Stamen', subdomains: 'abcd', maxZoom: 18 } },
-            none:      { url: null, opts: {} }
-        };
         panel.querySelectorAll('.bm-card').forEach(card => {
             card.addEventListener('click', function() {
                 panel.querySelectorAll('.bm-card').forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
                 const bmId = this.dataset.id;
                 state.activeBasemap = bmId;
-                const def = _basemapDefs[bmId];
+                const def = BASEMAPS[bmId];
                 if (!def) return;
                 const map = window.currentMap;
                 if (!map) return;

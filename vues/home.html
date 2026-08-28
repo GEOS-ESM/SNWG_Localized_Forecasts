@@ -74,11 +74,11 @@
                     <span>Base Map</span>
                 </div>
                 <select id="map-style" class="msp-select">
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
-                    <option value="voyager" selected>Voyager (default)</option>
+                    <option value="satellite" selected>Satellite (default)</option>
+                    <option value="voyager">Streets</option>
+                    <option value="light">Light Gray</option>
+                    <option value="dark">Dark Gray</option>
                     <option value="osm">OpenStreetMap</option>
-                    <option value="satellite">Satellite</option>
                 </select>
             </div>
 
@@ -1227,18 +1227,19 @@ $(document).ready(function () {
             
             let tileUrl, attribution;
             
+            // All keyless / free-to-use sources (Esri ArcGIS Online public services + OSM).
             switch(style) {
                 case 'dark':
-                    tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-                    attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+                    tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+                    attribution = 'Tiles &copy; Esri';
                     break;
                 case 'light':
-                    tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-                    attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+                    tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+                    attribution = 'Tiles &copy; Esri';
                     break;
                 case 'voyager':
-                    tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-                    attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+                    tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
+                    attribution = 'Tiles &copy; Esri';
                     break;
                 case 'osm':
                     tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -1246,7 +1247,7 @@ $(document).ready(function () {
                     break;
                 case 'satellite':
                     tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-                    attribution = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
+                    attribution = 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community';
                     break;
             }
             
