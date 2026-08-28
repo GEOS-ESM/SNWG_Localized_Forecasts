@@ -1919,6 +1919,7 @@ function readApiBaker(options = {}) {
                     enableAqiColors: false, 
                     sourceColumn: "master_pm25source",
                     param_text: "PM2.5 Concentration",
+                    showColor: true
                 },
                 {
                     id: "plot_o3_conc",
@@ -2035,6 +2036,7 @@ function readApiBaker(options = {}) {
                     enableAqiColors: true,
                     sourceColumn: "master_pm25source",
                     param_text: "PM2.5 AQI",
+                    enableAqiColors: true
                 },
                 {
                     id: "plot_o3_aqi",
@@ -2342,7 +2344,8 @@ function readApiBaker(options = {}) {
                         plot.naaqsLabel ?? '',
                         plot.sourceColumn ?? null,
                         plot.additionalColumns ?? null,
-                        plot.param_text ?? null,
+                        plot.param_text ?? null, 
+                        colorBySource = plot.showColor  ? true : false
                     );
                 } else {
                     console.error(`No DOM element with id '${plot.id}' exists on the page.`);
@@ -3750,7 +3753,9 @@ function draw_plot(
     naaqsLabel = '',
     sourceColumn = null,
     additionalColumns = null,
-    param_text = null
+    param_text = null,
+    colorBySource = false,
+    sourceColorMap = null
 ) {
 
     const datetime_data = combined_dataset["master_datetime"];
@@ -3759,7 +3764,6 @@ function draw_plot(
     const maxValues = plot_columns.map(({ column }) => Math.max(...cleanedData[column]));
     const maxValue = Math.max(...maxValues);
 
- 
     const now = new Date();
     const pad = n => n.toString().padStart(2, '0');
     const localNow = new Date(now.toLocaleString("en-US", { timeZone: timezone }));
@@ -3770,92 +3774,137 @@ function draw_plot(
     const lastIndex = cleanedData.master_datetime.length - 1;
     let currentX = null;
     let currentY = null;
-    
-   const traces = plot_columns
-    .filter(column => column && column.name && column.column)
-    .map(({ column, name, color, width, dash }, index) => {
-        let barColors;
-        if (plotType === "bar" && enableAqiColors) {
-            barColors = cleanedData.master_datetime.map((datetime, i) => {
-                const value = cleanedData[column][i];
-                const dataTime = new Date(datetime);
-                const alpha = dataTime <= localNow ? 1 : 0.5;
-                return getAqiBarColor(value, param, alpha);
-            });
-        } else {
-            // color
-            const baseColor = color || '#2196f3';
-            // rgba
-            const hexToRgba = (hex, alpha) => {
-                const h = hex.replace('#', '');
-                const bigint = parseInt(h.length === 3
-                    ? h.split('').map(c => c + c).join('')
-                    : h, 16);
-                return `rgba(${(bigint >> 16) & 255},${(bigint >> 8) & 255},${bigint & 255},${alpha})`;
-            };
-            const solidColor = baseColor.startsWith('#') ? hexToRgba(baseColor, 1) : baseColor;
-            const fadedColor = baseColor.startsWith('#') ? hexToRgba(baseColor, 0.45) : baseColor + '73';
-            barColors = cleanedData.master_datetime.map((datetime) => {
-                const dataTime = new Date(datetime);
-                return dataTime < localNow ? solidColor : fadedColor;
-            });
-        }
 
-        const lineColor = color || 'rgba(7, 23, 16, 0.65)';
-        const rgbaMatch = lineColor.match(/\d+/g);
-        const fadingColor = rgbaMatch
-            ? `rgba(${rgbaMatch[0]}, ${rgbaMatch[1]}, ${rgbaMatch[2]}, 0.6)`
-            : 'rgba(0, 0, 0, 0.6)';
 
-        return {
-            type: plotType === "bar" ? "bar" : "scatter",
-            mode: plotType === "bar" ? undefined : "lines",
-            connectgaps: plotType === "bar" ? undefined : false,
-            x: cleanedData.master_datetime,
-            y: cleanedData[column].map(v => {
-                const num = Number(v);
-                return Number.isFinite(num) ? num.toFixed(2) : v; 
-            }),
-            line: plotType === "bar" ? undefined : {
-                color: enableAqiColors ? barColors[0] : lineColor,
-                width: width || 1,
-                dash: dash || 'solid'
-            },
-            marker: plotType === "bar"
-                ? { color: barColors }
-                : undefined,
-            fill: plotType === "bar" ? undefined : enableFading && index === 0 ? 'tozeroy' : 'none',
-            fillcolor: plotType === "bar" ? undefined : enableFading && index === 0 ? fadingColor : 'none',
-            hovertemplate: (() => {
-                if (sourceColumn && sourceData.length > 0) {
-                    return '<b>%{x}</b><br>' +
-                           param_text + ': %{y}<br>' +
-                           'Source: <b>%{customdata[0]}</b><br>' +
-                           '<extra></extra>';
-                } else if (additionalColumns && additionalColumns.length > 0) {
-                    return '<b>%{x}</b><br>' +
-                           'Overall AQI: %{y}<br>' +
-                           'NO₂ AQI: %{customdata[0]}<br>' +
-                           'PM₂.₅ AQI: %{customdata[1]}<br>' +
-                           '<extra></extra>';
-                }
-                return '';
-            })(),
-            customdata: (() => {
-                if (sourceColumn && sourceData.length > 0) {
-                    return sourceData.map(s => [s || 'N/A']);
-                } else if (additionalColumns && additionalColumns.length > 0) {
-                    const additionalData = additionalColumns.map(col => cleanedData[col] || []);
-                    return cleanedData.master_datetime.map((_, i) => 
-                        additionalData.map(data => data[i] || 'N/A')
-                    );
-                }
-                return undefined;
-            })(),
-            name: name
+    const defaultSourcePalette = [
+        '#2196f3', '#124f81ff'
+    ];
+    const getSourceColor = (() => {
+        const map = sourceColorMap ? { ...sourceColorMap } : {};
+        let i = 0;
+        return (source) => {
+            if (!map[source]) {
+                map[source] = defaultSourcePalette[i % defaultSourcePalette.length];
+                i++;
+            }
+            return map[source];
         };
-    });
+    })();
 
+    const traces = plot_columns
+        .filter(column => column && column.name && column.column)
+        .map(({ column, name, color, width, dash }, index) => {
+
+
+            if (sourceColumn && sourceData.length > 0 && colorBySource) {
+                const groups = {};
+                cleanedData.master_datetime.forEach((dt, i) => {
+                    const src = sourceData[i] || 'GEOS-CF';
+                    if (!groups[src]) groups[src] = [];
+                    groups[src].push(i);
+                });
+
+                return Object.entries(groups).map(([src, indices]) => {
+                    const srcColor = getSourceColor(src);
+                    return {
+                        type: plotType === "bar" ? "bar" : "scatter",
+                        mode: plotType === "bar" ? undefined : "markers",
+                        x: indices.map(i => cleanedData.master_datetime[i]),
+                        y: indices.map(i => {
+                            const num = Number(cleanedData[column][i]);
+                            return Number.isFinite(num) ? num.toFixed(2) : cleanedData[column][i];
+                        }),
+                        marker: plotType === "bar"
+                            ? { color: srcColor }
+                            : { color: srcColor, size: 6 },
+                        line: plotType === "bar" ? undefined : { color: srcColor, width: width || 1, dash: dash || 'solid' },
+                        name: `${name} (${src})`,
+                        hovertemplate: '<b>%{x}</b><br>' + (param_text || name) + ': %{y}<br>Source: <b>' + src + '</b><extra></extra>'
+                    };
+                });
+            }
+
+
+            let barColors;
+            if (plotType === "bar" && enableAqiColors) {
+                barColors = cleanedData.master_datetime.map((datetime, i) => {
+                    const value = cleanedData[column][i];
+                    const dataTime = new Date(datetime);
+                    const alpha = dataTime <= localNow ? 1 : 0.5;
+                    return getAqiBarColor(value, param, alpha);
+                });
+            } else {
+                const baseColor = color || '#2196f3';
+                const hexToRgba = (hex, alpha) => {
+                    const h = hex.replace('#', '');
+                    const bigint = parseInt(h.length === 3
+                        ? h.split('').map(c => c + c).join('')
+                        : h, 16);
+                    return `rgba(${(bigint >> 16) & 255},${(bigint >> 8) & 255},${bigint & 255},${alpha})`;
+                };
+                const solidColor = baseColor.startsWith('#') ? hexToRgba(baseColor, 1) : baseColor;
+                const fadedColor = baseColor.startsWith('#') ? hexToRgba(baseColor, 0.45) : baseColor + '73';
+                barColors = cleanedData.master_datetime.map((datetime) => {
+                    const dataTime = new Date(datetime);
+                    return dataTime < localNow ? solidColor : fadedColor;
+                });
+            }
+
+            const lineColor = color || 'rgba(7, 23, 16, 0.65)';
+            const rgbaMatch = lineColor.match(/\d+/g);
+            const fadingColor = rgbaMatch
+                ? `rgba(${rgbaMatch[0]}, ${rgbaMatch[1]}, ${rgbaMatch[2]}, 0.6)`
+                : 'rgba(0, 0, 0, 0.6)';
+
+            return {
+                type: plotType === "bar" ? "bar" : "scatter",
+                mode: plotType === "bar" ? undefined : "lines",
+                connectgaps: plotType === "bar" ? undefined : false,
+                x: cleanedData.master_datetime,
+                y: cleanedData[column].map(v => {
+                    const num = Number(v);
+                    return Number.isFinite(num) ? num.toFixed(2) : v;
+                }),
+                line: plotType === "bar" ? undefined : {
+                    color: enableAqiColors ? barColors[0] : lineColor,
+                    width: width || 1,
+                    dash: dash || 'solid'
+                },
+                marker: plotType === "bar"
+                    ? { color: barColors }
+                    : undefined,
+                fill: plotType === "bar" ? undefined : enableFading && index === 0 ? 'tozeroy' : 'none',
+                fillcolor: plotType === "bar" ? undefined : enableFading && index === 0 ? fadingColor : 'none',
+                hovertemplate: (() => {
+                    if (sourceColumn && sourceData.length > 0) {
+                        return '<b>%{x}</b><br>' +
+                               param_text + ': %{y}<br>' +
+                               'Source: <b>%{customdata[0]}</b><br>' +
+                               '<extra></extra>';
+                    } else if (additionalColumns && additionalColumns.length > 0) {
+                        return '<b>%{x}</b><br>' +
+                               'Overall AQI: %{y}<br>' +
+                               'NO₂ AQI: %{customdata[0]}<br>' +
+                               'PM₂.₅ AQI: %{customdata[1]}<br>' +
+                               '<extra></extra>';
+                    }
+                    return '';
+                })(),
+                customdata: (() => {
+                    if (sourceColumn && sourceData.length > 0) {
+                        return sourceData.map(s => [s || 'N/A']);
+                    } else if (additionalColumns && additionalColumns.length > 0) {
+                        const additionalData = additionalColumns.map(col => cleanedData[col] || []);
+                        return cleanedData.master_datetime.map((_, i) =>
+                            additionalData.map(data => data[i] || 'N/A')
+                        );
+                    }
+                    return undefined;
+                })(),
+                name: name
+            };
+        })
+        .flat(); // flatten since source-colored columns explode into multiple traces
 
     // naaqs
     if (naaqsValue !== null && naaqsValue !== undefined) {
@@ -3886,9 +3935,9 @@ function draw_plot(
     const layout = {
         margin: {
             l: 0,
-            r: 0, 
-            t: 0, 
-            b: 20, 
+            r: 0,
+            t: 0,
+            b: 20,
             pad: 0
         },
         annotations: [
@@ -3934,7 +3983,7 @@ function draw_plot(
             showgrid: false,
             gridcolor: '#D3D3D3',
             title: {
-                text: '', 
+                text: '',
                 font: {
                     size: 16,
                     color: '#000000'
@@ -3977,13 +4026,12 @@ function draw_plot(
                     color: '#000000'
                 }
             },
-            
             color: '#000000',
             showgrid: true,
             gridcolor: '#D3D3D3',
             side: 'left',
-            automargin: true, 
-            ticklabelposition: "outside", 
+            automargin: true,
+            ticklabelposition: "outside",
             tickson: "boundaries",
         },
         hovermode: 'x unified',
@@ -4023,7 +4071,7 @@ function draw_plot(
             const halfDay = 12 * 60 * 60 * 1000;
             const startTime = new Date(targetTime.getTime() - halfDay).toISOString();
             const endTime = new Date(targetTime.getTime() + halfDay).toISOString();
-            
+
             setTimeout(() => {
                 Plotly.relayout(forecasts_div, {
                     'xaxis.range': [startTime, endTime]
@@ -4036,13 +4084,10 @@ function draw_plot(
 
     $(`#${forecasts_div}`).on('plotly_relayout', function(e, d) {
         if (d['xaxis.range[0]'] && d['xaxis.range[1]']) {
-            // Range
             const start = new Date(d['xaxis.range[0]']);
             const end = new Date(d['xaxis.range[1]']);
             const diffDays = (end - start) / (1000 * 60 * 60 * 24);
-            // Center
             if (!window.hasCustomTimestamp && diffDays > 6.5 && diffDays < 7.5) {
-                // Today
                 const today = new Date();
                 const center = today.getTime();
                 const halfWeek = 3.5 * 24 * 60 * 60 * 1000;
@@ -4054,7 +4099,6 @@ function draw_plot(
             }
         }
     });
-    
 
     const downloadDivId = `download-btns-${forecasts_div}`;
     if (!$(`#${downloadDivId}`).length) {
@@ -4072,7 +4116,6 @@ function draw_plot(
             return `${locRaw}_${species}`;
         };
 
-     
         const buildDownloadCSV = () => {
             const cleanedData = cleanAndSortData(combined_dataset["master_datetime"], combined_dataset);
             const locName = (window._lastOpenedLocationName || '').replace(/[_-]/g, ' ').trim() || forecasts_div;
@@ -4129,7 +4172,6 @@ function draw_plot(
         });
     }
 }
-
 function get_plot(location_name, param, unit, forecasts_div, forecasts_resample_div,merge,precomputer_forecasts,historical){
 
     var file_url = "https://www.noussair.com/fetch.php?url=https://gmao.gsfc.nasa.gov/gmaoftp/geoscf/forecasts/localized/00000000_latest/forecast_latest_FR40008_no2.json";
