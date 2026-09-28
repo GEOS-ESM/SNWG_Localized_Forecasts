@@ -196,6 +196,29 @@
         <div class="about-resource-card h-100">
           <h4>Pandora Station Data</h4>
           <p>Access live and historical data from the Pandonia Global Network.</p>
+          <details class="about-methods">
+            <summary>Data processing methods</summary>
+            <p>
+              Pandora observations are filtered before being used in our analysis. For both NO<sub>2</sub>
+              and O<sub>3</sub>, we apply the L2 data quality flags provided by PGN and retain only
+              observations with flag values of 0 or 10 (high quality, assured or not fully assured).
+              We also apply pollutant-specific data-quality and sanity checks.
+            </p>
+            <h5>NO<sub>2</sub></h5>
+            <ul>
+              <li>Missing values (Pandora sentinel −9e99) are removed.</li>
+              <li>Values are converted to numeric format.</li>
+              <li>The NO<sub>2</sub> quality flag is applied, retaining only flags 0 and 10.</li>
+              <li>Earlier model versions also used the NO<sub>2</sub> heterogeneity flag, retaining only 0 (well-mixed conditions).</li>
+            </ul>
+            <h5>O<sub>3</sub></h5>
+            <ul>
+              <li>Values are converted to numeric format.</li>
+              <li>Missing values (−9e99) are removed.</li>
+              <li>Aerosol optical depth values must be non-negative.</li>
+              <li>The O<sub>3</sub> quality flag is applied, retaining only flags 0 and 10.</li>
+            </ul>
+          </details>
           <a href="https://blickv.hetzner.pandonia-global-network.org/" target="_blank" rel="noopener">
             Visit PGN →
           </a>
@@ -510,6 +533,21 @@
   transition: color 0.2s ease;
 }
 .about-resource-card a:hover { text-decoration: underline; }
+
+.about-methods {
+  border-top: 1px solid #e8eaed;
+  padding-top: 12px;
+  margin-bottom: 16px;
+}
+.about-methods summary {
+  font-size: 12.5px; font-weight: 600; color: #0b1a38; cursor: pointer;
+  letter-spacing: 0.2px;
+}
+.about-methods[open] summary { margin-bottom: 10px; }
+.about-methods p { font-size: 12.5px; margin-bottom: 10px; }
+.about-methods h5 { font-size: 12.5px; font-weight: 600; color: #1a5cad; margin: 12px 0 6px; }
+.about-methods ul { font-size: 12.5px; color: #555; line-height: 1.6; padding-left: 18px; margin-bottom: 0; }
+.about-methods li { margin-bottom: 4px; }
 
 
 .about-workshop-title { font-size: 15px; font-weight: 600; color: #0b1a38; margin-bottom: 16px; line-height: 1.4; }

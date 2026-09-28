@@ -506,6 +506,26 @@ function create_map(sites, param) {
 
     return map;
 }
+// Returns the pollutant whose sub-index sets the overall AQI (the highest one).
+function getDominantPollutant(forecast) {
+    if (!forecast || typeof forecast !== "object") return null;
+    const num = v => (v !== undefined && v !== null && !isNaN(v)) ? Number(v) : null;
+    const candidates = [
+        { pollutant: "pm25", aqi: num(forecast.pm25_aqi) },
+        { pollutant: "pm25", aqi: num(forecast.PM25_NowCast_AQI) },
+        { pollutant: "no2",  aqi: num(forecast.NO2_AQI) ?? num(forecast.no2_aqi) },
+        { pollutant: "o3",   aqi: num(forecast.O3_AQI) ?? num(forecast.o3_aqi) }
+    ].filter(c => c.aqi !== null);
+    if (candidates.length === 0) return null;
+
+    const overall = num(forecast.overall_aqi);
+    if (overall !== null) {
+        const match = candidates.find(c => Math.round(c.aqi) === Math.round(overall));
+        if (match) return match.pollutant;
+    }
+    return candidates.reduce((a, b) => (b.aqi > a.aqi ? b : a)).pollutant;
+}
+
 function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
     return {
         type: "FeatureCollection",
@@ -547,6 +567,7 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
                         status: "active",
                         observation_source: site.observation_source || "NASA",
                         parameter: selected,
+                        aqi_pollutant: getDominantPollutant(matchingForecast),
                         obs_options: JSON.stringify(matchingForecast),
                         precomputed_forecasts: JSON.stringify([matchingForecast])
                     },
@@ -566,6 +587,8 @@ function generateSmallAqiBox(aqiValue, pollutant) {
     if (isNaN(aqi)) return '';
 
     const aqiLevel = getAqiLevel(aqi);
+    const abbr = pollutant ? pollutant_details(String(pollutant).toLowerCase(), "abbr") : "N/A";
+    const pollutantLabel = abbr !== "N/A" ? abbr : "";
 
 
     const segments = [
@@ -595,7 +618,7 @@ function generateSmallAqiBox(aqiValue, pollutant) {
                     ${aqi}
                 </div>
                 <div>
-                    <div style="font-size:12px;font-weight:600;">AQI (${pollutant.toUpperCase()})</div>
+                    <div style="font-size:12px;font-weight:600;">AQI${pollutantLabel ? ` (${pollutantLabel})` : ''}</div>
                     <div style="font-size:11px;">${aqiLevel.level}</div>
                 </div>
             </div>
@@ -1359,7 +1382,7 @@ function updateLeafletMarkers(map, geojson) {
             }
             
             const locationName = props.location_name || "Unknown";
-            const param = props.parameter || 'no2';
+            const param = props.aqi_pollutant || props.parameter || 'no2';
             
             if (hoverDiv) {
                 hoverDiv.innerHTML = `

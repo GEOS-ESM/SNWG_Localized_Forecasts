@@ -826,6 +826,11 @@ window.TickerAnimation = {
         }
         
         const tkState = this.getUrlParam('tk');
+        if (!tkState) {
+            const url = new URL(window.location);
+            url.searchParams.set('tk', 'pa');
+            window.history.replaceState({ tk: 'pa' }, '', url);
+        }
         if (tkState === 'pl') {
             this.isPlaying = true;
             playPauseBtn.classList.add('playing');
@@ -885,7 +890,7 @@ window.TickerAnimation = {
             if (hasRealCards && !this.isPlaying) {
 
                 const tkState = this.getUrlParam('tk');
-                if (tkState !== 'pa') {
+                if (tkState === 'pl') {
                     setTimeout(() => this.start(), 200);
                 }
             }
@@ -976,7 +981,7 @@ if (document.readyState === 'loading') {
 }
 </script>
 
-<script src="local_forecasts.js?v=1.4.0"></script>
+<script src="local_forecasts.js?v=1.4.1"></script>
 <script src="local_forecasts_assets.js?v=1.4.0"></script>
 
 <script src="https://unpkg.com/proj4"></script>
@@ -1073,15 +1078,22 @@ $(document).ready(function () {
         });
 
         let searchTimeout;
+        let tickerPlayingBeforeSearch = null;
         $(document).on('keyup', '#location-search-input', function() {
             const input = this;
             const searchText = $(input).val().toLowerCase().trim();
-            
- 
+
+
             if (searchText.length > 0) {
+                if (tickerPlayingBeforeSearch === null) {
+                    tickerPlayingBeforeSearch = window.TickerAnimation.isPlaying;
+                }
                 window.TickerAnimation.stop();
-            } else {
-                window.TickerAnimation.start();
+            } else if (tickerPlayingBeforeSearch !== null) {
+                if (tickerPlayingBeforeSearch) {
+                    window.TickerAnimation.start();
+                }
+                tickerPlayingBeforeSearch = null;
             }
             
             clearTimeout(searchTimeout);
@@ -1130,9 +1142,7 @@ $(document).ready(function () {
 
             // Pause banner
             const tkState = params.get('tk');
-            if (tkState === 'pa') {
-                $('#setting-pause-banner').prop('checked', true);
-            }
+            $('#setting-pause-banner').prop('checked', tkState !== 'pl');
         })();
 
         // Temperature unit segmented control
