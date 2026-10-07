@@ -3,17 +3,7 @@
     <div id="map-hover-info" style="display:none; position:absolute; z-index:99999; pointer-events:none; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2); padding:8px; font-size:14px; min-width:120px;"></div>
     
 
-    <div id="map-controls-overlay" class="map-settings-panel collapsed">
-        <div class="msp-header">
-            <div class="msp-header-left">
-                <i class="bi bi-sliders"></i>
-                <span>Settings</span>
-            </div>
-            <button id="toggle-map-controls" class="msp-close-btn" title="Close">
-                <i class="bi bi-x"></i>
-            </button>
-        </div>
-
+    <div id="map-controls-overlay" style="display:none">
         <div class="msp-body">
 
 
@@ -71,19 +61,6 @@
 
             <div class="msp-row">
                 <div class="msp-row-label">
-                    <span>Base Map</span>
-                </div>
-                <select id="map-style" class="msp-select">
-                    <option value="satellite" selected>Satellite (default)</option>
-                    <option value="voyager">Streets</option>
-                    <option value="light">Light Gray</option>
-                    <option value="dark">Dark Gray</option>
-                    <option value="osm">OpenStreetMap</option>
-                </select>
-            </div>
-
-            <div class="msp-row">
-                <div class="msp-row-label">
                     <span>Temperature unit</span>
                 </div>
                 <div class="msp-seg" id="temp-unit-seg">
@@ -136,9 +113,6 @@
         </div>
     </div>
 
-    <button id="map-controls-toggle-btn" title="Map Settings">
-        <i class="bi bi-sliders"></i>
-    </button>
     
 
     <div id='replay-animation'>
@@ -390,26 +364,6 @@
 }
 .msp-action-btn:hover { background: #eaeaea; }
 
-#map-controls-toggle-btn {
-    position: absolute;
-    top: 133px;
-    right: 12px;
-    z-index: 8999;
-    width: 40px;
-    height: 40px;
-    background: #fff;
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #444;
-    font-size: 17px;
-    transition: background 0.15s, box-shadow 0.15s;
-}
-#map-controls-toggle-btn:hover { background: #f5f5f5; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
 
 .locations-ticker-banner {
     position: fixed;
@@ -1123,13 +1077,6 @@ $(document).ready(function () {
         });
         
 
-        $('#toggle-map-controls, #map-controls-toggle-btn').on('click', function() {
-            const $panel = $('#map-controls-overlay');
-            $panel.toggleClass('collapsed');
-            // Show/hide the gear button based on panel state
-            $('#map-controls-toggle-btn').toggle($panel.hasClass('collapsed'));
-        });
-
         // Init settings panel state from URL
         (function initSettingsFromUrl() {
             const params = new URLSearchParams(window.location.search);
@@ -1229,48 +1176,6 @@ $(document).ready(function () {
         });
         
 
-        $('#map-style').on('change', function() {
-            const style = $(this).val();
-            if (window.currentMap && window.currentTileLayer) {
-                window.currentMap.removeLayer(window.currentTileLayer);
-            }
-            
-            let tileUrl, attribution;
-            
-            // All keyless / free-to-use sources (Esri ArcGIS Online public services + OSM).
-            switch(style) {
-                case 'dark':
-                    tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
-                    attribution = 'Tiles &copy; Esri';
-                    break;
-                case 'light':
-                    tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
-                    attribution = 'Tiles &copy; Esri';
-                    break;
-                case 'voyager':
-                    tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
-                    attribution = 'Tiles &copy; Esri';
-                    break;
-                case 'osm':
-                    tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-                    attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-                    break;
-                case 'satellite':
-                    tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-                    attribution = 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community';
-                    break;
-            }
-            
-            if (window.currentMap) {
-                window.currentTileLayer = L.tileLayer(tileUrl, {
-                    attribution: attribution,
-                    subdomains: 'abcd',
-                    maxZoom: 20,
-                    noWrap: true
-                }).addTo(window.currentMap);
-            }
-        });
-        
         $('#cluster-radius').on('input', function() {
             const value = $(this).val();
             $('#cluster-radius-value').text(value);

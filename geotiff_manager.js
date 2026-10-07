@@ -220,6 +220,23 @@
             ]
         },
         
+        logScales: {
+            pm25: {
+                title: 'PM 2.5', unitText: 'micrograms per cubic meter (μg/m³)',
+                min: 0.4, max: 409.6,
+                ticks: ['0.4', '1.6', '6.4', '25.6', '102.4', '409.6'],
+                colors: [[255,255,229],[255,240,190],[254,217,142],[254,178,76],[253,141,60],[236,100,30],[204,70,10],[150,45,10],[90,25,10]]
+            },
+            no2: {
+                title: 'NO₂', unitText: 'parts per billion by volume (ppbv)',
+                min: 1e-3, max: 1e1,
+                ticks: ['10<sup>-3</sup>', '10<sup>-2</sup>', '10<sup>-1</sup>', '10<sup>0</sup>', '10<sup>1</sup>'],
+                colors: [[247,252,245],[199,233,192],[161,217,155],[116,196,118],[65,171,93],[35,139,69],[0,109,44],[0,68,27],[0,30,10]]
+            }
+        },
+
+        outlinePath: 'parametres/world_outline.geojson',
+
         // pmtiles
         availableLayers: []
     };
@@ -235,6 +252,8 @@
         legendVisible: true,
         availableLayers: [],
         activeColormap: null,
+        currentPollutant: null,
+        currentUnit:    null,
         activeBasemap:  'satellite',
         allAddedLayers: []
     };
@@ -249,6 +268,7 @@
         osm:       { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',                                                         opts: { attribution: '&copy; OpenStreetMap contributors', subdomains: 'abc', maxZoom: 19 } },
         satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',              opts: { attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community', maxZoom: 19 } },
         topo:      { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',             opts: { attribution: 'Tiles &copy; Esri', maxZoom: 19 } },
+        outline:   { url: null, opts: {}, outline: true, background: '#fdfdf8' },
         none:      { url: null, opts: {} }
     };
 
@@ -285,38 +305,114 @@
         return upperColor.color;
     }
 
+    const SPECIES = {
+        no2:  { label: 'NO₂ — Nitrogen Dioxide',          colormap: 'viridis', range: [0, 2],  unitLabel: 'ppb' },
+        pm25: { label: 'PM2.5 — Fine Particulate Matter', colormap: null,      range: [0, 60], unitLabel: 'μg/m³' }
+    };
+
+    function isMolMolUnit(unit) {
+        if (unit) return unit.toLowerCase().includes('mol/mol') || unit.toLowerCase() === 'mol mol-1';
+        return !!(state.georaster && state.georaster.maxs[0] < 1e-3);
+    }
+
+    function opaque(cs) {
+        return cs.map(s => ({ value: s.value, color: [s.color[0], s.color[1], s.color[2], 255] }));
+    }
+
     function getColorScale(pollutant, unit) {
-        // Colormap override takes priority
-        if (state.activeColormap && CONFIG.colorScales[state.activeColormap]) {
-            const cs = CONFIG.colorScales[state.activeColormap];
-            // Re-express stops as absolute values using georaster min/max if available
-            if (state.georaster) {
-                const mn = state.georaster.mins[0];
-                const mx = state.georaster.maxs[0];
-                return cs.map(s => ({ value: mn + s.value * (mx - mn), color: s.color }));
-            }
+        const key = (pollutant || 'default').toLowerCase();
+        const species = SPECIES[key];
+        const isMolMol = isMolMolUnit(unit);
+
+        const ls = CONFIG.logScales[key];
+        if (state.activeColormap === 'log' && ls) {
+            const f  = isMolMol ? 1e-9 : 1;
+            const lo = Math.log10(ls.min * f);
+            const hi = Math.log10(ls.max * f);
+            const n  = ls.colors.length - 1;
+            const cs = ls.colors.map((c, i) => ({ value: lo + (hi - lo) * i / n, color: [c[0], c[1], c[2], 255] }));
+            cs.log = true;
             return cs;
         }
-        const isMolMol = unit && (unit.toLowerCase().includes('mol/mol') || unit.toLowerCase() === 'mol mol-1');
-        if (isMolMol && (pollutant === 'no2' || pollutant === 'o3' || pollutant === 'co' || pollutant === 'so2')) {
-            return CONFIG.colorScales.molmol;
+
+        const cmName = state.activeColormap || (species && species.colormap);
+        if (cmName && CONFIG.colorScales[cmName]) {
+            const cs = CONFIG.colorScales[cmName];
+            let mn, mx;
+            if (species) {
+                const f = isMolMol ? 1e-9 : 1;
+                mn = species.range[0] * f;
+                mx = species.range[1] * f;
+            } else if (state.georaster) {
+                mn = state.georaster.mins[0];
+                mx = state.georaster.maxs[0];
+            } else {
+                return opaque(cs);
+            }
+            return opaque(cs.map(s => ({ value: mn + s.value * (mx - mn), color: s.color })));
         }
-        const key = (pollutant || 'default').toLowerCase();
-        return CONFIG.colorScales[key] || CONFIG.colorScales.default;
+        if (isMolMol && (key === 'o3' || key === 'co' || key === 'so2')) {
+            return opaque(CONFIG.colorScales.molmol);
+        }
+        return opaque(CONFIG.colorScales[key] || CONFIG.colorScales.default);
+    }
+
+    let outlineLayer = null;
+    let outlineData  = null;
+
+    async function applyBasemap(id) {
+        const def = BASEMAPS[id];
+        const map = window.currentMap;
+        if (!def || !map) return;
+        state.activeBasemap = id;
+
+        if (window.currentTileLayer) map.removeLayer(window.currentTileLayer);
+        window.currentTileLayer = def.url ? L.tileLayer(def.url, def.opts).addTo(map) : null;
+        map.getContainer().style.background = def.background || '';
+
+        document.querySelectorAll('.bm-card').forEach(c => {
+            const on = c.dataset.id === id;
+            c.classList.toggle('active', on);
+            const check = c.querySelector('.bm-check');
+            if (check) check.textContent = on ? '\u2713' : '';
+        });
+
+        if (outlineLayer) { map.removeLayer(outlineLayer); outlineLayer = null; }
+        if (!def.outline) return;
+
+        if (!map.getPane('outlinePane')) {
+            map.createPane('outlinePane');
+            map.getPane('outlinePane').style.zIndex = 460;
+            map.getPane('outlinePane').style.pointerEvents = 'none';
+        }
+        try {
+            outlineData = outlineData || await (await fetch(CONFIG.outlinePath)).json();
+        } catch (e) {
+            console.warn('Could not load map outlines:', e);
+            return;
+        }
+        if (state.activeBasemap !== id) return;
+        if (outlineLayer) map.removeLayer(outlineLayer);
+        outlineLayer = L.geoJSON(outlineData, {
+            pane: 'outlinePane',
+            renderer: L.canvas({ pane: 'outlinePane' }),
+            interactive: false,
+            style: f => ({ color: '#1a1a1a', weight: f.properties.k === 'coast' ? 0.8 : 0.5, opacity: 0.85 })
+        }).addTo(map);
     }
 
     // Rebuild current layer with a new colormap
     function setColormap(name) {
         state.activeColormap = name || null;
         if (state.currentLayer && state.georaster) {
-            const pollutant = state.currentLayerName ? 
-                (state.currentLayerName.match(/no2|pm25|o3|co|so2/i) || ['no2'])[0].toLowerCase() : 'no2';
-            const colorScale = getColorScale(pollutant, null);
+            const pollutant = state.currentPollutant || 'no2';
+            const colorScale = getColorScale(pollutant, state.currentUnit);
             state.currentLayer.colorScale = colorScale;
             state.currentLayer.minValue   = state.georaster.mins[0];
             state.currentLayer.maxValue   = state.georaster.maxs[0];
             state.currentLayer._buildDataCanvas();
             state.currentLayer._redraw();
+            updateLegend(pollutant, state.georaster.mins[0], state.georaster.maxs[0], state.currentUnit);
         }
         // Sync all colormap selectors
         ['geotiff-colormap-select', 'geotiff-floating-colormap'].forEach(id => {
@@ -437,6 +533,16 @@
                 unit: 'μg/m³',
                 path: CONFIG.pmtilesPath + `geos_cf_PM25_RH35_${dateStr}_09z.tif`
             });
+
+            layers.push({
+                name: `GEOS-CF NO2 ${displayDate}`,
+                file: `geos_cf_NO2_${dateStr}_09z.tif`,
+                type: 'geotiff',
+                pollutant: 'no2',
+                date: displayDate,
+                unit: 'mol/mol',
+                path: CONFIG.pmtilesPath + `geos_cf_NO2_${dateStr}_09z.tif`
+            });
         });
 
         state.availableLayers = layers;
@@ -534,12 +640,38 @@
             const h = se.y - nw.y;
             if (w <= 0 || h <= 0) return;
 
+            const src = (this._nextCanvas && this._blendT > 0) ? this._blendCanvas() : this._dataCanvas;
+
             ctx.save();
             ctx.globalAlpha = this.opacity;
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(this._dataCanvas, nw.x, nw.y, w, h);
+            ctx.drawImage(src, nw.x, nw.y, w, h);
             ctx.restore();
+        },
+
+        setBlend: function(nextCanvas, t) {
+            this._nextCanvas = nextCanvas;
+            this._blendT     = t;
+            this._draw();
+        },
+
+        _blendCanvas: function() {
+            const a = this._dataCanvas;
+            const b = this._nextCanvas;
+            if (!this._mixCanvas) this._mixCanvas = document.createElement('canvas');
+            const m = this._mixCanvas;
+            if (m.width !== a.width || m.height !== a.height) {
+                m.width  = a.width;
+                m.height = a.height;
+            }
+            const c = m.getContext('2d');
+            c.globalAlpha = 1;
+            c.clearRect(0, 0, m.width, m.height);
+            c.drawImage(a, 0, 0);
+            c.globalAlpha = this._blendT;
+            c.drawImage(b, 0, 0, m.width, m.height);
+            return m;
         },
 
         _buildDataCanvas: function() {
@@ -648,6 +780,18 @@
             const mn  = this.minValue;
             const mx  = this.maxValue;
             if (!cs || cs.length === 0) return [128, 128, 128, 180];
+            if (cs.log) {
+                const lv = value > 0 ? Math.log10(value) : -Infinity;
+                if (lv <= cs[0].value) return cs[0].color;
+                for (let i = 1; i < cs.length; i++) {
+                    if (lv <= cs[i].value) {
+                        const a = cs[i-1], b = cs[i];
+                        const f = (lv - a.value) / (b.value - a.value);
+                        return [0, 1, 2, 3].map(k => Math.round(a.color[k] * (1-f) + b.color[k] * f));
+                    }
+                }
+                return cs[cs.length - 1].color;
+            }
             const t = Math.max(0, Math.min(1, (value - mn) / (mx - mn)));
             for (let i = 0; i < cs.length - 1; i++) {
                 const a  = cs[i],   b  = cs[i+1];
@@ -877,6 +1021,8 @@
             if (addToMap) {
                 state.currentLayer = layer;
                 state.currentLayerName = name || filePath;
+                state.currentPollutant = pollutant;
+                state.currentUnit = unit;
                 
                 // track
                 state.allAddedLayers.push(layer);
@@ -1122,14 +1268,45 @@
             }
         }
 
-        legend.innerHTML = `
-            <div class="aqi-legend-wrapper">
+        let categoriesHtml = `
             <div class="aqi-category good">Good</div>
             <div class="aqi-category moderate">Moderate</div>
             <div class="aqi-category usg">Unhealthy for sensitive groups</div>
             <div class="aqi-category unhealthy">Unhealthy</div>
             <div class="aqi-category vunhealthy">Very unhealthy</div>
-            <div class="aqi-category hazardous">Hazardous</div>
+            <div class="aqi-category hazardous">Hazardous</div>`;
+        const key = (pollutant || '').toLowerCase();
+        const species = SPECIES[key];
+        const ls = CONFIG.logScales[key];
+        const cmName = state.activeColormap || (species && species.colormap);
+        if (state.activeColormap === 'log' && ls) {
+            const n = ls.colors.length - 1;
+            const stops = ls.colors.map((c, i) => `rgb(${c[0]},${c[1]},${c[2]}) ${(i / n * 100).toFixed(1)}%`).join(', ');
+            const ticks = ls.ticks.map((t, i) =>
+                `<span style="left:${(i / (ls.ticks.length - 1) * 100).toFixed(2)}%">${t}</span>`).join('');
+            categoriesHtml = `
+            <div class="species-log-legend">
+                <div class="sll-title"><span>low</span><strong>${ls.title}</strong><span>high</span></div>
+                <div class="sll-bar" style="background:linear-gradient(to right, ${stops});"></div>
+                <div class="sll-ticks">${ticks}</div>
+                <div class="sll-unit">${ls.unitText}</div>
+            </div>`;
+        } else if (species && cmName && cmName !== 'aqi' && CONFIG.colorScales[cmName]) {
+            const stops = CONFIG.colorScales[cmName]
+                .map(s => `rgb(${s.color[0]},${s.color[1]},${s.color[2]}) ${(s.value * 100).toFixed(0)}%`)
+                .join(', ');
+            const [lo, hi] = species.range;
+            const ticks = [0, 0.25, 0.5, 0.75, 1].map(t => +(lo + t * (hi - lo)).toFixed(2));
+            const labels = ticks.map((v, i) => i === ticks.length - 1 ? `&ge;${v} ${species.unitLabel}` : `${v}`);
+            categoriesHtml = `
+            <div class="species-gradient-legend" style="background:linear-gradient(to right, ${stops});">
+                ${labels.map(l => `<span>${l}</span>`).join('')}
+            </div>`;
+        }
+
+        legend.innerHTML = `
+            <div class="aqi-legend-wrapper">
+            ${categoriesHtml}
             <div class="aqi-legend-footer">
                 <span class="legend-footer-item">Data Sources: <strong>NASA GEOS‑CF</strong> <span class="legend-meta">Daily · Global, Site Specific</span></span>
                 <span class="legend-footer-sep">·</span>
@@ -1192,7 +1369,8 @@
         frames:         [],
         currentIdx:     0,
         playing:        false,
-        _timer:         null,
+        _raf:           null,
+        _minFrameMs:    33,
         speed:          800,
         _pollutant:     null,
         _lastSyncedDate: null,
@@ -1228,7 +1406,7 @@
             this._setProgress(0, list.length);
             this._updateUI('loading');
 
-            const colorScale = getColorScale(pollutant, null);
+            const colorScale = getColorScale(pollutant, list[0].unit);
 
             // Fetch + parse all in parallel, then build canvases
             const results = await Promise.allSettled(
@@ -1287,6 +1465,7 @@
                 state.currentLayer.minValue   = frame.georaster.mins[0];
                 state.currentLayer.maxValue   = frame.georaster.maxs[0];
                 state.currentLayer._dataCanvas = frame._dataCanvas;
+                state.currentLayer._nextCanvas = null;
                 state.currentLayer._draw();
             }
 
@@ -1315,16 +1494,31 @@
             if (this.frames.length === 0) return;
             this.playing = true;
             this._updateUI('playing');
-            this._timer = setInterval(() => {
-                const next = (this.currentIdx + 1) % this.frames.length;
-                this._renderFrame(next);
-            }, this.speed);
+            const start = performance.now() - this.currentIdx * this.speed;
+            let last = 0;
+            const tick = now => {
+                if (!this.playing) return;
+                this._raf = requestAnimationFrame(tick);
+                if (now - last < this._minFrameMs) return;
+                last = now;
+
+                const pos  = ((now - start) / this.speed) % this.frames.length;
+                const idx  = Math.floor(pos);
+                if (idx !== this.currentIdx) this._renderFrame(idx);
+
+                const next = this.frames[(idx + 1) % this.frames.length];
+                if (state.currentLayer && next) {
+                    state.currentLayer.setBlend(next._dataCanvas, pos - idx);
+                }
+            };
+            this._raf = requestAnimationFrame(tick);
         },
 
         pause: function() {
             this.playing = false;
-            clearInterval(this._timer);
-            this._timer = null;
+            cancelAnimationFrame(this._raf);
+            this._raf = null;
+            if (state.currentLayer) state.currentLayer.setBlend(null, 0);
             this._updateUI('paused');
         },
 
@@ -1544,6 +1738,7 @@
                     <select id="geotiff-colormap-select" class="control-select">
                         <option value="">── Pollutant Default ──</option>
                         <option value="aqi">AQI (Green → Red)</option>
+                        <option value="log">Log Scale (PM2.5 Orange · NO₂ Green)</option>
                         <option value="viridis">Viridis</option>
                         <option value="plasma">Plasma</option>
                         <option value="magma">Magma</option>
@@ -1593,6 +1788,18 @@
         return true;
     }
 
+    function layerOptionsHTML() {
+        const optionHTML = l => `<option value="${l.path}" data-type="${l.type}" data-pollutant="${l.pollutant}" data-unit="${l.unit || POLLUTANT_UNITS[l.pollutant] || POLLUTANT_UNITS.default}">${l.name}</option>`;
+        const byDate = (a, b) => (a.date || '').localeCompare(b.date || '');
+        const groups = Object.entries(SPECIES).map(([key, sp]) => {
+            const layers = state.availableLayers.filter(l => l.pollutant === key).sort(byDate);
+            return layers.length ? `<optgroup label="${sp.label}">${layers.map(optionHTML).join('')}</optgroup>` : '';
+        });
+        const others = state.availableLayers.filter(l => !SPECIES[l.pollutant]);
+        if (others.length) groups.push(`<optgroup label="Other">${others.map(optionHTML).join('')}</optgroup>`);
+        return groups.join('');
+    }
+
     // dropdown
     async function populateLayerDropdown() {
         const select = document.getElementById('geotiff-layer-select');
@@ -1608,21 +1815,10 @@
             await discoverAvailableLayers();
         }
 
-        // clear
-        while (select.options.length > 1) {
-            select.remove(1);
-        }
+        Array.from(select.children).slice(1).forEach(el => el.remove());
 
         // add
-        state.availableLayers.forEach(layer => {
-            const option = document.createElement('option');
-            option.value = layer.path;
-            option.textContent = layer.name;
-            option.dataset.type = layer.type;
-            option.dataset.pollutant = layer.pollutant;
-            option.dataset.unit = layer.unit || POLLUTANT_UNITS[layer.pollutant] || POLLUTANT_UNITS.default;
-            select.appendChild(option);
-        });
+        select.insertAdjacentHTML('beforeend', layerOptionsHTML());
         
         console.log(`Added ${state.availableLayers.length} layers to dropdown`);
     }
@@ -1847,19 +2043,8 @@
         }
 
         // ── Basemap ───────────────────────────────────────────────────────────
-        if (p.bm) {
-            state.activeBasemap = p.bm;
-            const def = BASEMAPS[p.bm];
-            const map = window.currentMap;
-            if (def && map) {
-                if (window.currentTileLayer) map.removeLayer(window.currentTileLayer);
-                if (def.url) window.currentTileLayer = L.tileLayer(def.url, def.opts).addTo(map);
-                else window.currentTileLayer = null;
-            }
-            // Sync panel cards 
-            document.querySelectorAll('.bm-card').forEach(c => {
-                c.classList.toggle('active', c.dataset.id === p.bm);
-            });
+        if (p.bm && BASEMAPS[p.bm]) {
+            applyBasemap(p.bm);
         }
     }
 
@@ -1988,6 +2173,7 @@
         
 
         createFloatingButton();
+        createBannerToggle();
 
         console.log('GeoTIFF Manager initialized');
 
@@ -2093,6 +2279,40 @@
         };
     }
     
+    function setBannerHidden(hidden) {
+        document.body.classList.toggle('banner-hidden', hidden);
+        const cb = document.getElementById('fp-hide-banner');
+        if (cb) cb.checked = hidden;
+        positionBannerToggle();
+    }
+
+    function positionBannerToggle() {
+        const btn    = document.getElementById('banner-toggle-btn');
+        const banner = document.getElementById('locations-banner');
+        if (!btn || !banner) return;
+        const hidden = document.body.classList.contains('banner-hidden');
+        const base   = parseFloat(getComputedStyle(banner).bottom) || 0;
+        btn.style.bottom = `${hidden ? base : base + banner.offsetHeight}px`;
+        btn.innerHTML = `<i class="bi bi-chevron-${hidden ? 'up' : 'down'}"></i>`;
+        btn.title = hidden ? 'Show banner' : 'Hide banner';
+    }
+
+    function createBannerToggle() {
+        if (!document.body.classList.contains('home-page')) return;
+        const banner = document.getElementById('locations-banner');
+        if (!banner || document.getElementById('banner-toggle-btn')) return;
+
+        const btn = document.createElement('button');
+        btn.id = 'banner-toggle-btn';
+        btn.className = 'banner-toggle-btn';
+        btn.addEventListener('click', () => setBannerHidden(!document.body.classList.contains('banner-hidden')));
+        document.body.appendChild(btn);
+
+        positionBannerToggle();
+        window.addEventListener('resize', positionBannerToggle);
+        if (typeof ResizeObserver !== 'undefined') new ResizeObserver(positionBannerToggle).observe(banner);
+    }
+
     // floating
     function createFloatingButton() {
         if (!document.body.classList.contains('home-page')) return;
@@ -2129,13 +2349,11 @@
         panel.id = 'geotiff-floating-panel';
         panel.className = 'geotiff-floating-panel';
 
-        let layerOptions = '<option value="">── Select Layer ──</option>';
-        state.availableLayers.forEach(layer => {
-            layerOptions += `<option value="${layer.path}" data-type="${layer.type}" data-pollutant="${layer.pollutant}" data-unit="${layer.unit || ''}">${layer.name}</option>`;
-        });
+        const layerOptions = '<option value="">── Select Layer ──</option>' + layerOptionsHTML();
 
         const colormaps = [
-            { id: '', name: 'Pollutant Default', gradient: 'linear-gradient(to right,#440154,#3b5289,#21908c,#5dc962,#fde725)' },
+            { id: '', name: 'Species Default (NO₂ Viridis · PM2.5 AQI)', gradient: 'linear-gradient(to right,#440154,#3b5289,#21908c,#5dc962,#fde725)' },
+            { id: 'log', name: 'Log Scale (PM2.5 Orange · NO₂ Green)', gradient: 'linear-gradient(to right,#ffffe5,#fd8d3c,#5a190a 50%,#f7fcf5 50%,#41ab5d,#001e0a)' },
             { id: 'aqi', name: 'AQI', gradient: 'linear-gradient(to right,#00e400,#ffff00,#ff7e00,#ff0000,#8f3f97,#7e0023)' },
             { id: 'viridis', name: 'Viridis', gradient: 'linear-gradient(to right,#440154,#31688e,#21908c,#35b779,#fde725)' },
             { id: 'plasma', name: 'Plasma', gradient: 'linear-gradient(to right,#0d0887,#b12a90,#e16462,#fca636,#f0f921)' },
@@ -2147,6 +2365,7 @@
 
         const basemaps = [
             { id: 'satellite', name: 'Satellite',     abbr: 'SAT' },
+            { id: 'outline',   name: 'Outline',       abbr: 'OUT' },
             { id: 'voyager',   name: 'Streets',       abbr: 'STR' },
             { id: 'positron',  name: 'Light Gray',    abbr: 'LGT' },
             { id: 'dark',      name: 'Dark Gray',     abbr: 'DRK' },
@@ -2180,6 +2399,7 @@
                 <button class="fp-tab" data-tab="colors">Colors</button>
                 <button class="fp-tab" data-tab="animate">Animate</button>
                 <button class="fp-tab" data-tab="basemap">Basemap</button>
+                <button class="fp-tab" data-tab="settings">Settings</button>
             </div>
             <div class="fp-body">
 
@@ -2270,6 +2490,16 @@
                     <div class="fp-card">
                         <div class="fp-row">
                             <div class="fp-row-text">
+                                <span class="fp-row-title">Hide Bottom Banner</span>
+                                <span class="fp-row-sub">Locations ticker</span>
+                            </div>
+                            <label class="fp-ios-toggle">
+                                <input type="checkbox" id="fp-hide-banner" ${document.body.classList.contains('banner-hidden') ? 'checked' : ''}>
+                                <span class="fp-ios-track"></span>
+                            </label>
+                        </div>
+                        <div class="fp-row">
+                            <div class="fp-row-text">
                                 <span class="fp-row-title">GEOS-CF Forecast</span>
                                 <span class="fp-row-sub">GEOS-CF Forecast</span>
                             </div>
@@ -2316,6 +2546,10 @@
                     <div class="fp-card" id="fp-bm-grid">${basemapHTML}</div>
                 </div>
 
+                <div class="fp-section" id="fp-tab-settings">
+                    <div class="fp-card fp-settings-card"></div>
+                </div>
+
             </div>
         `;
         
@@ -2324,6 +2558,17 @@
             mapContainer.parentElement.appendChild(panel);
         } else {
             document.body.appendChild(panel);
+        }
+
+        const settingsSrc  = document.querySelector('#map-controls-overlay .msp-body');
+        const settingsCard = panel.querySelector('.fp-settings-card');
+        if (settingsSrc && settingsSrc.children.length) {
+            Array.from(settingsSrc.children).forEach(el => {
+                if (el.id !== 'geotiff-controls-container') settingsCard.appendChild(el);
+            });
+        } else {
+            panel.querySelector('.fp-tab[data-tab="settings"]').remove();
+            panel.querySelector('#fp-tab-settings').remove();
         }
 
         // ── Tab switching ──
@@ -2380,6 +2625,10 @@
             _patchURLParam('leg', state.legendVisible ? '1' : '0');
         });
 
+        document.getElementById('fp-hide-banner').addEventListener('change', function() {
+            setBannerHidden(this.checked);
+        });
+
         // ── Remove ──
         document.getElementById('geotiff-floating-remove').addEventListener('click', function() {
             AnimationController.stop();
@@ -2417,20 +2666,9 @@
         // ── Basemap cards ──
         panel.querySelectorAll('.bm-card').forEach(card => {
             card.addEventListener('click', function() {
-                panel.querySelectorAll('.bm-card').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
                 const bmId = this.dataset.id;
-                state.activeBasemap = bmId;
-                const def = BASEMAPS[bmId];
-                if (!def) return;
-                const map = window.currentMap;
-                if (!map) return;
-                if (window.currentTileLayer) map.removeLayer(window.currentTileLayer);
-                if (def.url) {
-                    window.currentTileLayer = L.tileLayer(def.url, def.opts).addTo(map);
-                } else {
-                    window.currentTileLayer = null;
-                }
+                if (!BASEMAPS[bmId]) return;
+                applyBasemap(bmId);
                 _patchURLParam('bm', bmId);
             });
         });
@@ -2536,7 +2774,61 @@
             body.home-page .geotiff-legend {
                 display: block !important;
             }
+
+            #locations-banner {
+                transition: transform 0.3s ease;
+            }
+            body.banner-hidden #locations-banner {
+                transform: translateY(calc(100% + 60px));
+                pointer-events: none;
+            }
+            .geotiff-legend,
+            .geotiff-loading {
+                transition: bottom 0.3s ease;
+            }
+            body.banner-hidden .geotiff-legend,
+            body.banner-hidden .geotiff-loading {
+                bottom: 50px !important;
+            }
+            @media (max-width: 480px) {
+                body.banner-hidden .geotiff-legend,
+                body.banner-hidden .geotiff-loading {
+                    bottom: 45px !important;
+                }
+            }
+
+            .banner-toggle-btn {
+                position: fixed;
+                right: 16px;
+                z-index: 1001;
+                width: 40px;
+                height: 22px;
+                padding: 0;
+                border: none;
+                border-radius: 6px 6px 0 0;
+                background: #1a1a1a;
+                color: #fff;
+                font-size: 14px;
+                line-height: 1;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.25);
+                transition: bottom 0.3s ease, background 0.15s;
+            }
+            .banner-toggle-btn:hover {
+                background: #333;
+            }
             
+            .geotiff-legend,
+            .aqi-legend-wrapper {
+                pointer-events: none;
+            }
+            .aqi-legend-wrapper > * {
+                pointer-events: auto;
+            }
+
             /* wrapper */
             .aqi-legend-wrapper {
                 display: flex;
@@ -2550,6 +2842,52 @@
             }
             
             /* categories */
+            .species-log-legend {
+                flex: 1;
+                max-width: 560px;
+                padding: 6px 22px 6px;
+                background: #222;
+                color: #fff;
+                font-size: 11px;
+                text-align: center;
+            }
+            .species-log-legend .sll-title {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                margin: 0 -14px 3px;
+            }
+            .species-log-legend .sll-title strong { font-size: 14px; font-weight: 600; }
+            .species-log-legend .sll-bar {
+                height: 14px;
+                border: 1px solid #fff;
+            }
+            .species-log-legend .sll-ticks {
+                position: relative;
+                height: 16px;
+                margin-top: 2px;
+            }
+            .species-log-legend .sll-ticks span {
+                position: absolute;
+                top: 0;
+                transform: translateX(-50%);
+                white-space: nowrap;
+            }
+            .species-log-legend .sll-ticks sup { font-size: 8px; }
+            .species-log-legend .sll-unit { font-size: 10px; opacity: 0.85; }
+
+            .species-gradient-legend {
+                flex: 1;
+                max-width: 900px;
+                display: flex;
+                justify-content: space-between;
+                padding: 6px 8px;
+                font-size: 11px;
+                font-weight: 600;
+                color: white;
+                text-shadow: 0 0 3px rgba(0, 0, 0, 0.9);
+            }
+
             .aqi-category {
                 flex: 1;
                 min-width: 60px;
@@ -2861,6 +3199,7 @@
                 min-width: 300px;
                 max-width: 420px;
                 height: 100%;
+                max-height: 100vh;
                 background: #f5f6fa;
                 z-index: 1001;
                 display: flex;
@@ -2926,16 +3265,22 @@
                 transition: all 0.15s;
             }
             .fp-tab:hover { color: #374151; }
+            .fp-settings-card { padding: 4px 14px 10px; }
             .fp-tab.active { color: #1e3a5f; border-bottom-color: #1e3a5f; }
 
             /* scrollable body */
             .fp-body {
                 flex: 1;
+                min-height: 0;
                 overflow-y: auto;
-                padding: 16px 14px;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+                padding: 16px 14px 220px;
                 scrollbar-width: thin;
                 scrollbar-color: #d1d5db #f5f6fa;
             }
+            body.banner-hidden .fp-body { padding-bottom: 130px; }
+            .fp-header, .fp-tabs { flex-shrink: 0; }
             .fp-body::-webkit-scrollbar { width: 4px; }
             .fp-body::-webkit-scrollbar-track { background: transparent; }
             .fp-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
