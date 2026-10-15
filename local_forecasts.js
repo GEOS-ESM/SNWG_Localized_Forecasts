@@ -473,6 +473,9 @@ function create_map(sites, param) {
         window.currentMap = map;
         window.currentMarkers = L.layerGroup();
         map.addLayer(window.currentMarkers);
+        map.on('zoomend', () => syncMarkerDetail(map));
+        syncMarkerDetail(map);
+        map.getContainer().classList.toggle('markers-hidden', !!window.__markersHidden);
         
         window.hoverDiv = document.getElementById('map-hover-info');
         
@@ -580,6 +583,89 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
     };
 }
    
+const AQI_SCALE = [
+    { min: 0,   max: 50,  level: "Good",                           short: "Good",      color: "#4CAF50" },
+    { min: 51,  max: 100, level: "Moderate",                       short: "Moderate",  color: "#FFEB3B" },
+    { min: 101, max: 150, level: "Unhealthy for Sensitive Groups", short: "USG",       color: "#FF9800" },
+    { min: 151, max: 200, level: "Unhealthy",                      short: "Unhealthy", color: "#F44336" },
+    { min: 201, max: 300, level: "Very Unhealthy",                 short: "Very Unh.", color: "#9C27B0" },
+    { min: 301, max: 500, level: "Hazardous",                      short: "Hazardous", color: "#7E0023" }
+];
+
+function generateMarkerHoverCard(props) {
+    const name = props.location_name || "Unknown";
+    const raw = props.aqi_value;
+    const hasAqi = raw !== '--' && raw !== 'N/A' && raw !== null && raw !== undefined && !isNaN(raw);
+    const aqi = hasAqi ? Number(raw) : null;
+
+    let forecast = {};
+    try { forecast = props.obs_options ? JSON.parse(props.obs_options) : {}; } catch (e) {}
+
+    const dominant = props.aqi_pollutant || null;
+    const abbr = code => {
+        const a = pollutant_details(String(code).toLowerCase(), "abbr");
+        return a && a !== "N/A" ? a : String(code).toUpperCase();
+    };
+
+    const header = `
+        <div class="mh-header">
+            <div class="mh-name">${name}</div>
+            ${forecast.local_time ? `<div class="mh-time">${String(forecast.local_time).substring(0, 16).replace('T', ' ')}</div>` : ''}
+        </div>`;
+
+    if (!hasAqi) {
+        return `${header}<div class="mh-empty">No AQI forecast available for this site.</div>`;
+    }
+
+    const level = getAqiLevel(aqi);
+    const segIdx = Math.max(0, AQI_SCALE.findIndex(s => aqi <= s.max));
+    const seg = AQI_SCALE[aqi > 500 ? AQI_SCALE.length - 1 : segIdx];
+    const segW = 100 / AQI_SCALE.length;
+    const clamped = Math.min(Math.max(aqi, seg.min), seg.max);
+    const pos = Math.min(100, AQI_SCALE.indexOf(seg) * segW + ((clamped - seg.min) / (seg.max - seg.min)) * segW);
+
+    const scale = AQI_SCALE.map(s => `
+        <div class="mh-seg${s === seg ? ' active' : ''}" style="--sc:${s.color}">
+            <span class="mh-seg-bar"></span>
+            <span class="mh-seg-label">${s.short}</span>
+        </div>`).join('');
+
+    const num = v => (v !== undefined && v !== null && v !== '' && !isNaN(v)) ? Math.round(Number(v)) : null;
+    const subs = [
+        { code: "pm25", aqi: num(forecast.pm25_aqi) ?? num(forecast.PM25_NowCast_AQI) },
+        { code: "no2",  aqi: num(forecast.NO2_AQI) ?? num(forecast.no2_aqi) },
+        { code: "o3",   aqi: num(forecast.O3_AQI) ?? num(forecast.o3_aqi) }
+    ].filter(p => p.aqi !== null);
+
+    const breakdown = subs.length ? `
+        <div class="mh-pollutants">
+            ${subs.map(p => {
+                const c = getAqiLevel(p.aqi).color;
+                return `<div class="mh-pol${p.code === dominant ? ' dominant' : ''}">
+                    <span class="mh-pol-name">${abbr(p.code)}</span>
+                    <span class="mh-pol-val" style="background:${c};color:${getMarkerTextColor(c)}">${p.aqi}</span>
+                </div>`;
+            }).join('')}
+        </div>` : '';
+
+    return `
+        ${header}
+        <div class="mh-main">
+            <div class="mh-aqi" style="background:${level.color};color:${getMarkerTextColor(level.color)}">${aqi}</div>
+            <div class="mh-info">
+                <div class="mh-level" style="--lc:${level.color}">${level.level}</div>
+                <div class="mh-sub">US AQI${dominant ? ` · driven by ${abbr(dominant)}` : ''}</div>
+            </div>
+        </div>
+        <div class="mh-message">${level.message}</div>
+        <div class="mh-scale">
+            <div class="mh-scale-track">${scale}</div>
+            <div class="mh-pointer" style="left:${pos}%"></div>
+        </div>
+        ${breakdown}
+        <div class="mh-cta">Click for full forecast</div>`;
+}
+
 function generateSmallAqiBox(aqiValue, pollutant) {
     if (aqiValue === 'N/A' || aqiValue === undefined || aqiValue === null || isNaN(aqiValue) || aqiValue === '--') return '';
 
@@ -1318,6 +1404,79 @@ function finalizeSitesLoading(filteredSites) {
 }
 
 
+const MARKER_DETAIL_ZOOM = 5;
+
+function syncMarkerDetail(map) {
+    const container = map && map.getContainer();
+    if (container) container.classList.toggle('markers-detailed', map.getZoom() >= MARKER_DETAIL_ZOOM);
+}
+
+function setMarkersVisible(visible) {
+    window.__markersHidden = !visible;
+    const map = window.currentMap;
+    if (map) map.getContainer().classList.toggle('markers-hidden', !visible);
+    if (!visible && window.hoverDiv) window.hoverDiv.style.display = 'none';
+    document.dispatchEvent(new CustomEvent('markers-visibility', { detail: { visible } }));
+}
+
+function areMarkersVisible() {
+    return !window.__markersHidden;
+}
+
+function getMarkerTextColor(hex) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+    if (!m) return '#fff';
+    const n = parseInt(m[1], 16);
+    const lum = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+    return lum > 0.6 ? '#1a1a1a' : '#fff';
+}
+
+function markerKey(props) {
+    return `${props.location_id}|${props.location_name}`;
+}
+
+function updateMarkersInPlace(geojson) {
+    const index = window.__markerIndex;
+    if (!index || index.size !== geojson.features.length) return false;
+    if (!geojson.features.every(f => index.has(markerKey(f.properties)))) return false;
+
+    geojson.features.forEach(feature => {
+        const props = feature.properties;
+        const marker = index.get(markerKey(props));
+        const prev = marker.featureProperties || {};
+        marker.featureProperties = props;
+
+        const container = marker.getElement() && marker.getElement().querySelector('.marker-container');
+        if (!container) return;
+
+        const color = props.aqi_color || '#9e9e9e';
+        const label = props.aqi_value === 'N/A' || props.aqi_value === '--' ? '—' : String(props.aqi_value);
+        const labelEl = container.querySelector('.marker-label');
+
+        const flip = (a, b) => {
+            const next = container.classList.contains(a) ? b : a;
+            container.classList.remove(a, b);
+            container.classList.add(next);
+        };
+
+        if (color !== (prev.aqi_color || '#9e9e9e')) {
+            container.style.setProperty('--c', color);
+            container.style.setProperty('--fg', getMarkerTextColor(color));
+            flip('dot-swap-a', 'dot-swap-b');
+        }
+        if (labelEl && labelEl.textContent !== label) {
+            labelEl.textContent = label;
+            flip('value-swap-a', 'value-swap-b');
+        }
+
+        if (marker._onMove && window.hoverDiv && window.hoverDiv.style.display !== 'none') {
+            window.hoverDiv.innerHTML = generateMarkerHoverCard(props);
+            window.hoverDiv.style.setProperty('--accent', color);
+        }
+    });
+    return true;
+}
+
 function updateLeafletMarkers(map, geojson) {
     const markerCluster = window.currentMarkers;
     if (!markerCluster) {
@@ -1326,6 +1485,8 @@ function updateLeafletMarkers(map, geojson) {
     }
 
     const isAnimSync = !!window.__geotiffAnimating;
+    if (isAnimSync && updateMarkersInPlace(geojson)) return;
+    window.__markerIndex = new Map();
 
     if (!isAnimSync && map && map.getContainer()) {
         const container = map.getContainer();
@@ -1346,69 +1507,56 @@ function updateLeafletMarkers(map, geojson) {
 
         const aqiColor = props.aqi_color || '#9e9e9e';
         
+        const labelText = aqiValue === '--' ? '—' : aqiValue;
+        const enterDelay = isAnimSync ? 0 : Math.min(index * 6, 700);
+        const labelDelay = (index % 24) * 12;
+
         const icon = L.divIcon({
             className: 'custom-marker-icon',
             html: `
-                <div class="marker-container" data-marker-id="${index}" style="opacity:0.7;">
-                    <div style="
-                        width:32px;
-                        height:32px;
-                        border-radius:50%;
-                        background:${aqiColor};
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        color:#fff;
-                        font-weight:bold;
-                        font-size:11px;
-                        box-shadow:0 2px 8px rgba(0,0,0,0.3);
-                        transition:all 0.2s ease;
-                    ">${aqiValue}</div>
+                <div class="marker-container${isAnimSync ? '' : ' is-entering'}" data-marker-id="${index}"
+                     style="--c:${aqiColor}; --fg:${getMarkerTextColor(aqiColor)}; --d:${enterDelay}ms; --ld:${labelDelay}ms;">
+                    <div class="marker-dot"></div>
+                    <div class="marker-label">${labelText}</div>
                 </div>
             `,
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
         });
         
-        const marker = L.marker(latlng, { icon: icon });
+        const marker = L.marker(latlng, { icon: icon, riseOnHover: true });
         
         marker.featureProperties = props;
+        window.__markerIndex.set(markerKey(props), marker);
         
         marker.on('mouseover', function(e) {
-            const markerEl = e.target.getElement();
-            if (markerEl) {
-                const container = markerEl.querySelector('.marker-container');
-                if (container) container.style.opacity = '1';
-            }
-            
-            const locationName = props.location_name || "Unknown";
-            const param = props.aqi_pollutant || props.parameter || 'no2';
-            
             if (hoverDiv) {
-                hoverDiv.innerHTML = `
-                    <div style="font-weight:bold; margin-bottom:4px;">${locationName}</div>
-                    ${generateSmallAqiBox(aqiValue, param)}
-                `;
+                const current = marker.featureProperties;
+                hoverDiv.innerHTML = generateMarkerHoverCard(current);
+                hoverDiv.classList.add('marker-hover-card');
+                hoverDiv.style.setProperty('--accent', current.aqi_color || '#9e9e9e');
                 hoverDiv.style.display = 'block';
+                hoverDiv.classList.remove('is-visible');
+                void hoverDiv.offsetWidth;
+                hoverDiv.classList.add('is-visible');
+                onMove({ containerPoint: map.latLngToContainerPoint(latlng) });
             }
             
             map.on('mousemove', onMove);
             function onMove(ev) {
-                if (hoverDiv) {
-                    hoverDiv.style.left = (ev.containerPoint.x + 15) + 'px';
-                    hoverDiv.style.top = (ev.containerPoint.y + 15) + 'px';
-                }
+                if (!hoverDiv) return;
+                const size = map.getSize();
+                const w = hoverDiv.offsetWidth, h = hoverDiv.offsetHeight;
+                let x = ev.containerPoint.x + 16, y = ev.containerPoint.y + 16;
+                if (x + w > size.x - 8) x = ev.containerPoint.x - w - 16;
+                if (y + h > size.y - 8) y = ev.containerPoint.y - h - 16;
+                hoverDiv.style.left = Math.max(8, x) + 'px';
+                hoverDiv.style.top = Math.max(8, y) + 'px';
             }
             marker._onMove = onMove;
         });
         
         marker.on('mouseout', function(e) {
-            const markerEl = e.target.getElement();
-            if (markerEl) {
-                const container = markerEl.querySelector('.marker-container');
-                if (container) container.style.opacity = '0.7';
-            }
-            
             if (hoverDiv) {
                 hoverDiv.style.display = 'none';
             }

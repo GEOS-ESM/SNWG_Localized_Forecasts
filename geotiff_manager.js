@@ -65,6 +65,9 @@
         defaultLayerName: null,
         loadDefaultOnInit: false,
         
+        animDaysBack: 10,
+        animDaysForward: 5,
+
         // opacity
         defaultOpacity: 0.7,
         defaultResolution: 256,
@@ -506,9 +509,9 @@
         // range
         const today = new Date();
         const startDate = new Date(today);
-        startDate.setDate(startDate.getDate() - 5);
+        startDate.setDate(startDate.getDate() - CONFIG.animDaysBack);
         const endDate = new Date(today);
-        endDate.setDate(endDate.getDate() + 5);
+        endDate.setDate(endDate.getDate() + CONFIG.animDaysForward);
 
         // dates
         const dateList = [];
@@ -1286,10 +1289,12 @@
                 `<span style="left:${(i / (ls.ticks.length - 1) * 100).toFixed(2)}%">${t}</span>`).join('');
             categoriesHtml = `
             <div class="species-log-legend">
-                <div class="sll-title"><span>low</span><strong>${ls.title}</strong><span>high</span></div>
-                <div class="sll-bar" style="background:linear-gradient(to right, ${stops});"></div>
-                <div class="sll-ticks">${ticks}</div>
-                <div class="sll-unit">${ls.unitText}</div>
+                <strong class="sll-name">${ls.title}</strong>
+                <div class="sll-scale">
+                    <div class="sll-bar" style="background:linear-gradient(to right, ${stops});"></div>
+                    <div class="sll-ticks">${ticks}</div>
+                </div>
+                <span class="sll-unit" title="${ls.unitText}">${(ls.unitText.match(/\(([^)]+)\)/) || [, ls.unitText])[1]}</span>
             </div>`;
         } else if (species && cmName && cmName !== 'aqi' && CONFIG.colorScales[cmName]) {
             const stops = CONFIG.colorScales[cmName]
@@ -1316,6 +1321,11 @@
 </span></span>
                 <span class="legend-footer-sep">|</span>
                 <span class="legend-footer-item legend-footer-date-item">
+                    <button id="legend-play-btn" class="legend-play-btn" title="Play ${CONFIG.animDaysBack}-day history + ${CONFIG.animDaysForward}-day forecast">
+                        <i class="bi bi-play-fill"></i><span class="legend-play-text">Play</span>
+                    </button>
+                    <button id="legend-markers-btn" class="legend-markers-btn" title="Hide site markers"><i class="bi bi-geo-alt-fill"></i></button>
+                    <span class="legend-timeline" title="Animation timeline"><span id="legend-timeline-fill" class="legend-timeline-fill"></span></span>
                     <strong>Date</strong> <span id="legend-current-date">${displayDate}</span>
                     <button class="legend-layers-btn" title="Open Layers Panel"><i class="bi bi-layers-fill"></i></button>
                 </span>
@@ -1342,7 +1352,49 @@
             });
         }
 
+        const lPlayBtn = legend.querySelector('#legend-play-btn');
+        if (lPlayBtn) lPlayBtn.addEventListener('click', toggleLegendPlayback);
+        const lMarkersBtn = legend.querySelector('#legend-markers-btn');
+        if (lMarkersBtn) lMarkersBtn.addEventListener('click', () => setSiteMarkersVisible(window.__markersHidden));
+        syncMarkerToggles();
+        AnimationController._syncLegendUI();
+
         legend.style.display = state.legendVisible ? 'block' : 'none';
+    }
+
+    function setSiteMarkersVisible(visible) {
+        if (typeof setMarkersVisible === 'function') setMarkersVisible(visible);
+    }
+
+    function syncMarkerToggles() {
+        const visible = !window.__markersHidden;
+        const cb = document.getElementById('fp-show-markers');
+        if (cb) cb.checked = visible;
+        document.querySelectorAll('#nf-markers-btn, #legend-markers-btn').forEach(btn => {
+            btn.classList.toggle('is-off', !visible);
+            btn.title = visible ? 'Hide site markers' : 'Show site markers';
+            const icon = btn.querySelector('i');
+            if (icon) icon.className = visible ? 'bi bi-geo-alt-fill' : 'bi bi-geo-alt';
+        });
+    }
+    document.addEventListener('markers-visibility', syncMarkerToggles);
+
+    function currentAnimPollutant() {
+        return state.currentLayerName ?
+            (state.currentLayerName.match(/no2|pm25|o3|co|so2/i) || ['pm25'])[0].toLowerCase() : 'pm25';
+    }
+
+    async function toggleLegendPlayback() {
+        const ac = AnimationController;
+        if (ac._loading) return;
+        if (ac.playing) { ac.pause(); return; }
+        const pollutant = currentAnimPollutant();
+        if (ac.frames.length === 0 || ac._pollutant !== pollutant) {
+            const ok = await ac.preload(pollutant);
+            if (!ok) return;
+            showNotification(`Animation ready: ${ac.frames.length} days`, 'success');
+        }
+        ac.play();
     }
 
     // toggle
@@ -1384,8 +1436,8 @@
             if (pool.length === 0) return [];
 
             const today   = new Date().toISOString().split('T')[0];
-            const cutFrom = new Date(today); cutFrom.setDate(cutFrom.getDate() - 3);
-            const cutTo   = new Date(today); cutTo.setDate(cutTo.getDate()   + 4);
+            const cutFrom = new Date(today); cutFrom.setDate(cutFrom.getDate() - CONFIG.animDaysBack);
+            const cutTo   = new Date(today); cutTo.setDate(cutTo.getDate()   + CONFIG.animDaysForward);
             const fmt = d => d.toISOString().split('T')[0];
 
             return pool.filter(l => l.date >= fmt(cutFrom) && l.date <= fmt(cutTo));
@@ -1403,6 +1455,7 @@
                 return false;
             }
 
+            this._loading = true;
             this._setProgress(0, list.length);
             this._updateUI('loading');
 
@@ -1439,6 +1492,7 @@
                 })
             );
 
+            this._loading = false;
             this.frames = results
                 .filter(r => r.status === 'fulfilled' && r.value._dataCanvas)
                 .map(r => r.value);
@@ -1476,9 +1530,11 @@
 
             const dateEl = document.getElementById('anim-date-label');
             if (dateEl) dateEl.textContent = frame.meta.date;
+            this._syncPlayerUI();
 
             const legendDate = document.getElementById('legend-current-date');
             if (legendDate) legendDate.textContent = frame.meta.date;
+            this._syncLegendUI();
 
             _patchURLParam('dt', frame.meta.date);
 
@@ -1642,6 +1698,31 @@
             const text = document.getElementById('anim-progress-text');
             if (bar)  bar.style.width  = `${Math.round((done / total) * 100)}%`;
             if (text) text.textContent = done < total ? `Loading ${done}/${total}…` : `${total} frames ready`;
+            const lText = document.querySelector('#legend-play-btn .legend-play-text');
+            if (lText && this._loading) lText.textContent = `${done}/${total}`;
+        },
+
+        _syncLegendUI: function() {
+            const btn = document.getElementById('legend-play-btn');
+            if (btn) {
+                const mode = this._loading ? 'loading' : this.playing ? 'playing' : 'paused';
+                btn.dataset.mode = mode;
+                btn.querySelector('i').className =
+                    mode === 'loading' ? 'bi bi-arrow-repeat legend-play-spin' :
+                    mode === 'playing' ? 'bi bi-pause-fill' : 'bi bi-play-fill';
+                btn.querySelector('.legend-play-text').textContent =
+                    mode === 'loading' ? 'Loading…' : mode === 'playing' ? 'Pause' : 'Play';
+            }
+            const timeline = document.querySelector('#geotiff-legend .legend-timeline');
+            const fill = document.getElementById('legend-timeline-fill');
+            if (timeline && fill) {
+                const n = this.frames.length;
+                timeline.classList.toggle('active', n > 0);
+                fill.style.width = n > 1 ? `${(this.currentIdx / (n - 1)) * 100}%` : '0%';
+                const frame = this.frames[this.currentIdx];
+                const today = new Date().toISOString().split('T')[0];
+                fill.dataset.phase = !frame ? '' : frame.meta.date > today ? 'forecast' : frame.meta.date === today ? 'today' : 'past';
+            }
         },
 
         _updateUI: function(mode) {
@@ -1649,28 +1730,72 @@
             const loadBtn  = document.getElementById('anim-load-btn');
             const controls = document.getElementById('anim-controls');
             const progress = document.getElementById('anim-progress');
+            this._syncLegendUI();
             if (!playBtn) return;
 
             if (mode === 'loading') {
-                if (loadBtn)  loadBtn.disabled = true;
+                if (loadBtn)  loadBtn.style.display = 'none';
                 if (controls) controls.style.display = 'none';
                 if (progress) progress.style.display = 'block';
-            } else if (mode === 'ready' || mode === 'paused') {
-                if (loadBtn)  loadBtn.disabled = false;
+            } else if (mode === 'ready' || mode === 'paused' || mode === 'playing') {
+                if (loadBtn)  loadBtn.style.display = 'none';
                 if (controls) controls.style.display = 'flex';
                 if (progress) progress.style.display = 'none';
-                if (playBtn)  playBtn.innerHTML = '&#9654;';
-                const scrubber = document.getElementById('anim-scrubber');
-                if (scrubber) {
-                    scrubber.max   = this.frames.length - 1;
-                    scrubber.value = this.currentIdx;
-                }
-            } else if (mode === 'playing') {
-                if (playBtn) playBtn.innerHTML = '&#9646;&#9646;';
+                playBtn.innerHTML = mode === 'playing' ? '<i class="bi bi-pause-fill"></i>' : '<i class="bi bi-play-fill"></i>';
+                playBtn.classList.toggle('is-playing', mode === 'playing');
+                if (mode === 'ready') this._buildPlayerTimeline();
+                this._syncPlayerUI();
             } else if (mode === 'idle') {
-                if (loadBtn)  loadBtn.disabled = false;
+                if (loadBtn)  loadBtn.style.display = 'flex';
                 if (controls) controls.style.display = 'none';
                 if (progress) progress.style.display = 'none';
+                const dateEl = document.getElementById('anim-date-label');
+                if (dateEl) dateEl.innerHTML = '&mdash;';
+                const phase = document.getElementById('nf-phase');
+                if (phase) phase.textContent = '';
+            }
+        },
+
+        _phaseOf: function(dateStr) {
+            const today = new Date().toISOString().split('T')[0];
+            return dateStr > today ? 'forecast' : dateStr === today ? 'today' : 'past';
+        },
+
+        _buildPlayerTimeline: function() {
+            const scrubber = document.getElementById('anim-scrubber');
+            if (scrubber) scrubber.max = Math.max(0, this.frames.length - 1);
+            const ticks = document.getElementById('nf-ticks');
+            const n = this.frames.length;
+            if (ticks) {
+                ticks.innerHTML = this.frames.map((f, i) => {
+                    const left = n > 1 ? (i / (n - 1)) * 100 : 0;
+                    return `<span class="nf-tick ${this._phaseOf(f.meta.date)}" style="left:${left}%"></span>`;
+                }).join('');
+            }
+            const fmt = d => d ? d.substring(5).replace('-', '/') : '';
+            const startEl = document.getElementById('nf-start-label');
+            const endEl = document.getElementById('nf-end-label');
+            if (startEl) startEl.textContent = fmt(this.frames[0] && this.frames[0].meta.date);
+            if (endEl) endEl.textContent = fmt(this.frames[n - 1] && this.frames[n - 1].meta.date);
+            const pol = document.getElementById('nf-pollutant');
+            if (pol && this._pollutant) pol.textContent = this._pollutant.toUpperCase();
+        },
+
+        _syncPlayerUI: function() {
+            const n = this.frames.length;
+            const scrubber = document.getElementById('anim-scrubber');
+            if (scrubber) {
+                scrubber.value = this.currentIdx;
+                scrubber.style.setProperty('--p', n > 1 ? `${(this.currentIdx / (n - 1)) * 100}%` : '0%');
+            }
+            const count = document.getElementById('nf-frame-count');
+            if (count) count.textContent = n ? `Day ${this.currentIdx + 1} of ${n}` : '';
+            const frame = this.frames[this.currentIdx];
+            const phase = document.getElementById('nf-phase');
+            if (phase && frame) {
+                const p = this._phaseOf(frame.meta.date);
+                phase.className = 'nf-phase ' + p;
+                phase.textContent = p === 'forecast' ? 'Forecast' : p === 'today' ? 'Today' : 'History';
             }
         },
 
@@ -2463,7 +2588,7 @@
                                 <span class="fp-row-title">Coverage</span>
                                 <span class="fp-row-sub">Global &middot; Daily</span>
                             </div>
-                            <span class="fp-row-value">&minus;3 to +4 days</span>
+                            <span class="fp-row-value">&minus;${CONFIG.animDaysBack} to +${CONFIG.animDaysForward} days</span>
                         </div>
                     </div>
 
@@ -2486,56 +2611,66 @@
 
                 <!-- ANIMATE -->
                 <div class="fp-section" id="fp-tab-animate">
-                    <p class="fp-group-label">TIME SERIES</p>
-                    <div class="fp-card">
-                        <div class="fp-row">
-                            <div class="fp-row-text">
-                                <span class="fp-row-title">Hide Bottom Banner</span>
-                                <span class="fp-row-sub">Locations ticker</span>
+                    <div class="nf-player">
+                        <div class="nf-hero">
+                            <div class="nf-tags">
+                                <span class="nf-tag-brand">GEOS-CF</span>
+                                <span id="nf-pollutant" class="nf-tag">${(currentAnimPollutant() || '').toUpperCase()}</span>
+                                <span class="nf-tag">${CONFIG.animDaysBack}d history</span>
+                                <span class="nf-tag">${CONFIG.animDaysForward}d forecast</span>
                             </div>
-                            <label class="fp-ios-toggle">
-                                <input type="checkbox" id="fp-hide-banner" ${document.body.classList.contains('banner-hidden') ? 'checked' : ''}>
-                                <span class="fp-ios-track"></span>
-                            </label>
-                        </div>
-                        <div class="fp-row">
-                            <div class="fp-row-text">
-                                <span class="fp-row-title">GEOS-CF Forecast</span>
-                                <span class="fp-row-sub">GEOS-CF Forecast</span>
-                            </div>
-                            <span id="anim-date-label" class="fp-row-badge"></span>
-                        </div>
-                    </div>
-                    <div id="anim-progress" style="display:none; margin-bottom:12px;">
-                        <div class="anim-progress-track"><div id="anim-progress-bar" class="anim-progress-bar"></div></div>
-                        <span id="anim-progress-text" class="anim-progress-text"></span>
-                    </div>
-                    <button id="anim-load-btn" class="fp-btn-primary">Animate</button>
-                    <div id="anim-controls" style="display:none; flex-direction:column; gap:14px; margin-top:16px;">
-                        <div class="fp-card" style="padding:4px 4px;">
-                            <div class="anim-transport">
-                                <button id="anim-prev-btn" class="anim-btn" title="Step back">&#9664;&#9664;</button>
-                                <button id="anim-play-btn" class="anim-btn anim-btn-main" title="Play / Pause">&#9654;</button>
-                                <button id="anim-next-btn" class="anim-btn" title="Step forward">&#9654;&#9654;</button>
-                                <button id="anim-stop-btn" class="anim-btn anim-btn-stop" title="Stop">&#9632;</button>
+                            <h3 class="nf-title">Air Quality Timeline</h3>
+                            <div class="nf-now">
+                                <span id="anim-date-label" class="nf-date">&mdash;</span>
+                                <span id="nf-phase" class="nf-phase"></span>
                             </div>
                         </div>
-                        <div class="fp-card" style="padding:12px 16px;">
-                            <div class="fp-row">
-                                <span class="fp-row-title" style="font-size:13px;">Scrub</span>
-                            </div>
-                            <input type="range" id="anim-scrubber" class="fp-slider" min="0" max="6" value="0" step="1">
+
+                        <div id="anim-progress" class="nf-loading" style="display:none;">
+                            <div class="anim-progress-track"><div id="anim-progress-bar" class="anim-progress-bar"></div></div>
+                            <span id="anim-progress-text" class="anim-progress-text"></span>
                         </div>
-                        <p class="fp-group-label">PLAYBACK SPEED</p>
-                        <div class="fp-card">
-                            <div class="fp-row">
-                                <div class="fp-seg" id="anim-speed-group">
-                                    <button class="fp-seg-btn" data-ms="1600">Slow</button>
-                                    <button class="fp-seg-btn active" data-ms="800">Med</button>
-                                    <button class="fp-seg-btn" data-ms="350">Fast</button>
-                                    <button class="fp-seg-btn" data-ms="140">Max</button>
+
+                        <button id="anim-load-btn" class="nf-btn-play"><i class="bi bi-play-fill"></i> Play</button>
+
+                        <div id="anim-controls" class="nf-controls" style="display:none;">
+                            <div class="nf-scrub">
+                                <input type="range" id="anim-scrubber" class="nf-scrubber" min="0" max="6" value="0" step="1">
+                                <div id="nf-ticks" class="nf-ticks"></div>
+                                <div class="nf-scrub-labels">
+                                    <span id="nf-start-label"></span>
+                                    <span id="nf-frame-count"></span>
+                                    <span id="nf-end-label"></span>
                                 </div>
                             </div>
+                            <div class="nf-transport">
+                                <button id="anim-stop-btn" class="nf-icon-btn" title="Stop"><i class="bi bi-stop-fill"></i></button>
+                                <button id="anim-prev-btn" class="nf-icon-btn" title="Previous day"><i class="bi bi-skip-backward-fill"></i></button>
+                                <button id="anim-play-btn" class="nf-icon-btn nf-main" title="Play / Pause"><i class="bi bi-play-fill"></i></button>
+                                <button id="anim-next-btn" class="nf-icon-btn" title="Next day"><i class="bi bi-skip-forward-fill"></i></button>
+                                <button id="nf-markers-btn" class="nf-icon-btn" title="Show / hide markers"><i class="bi bi-geo-alt-fill"></i></button>
+                            </div>
+                            <div class="nf-speed">
+                                <span class="nf-label">Playback speed</span>
+                                <div class="nf-speed-track" id="anim-speed-group">
+                                    <button class="nf-speed-opt" data-ms="1600"><span class="nf-dot"></span>0.5x</button>
+                                    <button class="nf-speed-opt active" data-ms="800"><span class="nf-dot"></span>1x</button>
+                                    <button class="nf-speed-opt" data-ms="400"><span class="nf-dot"></span>2x</button>
+                                    <button class="nf-speed-opt" data-ms="200"><span class="nf-dot"></span>4x</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nf-options">
+                            <span class="nf-label">Display</span>
+                            <label class="nf-option">
+                                <span><i class="bi bi-geo-alt"></i> Show site markers</span>
+                                <span class="nf-toggle"><input type="checkbox" id="fp-show-markers" ${window.__markersHidden ? '' : 'checked'}><span></span></span>
+                            </label>
+                            <label class="nf-option">
+                                <span><i class="bi bi-layout-text-window-reverse"></i> Hide bottom banner</span>
+                                <span class="nf-toggle"><input type="checkbox" id="fp-hide-banner" ${document.body.classList.contains('banner-hidden') ? 'checked' : ''}><span></span></span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -2629,6 +2764,14 @@
             setBannerHidden(this.checked);
         });
 
+        document.getElementById('fp-show-markers').addEventListener('change', function() {
+            setSiteMarkersVisible(this.checked);
+        });
+        document.getElementById('nf-markers-btn').addEventListener('click', () => {
+            setSiteMarkersVisible(window.__markersHidden);
+        });
+        syncMarkerToggles();
+
         // ── Remove ──
         document.getElementById('geotiff-floating-remove').addEventListener('click', function() {
             AnimationController.stop();
@@ -2674,12 +2817,7 @@
         });
 
         // ── Animation controls ──
-        document.getElementById('anim-load-btn').addEventListener('click', async function() {
-            const pollutant = state.currentLayerName ?
-                (state.currentLayerName.match(/no2|pm25|o3|co|so2/i) || ['pm25'])[0].toLowerCase() : 'pm25';
-            const ok = await AnimationController.preload(pollutant);
-            if (ok) showNotification(`Animation ready: ${AnimationController.frames.length} frames`, 'success');
-        });
+        document.getElementById('anim-load-btn').addEventListener('click', toggleLegendPlayback);
         document.getElementById('anim-play-btn').addEventListener('click', function() {
             if (AnimationController.playing) AnimationController.pause();
             else AnimationController.play();
@@ -2690,9 +2828,9 @@
         document.getElementById('anim-scrubber').addEventListener('input', function() {
             AnimationController.setFrame(parseInt(this.value));
         });
-        panel.querySelectorAll('.fp-seg-btn').forEach(btn => {
+        panel.querySelectorAll('.nf-speed-opt').forEach(btn => {
             btn.addEventListener('click', function() {
-                panel.querySelectorAll('.fp-seg-btn').forEach(b => b.classList.remove('active'));
+                panel.querySelectorAll('.nf-speed-opt').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 AnimationController.setSpeed(parseInt(this.dataset.ms));
             });
@@ -2843,38 +2981,38 @@
             
             /* categories */
             .species-log-legend {
-                flex: 1;
-                max-width: 560px;
-                padding: 6px 22px 6px;
-                background: #222;
-                color: #fff;
-                font-size: 11px;
-                text-align: center;
-            }
-            .species-log-legend .sll-title {
                 display: flex;
-                justify-content: space-between;
-                align-items: baseline;
-                margin: 0 -14px 3px;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                max-width: 420px;
+                padding: 4px 12px 2px;
+                border-radius: 8px 8px 0 0;
+                background: rgba(0, 0, 0, 0.75);
+                color: #fff;
+                font-size: 9px;
             }
-            .species-log-legend .sll-title strong { font-size: 14px; font-weight: 600; }
+            .species-log-legend .sll-name { font-size: 11px; font-weight: 700; white-space: nowrap; }
+            .species-log-legend .sll-scale { flex: 1; min-width: 0; padding: 0 6px; }
             .species-log-legend .sll-bar {
-                height: 14px;
-                border: 1px solid #fff;
+                height: 6px;
+                border-radius: 3px;
             }
             .species-log-legend .sll-ticks {
                 position: relative;
-                height: 16px;
-                margin-top: 2px;
+                height: 11px;
+                margin-top: 1px;
+                color: rgba(255, 255, 255, 0.8);
             }
             .species-log-legend .sll-ticks span {
                 position: absolute;
                 top: 0;
                 transform: translateX(-50%);
                 white-space: nowrap;
+                line-height: 11px;
             }
-            .species-log-legend .sll-ticks sup { font-size: 8px; }
-            .species-log-legend .sll-unit { font-size: 10px; opacity: 0.85; }
+            .species-log-legend .sll-ticks sup { font-size: 7px; }
+            .species-log-legend .sll-unit { font-size: 10px; color: rgba(255, 255, 255, 0.75); white-space: nowrap; }
 
             .species-gradient-legend {
                 flex: 1;
@@ -2984,6 +3122,72 @@
                 padding: 0;
                 transition: background 0.15s, border-color 0.15s;
                 vertical-align: middle;
+            }
+            .legend-play-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 3px;
+                height: 20px;
+                padding: 0 8px 0 5px;
+                border: none;
+                border-radius: 10px;
+                background: #fff;
+                color: #141414;
+                font-size: 10px;
+                font-weight: 700;
+                cursor: pointer;
+                box-shadow: 0 0 0 0 rgba(252, 61, 33, 0.6);
+                transition: background 0.15s, transform 0.15s;
+                animation: legend-play-pulse 2.4s ease-out infinite;
+            }
+            .legend-play-btn i { font-size: 13px; line-height: 1; }
+            .legend-play-btn:hover { background: rgba(255,255,255,0.8); transform: scale(1.05); }
+            .legend-play-btn[data-mode="playing"],
+            .legend-play-btn[data-mode="loading"] { animation: none; }
+            .legend-play-btn[data-mode="playing"] { background: #FC3D21; color: #fff; }
+            .legend-play-btn[data-mode="loading"] { background: rgba(255,255,255,0.2); color: #fff; cursor: progress; }
+            .legend-markers-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px;
+                height: 20px;
+                border: none;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.12);
+                color: #fff;
+                font-size: 11px;
+                cursor: pointer;
+                padding: 0;
+                transition: background 0.15s, color 0.15s, transform 0.15s;
+            }
+            .legend-markers-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.1); }
+            .legend-markers-btn.is-off { color: rgba(255,255,255,0.4); background: transparent; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25); }
+            .legend-play-spin { display: inline-block; animation: geotiff-spin 0.9s linear infinite; }
+            @keyframes legend-play-pulse {
+                0%   { box-shadow: 0 0 0 0 rgba(252, 61, 33, 0.7); }
+                70%  { box-shadow: 0 0 0 6px rgba(252, 61, 33, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(252, 61, 33, 0); }
+            }
+            .legend-timeline {
+                display: none;
+                position: relative;
+                width: 70px;
+                height: 4px;
+                border-radius: 2px;
+                background: rgba(255,255,255,0.25);
+                overflow: hidden;
+            }
+            .legend-timeline.active { display: inline-block; }
+            .legend-timeline-fill {
+                position: absolute;
+                inset: 0 auto 0 0;
+                border-radius: 2px;
+                background: #FC3D21;
+                transition: width 0.25s ease;
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .legend-play-btn, .legend-play-spin { animation: none; }
             }
             .legend-layers-btn:hover {
                 background: rgba(255,255,255,0.22);
@@ -3568,6 +3772,190 @@
             }
             .anim-btn-stop:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
             .anim-scrubber { width: 100%; accent-color: #1e3a5f; cursor: pointer; }
+
+            .nf-player {
+                --nasa-blue: #0B3D91;
+                --nasa-red: #FC3D21;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                padding: 18px 16px 16px;
+                border-radius: 14px;
+                color: #141414;
+                background:
+                    radial-gradient(120% 60% at 100% 0%, rgba(11, 61, 145, 0.08), transparent 60%),
+                    #fff;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06);
+                overflow: hidden;
+            }
+            .nf-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+            .nf-tag-brand {
+                font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+                color: var(--nasa-blue);
+            }
+            .nf-tag {
+                font-size: 10px; font-weight: 600;
+                padding: 1px 6px;
+                border: 1px solid rgba(0, 0, 0, 0.18);
+                border-radius: 3px;
+                color: #4b5563;
+            }
+            .nf-title { margin: 8px 0 6px; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; color: #141414; }
+            .nf-now { display: flex; align-items: center; gap: 8px; }
+            .nf-date { font-size: 15px; font-weight: 700; color: #141414; font-variant-numeric: tabular-nums; }
+            .nf-phase {
+                font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+                padding: 2px 7px; border-radius: 3px;
+            }
+            .nf-phase:empty { display: none; }
+            .nf-phase.past     { background: #f3f4f6; color: #4b5563; }
+            .nf-phase.today    { background: var(--nasa-blue); color: #fff; }
+            .nf-phase.forecast { background: var(--nasa-red); color: #fff; }
+
+            .nf-btn-play {
+                display: flex; align-items: center; justify-content: center; gap: 6px;
+                height: 44px;
+                border: none; border-radius: 6px;
+                background: var(--nasa-blue); color: #fff;
+                font: inherit; font-size: 16px; font-weight: 700;
+                cursor: pointer;
+                transition: background 0.15s, transform 0.15s;
+            }
+            .nf-btn-play i { font-size: 24px; }
+            .nf-btn-play:hover { background: #1450b8; box-shadow: 0 4px 14px rgba(11, 61, 145, 0.35); }
+            .nf-btn-play:active { transform: scale(0.98); }
+
+            .nf-player .anim-progress-track { height: 3px; background: rgba(0, 0, 0, 0.1); border-radius: 0; }
+            .nf-player .anim-progress-bar { background: var(--nasa-blue); border-radius: 0; box-shadow: 0 0 8px rgba(11, 61, 145, 0.6); }
+            .nf-player .anim-progress-text { color: #6b7280; margin: 8px 0 0; }
+
+            .nf-controls { flex-direction: column; gap: 14px; animation: nf-fade-up 0.35s ease-out; }
+            @keyframes nf-fade-up { from { opacity: 0; transform: translateY(6px); } }
+
+            .nf-scrub { position: relative; }
+            .nf-scrubber {
+                -webkit-appearance: none; appearance: none;
+                width: 100%; height: 16px; margin: 0;
+                background: transparent; cursor: pointer;
+                --p: 0%;
+            }
+            .nf-scrubber::-webkit-slider-runnable-track {
+                height: 4px; border-radius: 2px;
+                background: linear-gradient(to right, var(--nasa-blue) var(--p), rgba(0, 0, 0, 0.15) var(--p));
+                transition: height 0.15s;
+            }
+            .nf-scrubber::-moz-range-track { height: 4px; border-radius: 2px; background: rgba(0, 0, 0, 0.15); }
+            .nf-scrubber::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--nasa-blue); }
+            .nf-scrubber::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 14px; height: 14px; margin-top: -5px;
+                border-radius: 50%; border: none;
+                background: var(--nasa-blue);
+                transform: scale(0.8);
+                transition: transform 0.15s;
+            }
+            .nf-scrubber::-moz-range-thumb {
+                width: 14px; height: 14px; border-radius: 50%; border: none;
+                background: var(--nasa-blue);
+            }
+            .nf-scrub:hover .nf-scrubber::-webkit-slider-thumb { transform: scale(1.25); }
+            .nf-ticks { position: relative; height: 6px; margin: 2px 7px 0; }
+            .nf-tick {
+                position: absolute; top: 0;
+                width: 2px; height: 4px; margin-left: -1px;
+                background: rgba(0, 0, 0, 0.2);
+            }
+            .nf-tick.forecast { background: var(--nasa-red); }
+            .nf-tick.today { height: 6px; width: 3px; background: var(--nasa-blue); }
+            .nf-scrub-labels {
+                display: flex; justify-content: space-between;
+                margin-top: 4px;
+                font-size: 10px; color: #6b7280;
+                font-variant-numeric: tabular-nums;
+            }
+            #nf-frame-count { color: #141414; font-weight: 600; }
+
+            .nf-transport { display: flex; align-items: center; justify-content: space-between; }
+            .nf-icon-btn {
+                display: flex; align-items: center; justify-content: center;
+                width: 40px; height: 40px;
+                border: none; border-radius: 50%;
+                background: transparent; color: #141414;
+                font-size: 20px; cursor: pointer;
+                transition: transform 0.15s, background 0.15s, color 0.15s;
+            }
+            .nf-icon-btn:hover { transform: scale(1.18); background: rgba(11, 61, 145, 0.08); color: #0B3D91; }
+            .nf-icon-btn.nf-main {
+                width: 56px; height: 56px;
+                background: var(--nasa-blue); color: #fff;
+                font-size: 30px;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+            }
+            .nf-icon-btn.nf-main:hover { background: #1450b8; transform: scale(1.08); }
+            .nf-icon-btn.nf-main.is-playing { box-shadow: 0 0 0 4px rgba(252, 61, 33, 0.35), 0 4px 14px rgba(0, 0, 0, 0.25); }
+            .nf-icon-btn.is-off { color: rgba(0, 0, 0, 0.3); }
+
+            .nf-label {
+                display: block; margin-bottom: 8px;
+                font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+                color: #6b7280;
+            }
+
+            .nf-speed-track { position: relative; display: flex; justify-content: space-between; }
+            .nf-speed-track::before {
+                content: ''; position: absolute; left: 12%; right: 12%; top: 7px;
+                height: 1px; background: rgba(0, 0, 0, 0.15);
+            }
+            .nf-speed-opt {
+                position: relative; flex: 1;
+                display: flex; flex-direction: column; align-items: center; gap: 6px;
+                border: none; background: none; padding: 0;
+                color: #6b7280;
+                font: inherit; font-size: 11px; font-weight: 600;
+                cursor: pointer;
+            }
+            .nf-dot {
+                width: 9px; height: 9px; margin-top: 3px;
+                border-radius: 50%; background: rgba(0, 0, 0, 0.25);
+                transition: transform 0.2s, background 0.2s;
+            }
+            .nf-speed-opt:hover { color: #141414; }
+            .nf-speed-opt:hover .nf-dot { background: #141414; }
+            .nf-speed-opt.active { color: #141414; }
+            .nf-speed-opt.active .nf-dot {
+                background: var(--nasa-blue); transform: scale(1.7);
+                box-shadow: 0 0 0 2px rgba(11, 61, 145, 0.2);
+            }
+
+            .nf-options { padding-top: 12px; border-top: 1px solid rgba(0, 0, 0, 0.08); }
+            .nf-option {
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 8px 0;
+                font-size: 13px; color: #1f2937; cursor: pointer;
+            }
+            .nf-option i { margin-right: 6px; color: #6b7280; }
+            .nf-toggle { position: relative; flex: none; }
+            .nf-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+            .nf-toggle span {
+                display: block; width: 36px; height: 20px; border-radius: 10px;
+                background: #d1d5db;
+                transition: background 0.2s;
+            }
+            .nf-toggle span::after {
+                content: ''; position: absolute; top: 2px; left: 2px;
+                width: 16px; height: 16px; border-radius: 50%;
+                background: #fff;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            .nf-toggle input:checked + span { background: #0B3D91; }
+            .nf-toggle input:checked + span::after { transform: translateX(16px); }
+            .nf-toggle input:focus-visible + span { outline: 2px solid #0B3D91; outline-offset: 2px; }
+
+            @media (prefers-reduced-motion: reduce) {
+                .nf-controls { animation: none; }
+            }
 
             /* map date overlay */
             .map-anim-date {

@@ -37,8 +37,7 @@
     overscroll-behavior: contain;
 }
 
-.ticker-card,
-.marker-container > div {
+.ticker-card {
     contain: layout style paint;
 }
 
@@ -298,6 +297,145 @@ mark {
     z-index: 999 !important;
 }
 
+#map-hover-info.marker-hover-card {
+    width: 260px;
+    min-width: 0 !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 3px solid var(--accent, #9e9e9e);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22) !important;
+    color: #1f2328;
+    font-size: 12px !important;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+#map-hover-info.marker-hover-card.is-visible {
+    animation: hover-card-in 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+@keyframes hover-card-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.96); }
+    to   { opacity: 1; transform: none; }
+}
+
+.marker-hover-card .mh-header { margin-bottom: 10px; }
+.marker-hover-card .mh-name { font-size: 14px; font-weight: 700; }
+.marker-hover-card .mh-time { font-size: 11px; color: #6b7280; margin-top: 2px; }
+.marker-hover-card .mh-empty { color: #6b7280; }
+
+.marker-hover-card .mh-main { display: flex; align-items: center; gap: 10px; }
+
+.marker-hover-card .mh-aqi {
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.marker-hover-card .mh-level { font-size: 14px; font-weight: 700; }
+.marker-hover-card .mh-sub { font-size: 11px; color: #6b7280; }
+.marker-hover-card .mh-message { margin: 8px 0 10px; color: #374151; }
+
+.marker-hover-card .mh-scale { position: relative; padding-top: 2px; }
+.marker-hover-card .mh-scale-track { display: flex; gap: 2px; }
+.marker-hover-card .mh-seg { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+.marker-hover-card .mh-seg-bar {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--sc);
+    opacity: 0.45;
+    transform-origin: left center;
+    animation: scale-seg-in 0.4s ease-out backwards;
+}
+
+.marker-hover-card .mh-seg:nth-child(2) .mh-seg-bar { animation-delay: 40ms; }
+.marker-hover-card .mh-seg:nth-child(3) .mh-seg-bar { animation-delay: 80ms; }
+.marker-hover-card .mh-seg:nth-child(4) .mh-seg-bar { animation-delay: 120ms; }
+.marker-hover-card .mh-seg:nth-child(5) .mh-seg-bar { animation-delay: 160ms; }
+.marker-hover-card .mh-seg:nth-child(6) .mh-seg-bar { animation-delay: 200ms; }
+
+.marker-hover-card .mh-seg.active .mh-seg-bar { opacity: 1; height: 8px; margin-top: -1px; }
+.marker-hover-card .mh-seg-label { font-size: 9px; color: #9ca3af; white-space: nowrap; }
+.marker-hover-card .mh-seg.active .mh-seg-label { color: #111827; font-weight: 700; }
+
+.marker-hover-card .mh-pointer {
+    position: absolute;
+    top: -6px;
+    width: 0;
+    height: 0;
+    margin-left: -5px;
+    border: 5px solid transparent;
+    border-top: 6px solid #111827;
+    animation: pointer-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s backwards;
+}
+
+@keyframes scale-seg-in {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+@keyframes pointer-in {
+    from { left: 0; opacity: 0; }
+}
+
+.marker-hover-card .mh-pollutants {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.marker-hover-card .mh-pol {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 4px 6px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.marker-hover-card .mh-pol.dominant { box-shadow: inset 0 0 0 1.5px #111827; }
+.marker-hover-card .mh-pol-name { font-size: 11px; font-weight: 600; }
+
+.marker-hover-card .mh-pol-val {
+    min-width: 26px;
+    padding: 2px 5px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.marker-hover-card .mh-cta {
+    margin-top: 10px;
+    font-size: 10px;
+    color: #6b7280;
+    text-align: right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #map-hover-info.marker-hover-card.is-visible,
+    .marker-hover-card .mh-seg-bar,
+    .marker-hover-card .mh-pointer {
+        animation: none !important;
+    }
+}
+
 /* Leaflet marker styling */
 .custom-marker-icon {
     background: transparent !important;
@@ -309,13 +447,164 @@ mark {
     border: none !important;
 }
 
+.leaflet-container .leaflet-marker-pane {
+    transition: opacity 0.35s ease;
+}
+
+.leaflet-container.markers-hidden .leaflet-marker-pane {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.leaflet-container.markers-hidden .leaflet-marker-pane * {
+    pointer-events: none !important;
+}
+
 .marker-container {
-    transition: opacity 0.2s ease;
+    position: relative;
+    width: 14px;
+    height: 14px;
     cursor: pointer;
 }
 
-.marker-container:hover {
-    opacity: 1 !important;
+.marker-dot {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--c);
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent),
+                0 2px 6px rgba(0, 0, 0, 0.35);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease,
+                background-color 0.5s ease;
+}
+
+.marker-dot::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: var(--c);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.marker-container:hover .marker-dot {
+    transform: scale(1.35);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--c) 40%, transparent),
+                0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+.marker-container:hover .marker-dot::after {
+    animation: marker-ripple 1.2s ease-out infinite;
+}
+
+.marker-label {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 9px);
+    min-width: 34px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: var(--c);
+    color: var(--fg, #fff);
+    font: 700 12px/1 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, 6px) scale(0.5);
+    transform-origin: 50% 100%;
+    transition: opacity 0.2s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                background-color 0.5s ease, color 0.5s ease;
+    transition-delay: 0s;
+}
+
+.marker-label::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    margin-left: -5px;
+    border: 5px solid transparent;
+    border-top-color: var(--c);
+    transition: border-top-color 0.5s ease;
+}
+
+.markers-detailed .marker-label,
+.marker-container:hover .marker-label {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+}
+
+.markers-detailed .marker-label {
+    transition-delay: var(--ld, 0ms);
+}
+
+.marker-container:hover .marker-label {
+    transition-delay: 0s;
+}
+
+.marker-container.is-entering .marker-dot {
+    animation: marker-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) var(--d, 0ms) backwards;
+}
+
+.marker-container.is-entering .marker-dot::after {
+    animation: marker-ripple 0.9s ease-out calc(var(--d, 0ms) + 150ms) 1;
+}
+
+.markers-detailed .marker-container.is-entering .marker-label {
+    animation: label-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--d, 0ms) + 200ms) backwards;
+}
+
+.marker-container.dot-swap-a .marker-dot { animation: marker-swap-a 0.5s ease-out; }
+.marker-container.dot-swap-b .marker-dot { animation: marker-swap-b 0.5s ease-out; }
+.marker-container.dot-swap-a .marker-dot::after { animation: marker-ripple 0.7s ease-out; }
+.marker-container.dot-swap-b .marker-dot::after { animation: marker-ripple-b 0.7s ease-out; }
+
+.markers-detailed .marker-container.value-swap-a .marker-label { animation: value-swap-a 0.4s ease-out; }
+.markers-detailed .marker-container.value-swap-b .marker-label { animation: value-swap-b 0.4s ease-out; }
+
+@keyframes marker-swap-a { 40% { transform: scale(1.45); } }
+@keyframes marker-swap-b { 40% { transform: scale(1.45); } }
+
+@keyframes marker-ripple-b {
+    from { transform: scale(1); opacity: 0.55; }
+    to   { transform: scale(3); opacity: 0; }
+}
+
+@keyframes value-swap-a {
+    from { opacity: 0.15; transform: translate(-50%, -5px) scale(0.92); }
+    to   { opacity: 1;    transform: translate(-50%, 0) scale(1); }
+}
+@keyframes value-swap-b {
+    from { opacity: 0.15; transform: translate(-50%, -5px) scale(0.92); }
+    to   { opacity: 1;    transform: translate(-50%, 0) scale(1); }
+}
+
+@keyframes marker-pop {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+@keyframes marker-ripple {
+    from { transform: scale(1); opacity: 0.55; }
+    to   { transform: scale(3); opacity: 0; }
+}
+
+@keyframes label-pop {
+    from { transform: translate(-50%, 8px) scale(0.4); opacity: 0; }
+    to   { transform: translate(-50%, 0) scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marker-dot,
+    .marker-dot::after,
+    .marker-label {
+        animation: none !important;
+        transition: opacity 0.15s ease !important;
+    }
 }
 
 /* Ensure map container is properly sized */

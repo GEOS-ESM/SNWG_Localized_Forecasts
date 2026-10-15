@@ -4,10 +4,88 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="This tool focuses on generating localized forecasts for select locations based on NASA GMAO's GEOS Composition Forecasting (GEOS-CF). Some of the location data are provided by OpenAQ. Using this library, you can train and load models based on your location data online and measure the uncertainty of the forecast based on the data provided.">
-    <meta name="keywords" content="HAQAST, NASA, GEOS-CF, OpenAQ, Air Quality, Forecasts">
-    <meta name="theme-color" content="#ffffff">
-    <title>SNWG Localized Forecasts</title>
+    <meta name="description" content="Localized NASA air quality forecasts from GMAO's GEOS-CF model: daily PM2.5, NO2 and ozone AQI forecasts for cities and monitoring sites worldwide, corrected with OpenAQ and NASA Pandora observations.">
+    <meta name="keywords" content="NASA air quality, NASA air quality forecast, GMAO, NASA GMAO, GEOS-CF, GEOS Composition Forecasting, GEOS-CF air quality, air quality forecast, AQI forecast, PM2.5 forecast, NO2 forecast, ozone forecast, localized air quality forecasts, NASA Pandora, OpenAQ, SNWG, HAQAST, NASA Earthdata">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="author" content="NASA Global Modeling and Assimilation Office (GMAO)">
+    <meta name="theme-color" content="#0B3D91">
+    <title>NASA GEOS-CF Air Quality Forecasts | GMAO Localized AQI</title>
+    <link rel="canonical" href="https://geos-esm.github.io/SNWG_Localized_Forecasts/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="NASA GEOS-CF Localized Air Quality Forecasts">
+    <meta property="og:title" content="NASA GEOS-CF Air Quality Forecasts | GMAO Localized AQI">
+    <meta property="og:description" content="Localized NASA air quality forecasts from GMAO's GEOS-CF model: daily PM2.5, NO2 and ozone AQI forecasts for cities and monitoring sites worldwide, corrected with OpenAQ and NASA Pandora observations.">
+    <meta property="og:url" content="https://geos-esm.github.io/SNWG_Localized_Forecasts/">
+    <meta property="og:image" content="https://geos-esm.github.io/SNWG_Localized_Forecasts/parametres/cover_ozone_geos_cf.webp">
+    <meta property="og:image:alt" content="NASA GEOS-CF global surface ozone forecast map">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="NASA GEOS-CF Air Quality Forecasts | GMAO Localized AQI">
+    <meta name="twitter:description" content="Localized NASA air quality forecasts from GMAO's GEOS-CF model: daily PM2.5, NO2 and ozone AQI forecasts for cities and monitoring sites worldwide, corrected with OpenAQ and NASA Pandora observations.">
+    <meta name="twitter:image" content="https://geos-esm.github.io/SNWG_Localized_Forecasts/parametres/cover_ozone_geos_cf.webp">
+    <meta name="twitter:image:alt" content="NASA GEOS-CF global surface ozone forecast map">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebApplication",
+                "@id": "https://geos-esm.github.io/SNWG_Localized_Forecasts/#app",
+                "name": "NASA GEOS-CF Localized Air Quality Forecasts",
+                "alternateName": ["SNWG Localized Forecasts", "NASA GMAO Air Quality Forecasts"],
+                "url": "https://geos-esm.github.io/SNWG_Localized_Forecasts/",
+                "description": "Localized NASA air quality forecasts from GMAO's GEOS-CF model: daily PM2.5, NO2 and ozone AQI forecasts for cities and monitoring sites worldwide, corrected with OpenAQ and NASA Pandora observations.",
+                "applicationCategory": "ScienceApplication",
+                "operatingSystem": "Any (web browser)",
+                "isAccessibleForFree": true,
+                "image": "https://geos-esm.github.io/SNWG_Localized_Forecasts/parametres/cover_ozone_geos_cf.webp",
+                "inLanguage": "en",
+                "provider": { "@id": "https://gmao.gsfc.nasa.gov/#org" },
+                "isBasedOn": { "@id": "https://geos-esm.github.io/SNWG_Localized_Forecasts/#dataset" },
+                "about": [
+                    { "@type": "Thing", "name": "Air quality forecasting" },
+                    { "@type": "Thing", "name": "Air Quality Index (AQI)" },
+                    { "@type": "Thing", "name": "PM2.5" },
+                    { "@type": "Thing", "name": "Nitrogen dioxide (NO2)" },
+                    { "@type": "Thing", "name": "Ozone (O3)" }
+                ]
+            },
+            {
+                "@type": "Dataset",
+                "@id": "https://geos-esm.github.io/SNWG_Localized_Forecasts/#dataset",
+                "name": "NASA GEOS-CF Localized Air Quality Forecasts",
+                "description": "Site-level air quality forecasts of PM2.5, nitrogen dioxide (NO2) and ozone (O3), with US AQI, produced from the NASA GMAO GEOS Composition Forecasting (GEOS-CF) system and corrected with machine learning against OpenAQ and NASA Pandora observations.",
+                "url": "https://geos-esm.github.io/SNWG_Localized_Forecasts/",
+                "keywords": ["NASA air quality", "GMAO", "GEOS-CF", "air quality forecast", "AQI", "PM2.5", "NO2", "ozone", "Pandora", "OpenAQ"],
+                "creator": { "@id": "https://gmao.gsfc.nasa.gov/#org" },
+                "spatialCoverage": { "@type": "Place", "name": "Global" },
+                "variableMeasured": ["PM2.5", "Nitrogen dioxide (NO2)", "Ozone (O3)", "Air Quality Index (AQI)"],
+                "isAccessibleForFree": true,
+                "distribution": [
+                    {
+                        "@type": "DataDownload",
+                        "encodingFormat": "application/json",
+                        "contentUrl": "https://gmao.gsfc.nasa.gov/gmaoftp/geoscf/forecasts/localized/"
+                    }
+                ]
+            },
+            {
+                "@type": "ResearchOrganization",
+                "@id": "https://gmao.gsfc.nasa.gov/#org",
+                "name": "NASA Global Modeling and Assimilation Office (GMAO)",
+                "alternateName": "GMAO",
+                "url": "https://gmao.gsfc.nasa.gov/",
+                "parentOrganization": {
+                    "@type": "GovernmentOrganization",
+                    "name": "NASA Goddard Space Flight Center",
+                    "url": "https://www.nasa.gov/goddard/"
+                }
+            }
+        ]
+    }
+    </script>
 
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://unpkg.com" crossorigin>
@@ -28,8 +106,8 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <link rel="preload" href="./parametres/lf-style.css?v=1.0.1" as="style">
-    <link rel="stylesheet" href="./parametres/lf-style.css?v=1.0.1">
+    <link rel="preload" href="./parametres/lf-style.css?v=1.0.4" as="style">
+    <link rel="stylesheet" href="./parametres/lf-style.css?v=1.0.4">
     <link rel="preload" href="./parametres/wave.css?v=1.0.1" as="style">
     <link rel="stylesheet" href="./parametres/wave.css?v=1.0.1">
     
@@ -429,7 +507,7 @@ header .nav-link.active,
 <header>
     <nav class="navbar navbar-expand-lg">
         <a class="navbar-brand d-flex align-items-center" href="#">
-            <img src="parametres/snwg_logo_blue.svg" alt="SNWG Logo">
+            <img src="parametres/snwg_logo_blue.svg" alt="NASA SNWG Localized Air Quality Forecasts">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -448,6 +526,18 @@ header .nav-link.active,
 </header>
 
 
+<h1 class="visually-hidden">NASA GEOS-CF Localized Air Quality Forecasts</h1>
+<noscript>
+    <section class="container py-4">
+        <h2>NASA air quality forecasts from GMAO's GEOS-CF</h2>
+        <p>Localized PM2.5, nitrogen dioxide (NO2) and ozone (O3) forecasts and AQI for cities and monitoring sites worldwide, produced from the NASA Global Modeling and Assimilation Office (GMAO) GEOS Composition Forecasting (GEOS-CF) system and corrected with OpenAQ and NASA Pandora observations. Enable JavaScript to use the interactive forecast map.</p>
+        <ul>
+            <li><a href="https://gmao.gsfc.nasa.gov/gmao-products/geos-cf/">NASA GMAO GEOS-CF</a></li>
+            <li><a href="https://www.earthdata.nasa.gov/data/projects/nsite/solutions/air-quality-sensors-forecasts">NASA Earthdata: Air Quality Sensors and Forecasts</a></li>
+            <li><a href="https://www.pandonia-global-network.org/">NASA Pandora</a></li>
+        </ul>
+    </section>
+</noscript>
 <div class='toast-notifications'></div>
 </div>
 <div class="main_wave_js wavejs">
@@ -467,10 +557,10 @@ header .nav-link.active,
 
         <div class="d-flex align-items-center gap-3">
             <a href="https://gmao.gsfc.nasa.gov/" target="_blank" rel="noopener">
-                <img src="parametres/ESD-logo.png" alt="NASA Logo" style="height: 35px;" loading="lazy" decoding="async">
+                <img src="parametres/ESD-logo.png" alt="NASA Earth Science Division" style="height: 35px;" loading="lazy" decoding="async">
             </a>
             <a href="https://marroninstitute.nyu.edu/" target="_blank" rel="noopener">
-                <img src="parametres/Marron_logo.png" alt="NYU Marron Logo" style="height: 35px;" loading="lazy" decoding="async">
+                <img src="parametres/Marron_logo.png" alt="NYU Marron Institute" style="height: 35px;" loading="lazy" decoding="async">
             </a>
         </div>
 
