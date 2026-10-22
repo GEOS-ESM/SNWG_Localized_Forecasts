@@ -534,6 +534,22 @@ function getDominantPollutant(forecast) {
     return subs.reduce((a, b) => (b.aqi > a.aqi ? b : a)).code;
 }
 
+function getAqiSource(forecast) {
+    const code = getDominantPollutant(forecast);
+    if (!code) return null;
+    const abbr = pollutant_details(code, "abbr");
+    let source = null;
+    if (code === "o3") {
+        source = "GEOS-CF";
+    } else if (code === "no2") {
+        const corrected = forecast.corrected !== undefined && forecast.corrected !== null && !isNaN(forecast.corrected);
+        source = corrected ? "GEOS-CF, bias-corrected" : "GEOS-CF";
+    } else if (code === "pm25" && forecast.pm25source) {
+        source = forecast.pm25source;
+    }
+    return { code, abbr: abbr && abbr !== "N/A" ? abbr : code.toUpperCase(), source };
+}
+
 function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
     return {
         type: "FeatureCollection",
@@ -1918,6 +1934,7 @@ function readApiBaker(options = {}) {
                 master_predicted: [],
                 master_predicted_aqi: [],
                 master_overall_aqi: [],
+                master_aqi_source: [],
                 master_observation: [],
                 master_observation_source: [],   
                 master_observation_pandora: [],   
@@ -2018,6 +2035,7 @@ function readApiBaker(options = {}) {
                 }
                 
                 masterData.master_overall_aqi.push(getOverallAqi(forecast));
+                masterData.master_aqi_source.push(getAqiSource(forecast));
             });
             
             // Hero
@@ -2684,10 +2702,16 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     } else {
         aqiData = hasOverallAqi ? masterData.master_overall_aqi : (masterData.master_predicted_aqi || masterData.master_no2_aqi || []);
     }
+    if (hasOverallAqi) pollutantLabel = 'US';
     const datetimes = masterData.master_datetime || [];
+    const aqiSources = hasOverallAqi ? (masterData.master_aqi_source || []) : [];
+    const sourceLabel = (src, withSource = true) => {
+        if (!src) return '';
+        return withSource && src.source ? `${src.abbr} · ${src.source}` : src.abbr;
+    };
 
 
-    const findAqi = (localHourStr) => {
+    const findAqi =(localHourStr) => {
         // Exact match
         for (let i = 0; i < datetimes.length; i++) {
             if (datetimes[i] && datetimes[i].slice(0, 13) === localHourStr && aqiData[i] != null)
@@ -2742,6 +2766,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
     const currentResult = findAqiWithLocalTime(currentLocalStr);
     let currentAqi = currentResult.aqi ?? '--';
     let localTimeStr = currentResult.localTime;
+    const currentSource = currentResult.index !== -1 ? (aqiSources[currentResult.index] || null) : null;
 
     const prevT = addHours(-1);
     const prevAqi = findAqi(`${prevT.year}-${prevT.month}-${prevT.day} ${pad(prevT.hour)}`);
@@ -2826,7 +2851,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
         const tempC = tData[i];
         const rh = rhData[i];
         const wind = windData[i];
-        return { dt, dtMs, dateStr, hourStr, aqi, isNow, isPast, isFuture72, tempC: formatTemp(tempC), rh, wind };
+        return { dt, dtMs, dateStr, hourStr, aqi, src: aqiSources[i] || null, isNow, isPast, isFuture72, tempC: formatTemp(tempC), rh, wind };
     }).filter(f => f && (f.isNow || (!f.isPast && f.isFuture72)));
 
     const periodHours = { '6h': 6, '12h': 12, '18h': 18, '24h': 24, '48h': 48, '72h': 72 };
@@ -2841,6 +2866,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
             if (f.isNow && !foundNow) {
                 foundNow = true;
                 f.aqi = currentAqi;
+                f.src = currentSource;
             } else if (f.isNow && foundNow) {
                 f.isNow = false;
             }
@@ -2864,13 +2890,14 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
                 <div class="card-time">${f.isNow ? 'Now' : f.hourStr}</div>
                 <div class="card-aqi" style="color:${getAqiLevel(f.aqi).color};">${f.aqi}</div>
                 <div class="card-level">${getAqiLevel(f.aqi).level}</div>
+                ${f.src ? `<div class="card-source" title="${sourceLabel(f.src).replace(/<[^>]+>/g, '')}">${f.src.abbr}${f.src.source ? `<span>${f.src.source}</span>` : ''}</div>` : ''}
                 ${metHtml}
             </div>`;
         }).join('');
     };
 
     // mini bar chart 
-    const sourceData = masterData.master_pm25source || [];
+    const sourceData = hasOverallAqi ? aqiSources.map(s => sourceLabel(s) || null) : (masterData.master_pm25source || []);
     const findEntry = (localHourStr) => {
         for (let i = 0; i < datetimes.length; i++) {
             if (datetimes[i] && datetimes[i].slice(0, 13) === localHourStr && aqiData[i] != null)
@@ -2907,7 +2934,12 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
 
     // Source colors 
     const sourceColors = { 'GEOS-CF': '#1565C0', 'GEOS-FP': '#00838F', 'MERRA-2': '#6A1B9A', 'AirNow': '#2E7D32', 'CNN': '#BF360C', 'ML': '#E65100' };
-    const getSourceColor = (s) => sourceColors[s] || '#888';
+    const getSourceColor = (s) => {
+        if (!s) return '#888';
+        if (/^O<sub>3/.test(s)) return '#6A1B9A';
+        const key = Object.keys(sourceColors).find(k => s.includes(k));
+        return key ? sourceColors[key] : '#888';
+    };
     const uniqueSources = [...new Set(barPoints.filter(p=>p.source).map(p=>p.source))];
     const sourceLegendHtml = uniqueSources.length > 0 ? `
         <div class="mini-source-legend">
@@ -3016,7 +3048,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
                             data-hour="${p.dayName} ${p.dateLabel}"
                             data-aqi="${p.avg}"
                             data-level="${aqiLevel}"
-                            data-source="${p.sources.join('/') || '--'}"
+                            data-source="${p.sources.join('<br>') || '--'}"
                             data-color="${col}">
                             <div class="mini-bar-inner">
                                 <div class="mini-bar" style="height:${heightPct}%;background:${col};box-shadow:inset 0 -3px 0 ${srcCol};"></div>
@@ -3074,6 +3106,7 @@ function generateForecastHeroSection(masterData, locationName, timezone, request
                 <span class="aqi-level-badge" style="background-color:${aqiLevel.color};">${aqiLevel.level}</span>
             </div>
             <div class="aqi-subtitle">${isDosMissionData ? `3-hour Average (${currentThreeHourAvg}) · ${localTimeStr} Local` : `Air Quality Index (USAQI) · ${localTimeStr} Local`}</div>
+            ${currentSource ? `<div class="aqi-source">Driven by ${sourceLabel(currentSource)}</div>` : ''}
         </div>
 
         <div class="forecast-periods">
