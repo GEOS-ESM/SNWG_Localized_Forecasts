@@ -509,24 +509,29 @@ function create_map(sites, param) {
 
     return map;
 }
+function getPollutantAqis(forecast) {
+    if (!forecast || typeof forecast !== "object") return [];
+    const num = v => (v !== undefined && v !== null && v !== '' && !isNaN(v)) ? Math.round(Number(v)) : null;
+    const pm25 = [num(forecast.pm25_aqi), num(forecast.PM25_NowCast_AQI)].filter(v => v !== null);
+    return [
+        { code: "pm25", aqi: pm25.length ? Math.max(...pm25) : null },
+        { code: "no2",  aqi: num(forecast.NO2_AQI) ?? num(forecast.no2_aqi) },
+        { code: "o3",   aqi: num(forecast.O3_AQI) ?? num(forecast.o3_aqi) }
+    ].filter(p => p.aqi !== null);
+}
+
+function getOverallAqi(forecast) {
+    const subs = getPollutantAqis(forecast);
+    if (subs.length) return Math.max(...subs.map(p => p.aqi));
+    const o = forecast && forecast.overall_aqi;
+    return (o !== undefined && o !== null && !isNaN(o)) ? Math.round(Number(o)) : null;
+}
+
 // Returns the pollutant whose sub-index sets the overall AQI (the highest one).
 function getDominantPollutant(forecast) {
-    if (!forecast || typeof forecast !== "object") return null;
-    const num = v => (v !== undefined && v !== null && !isNaN(v)) ? Number(v) : null;
-    const candidates = [
-        { pollutant: "pm25", aqi: num(forecast.pm25_aqi) },
-        { pollutant: "pm25", aqi: num(forecast.PM25_NowCast_AQI) },
-        { pollutant: "no2",  aqi: num(forecast.NO2_AQI) ?? num(forecast.no2_aqi) },
-        { pollutant: "o3",   aqi: num(forecast.O3_AQI) ?? num(forecast.o3_aqi) }
-    ].filter(c => c.aqi !== null);
-    if (candidates.length === 0) return null;
-
-    const overall = num(forecast.overall_aqi);
-    if (overall !== null) {
-        const match = candidates.find(c => Math.round(c.aqi) === Math.round(overall));
-        if (match) return match.pollutant;
-    }
-    return candidates.reduce((a, b) => (b.aqi > a.aqi ? b : a)).pollutant;
+    const subs = getPollutantAqis(forecast);
+    if (subs.length === 0) return null;
+    return subs.reduce((a, b) => (b.aqi > a.aqi ? b : a)).code;
 }
 
 function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
@@ -542,8 +547,9 @@ function sitesArrayToGeoJSON(sites, selectedSource = "no2") {
 
                 // overall
                 if (matchingForecast && typeof matchingForecast === "object") {
-                    if (matchingForecast.overall_aqi !== undefined && matchingForecast.overall_aqi !== null && !isNaN(matchingForecast.overall_aqi)) {
-                        aqi = matchingForecast.overall_aqi;
+                    const overall = getOverallAqi(matchingForecast);
+                    if (overall !== null) {
+                        aqi = overall;
                     } else if (site.forecasted_value !== undefined && site.forecasted_value !== null && site.forecasted_value !== "N/A") {
                         aqi = site.forecasted_value;
                     }
@@ -630,12 +636,7 @@ function generateMarkerHoverCard(props) {
             <span class="mh-seg-label">${s.short}</span>
         </div>`).join('');
 
-    const num = v => (v !== undefined && v !== null && v !== '' && !isNaN(v)) ? Math.round(Number(v)) : null;
-    const subs = [
-        { code: "pm25", aqi: num(forecast.pm25_aqi) ?? num(forecast.PM25_NowCast_AQI) },
-        { code: "no2",  aqi: num(forecast.NO2_AQI) ?? num(forecast.no2_aqi) },
-        { code: "o3",   aqi: num(forecast.O3_AQI) ?? num(forecast.o3_aqi) }
-    ].filter(p => p.aqi !== null);
+    const subs = getPollutantAqis(forecast);
 
     const breakdown = subs.length ? `
         <div class="mh-pollutants">
@@ -1013,7 +1014,8 @@ function readCompressedJsonAndAddBannersOptimized(fileUrl, selectedSource) {
 function getAqiFromForecast(forecast, selected) {
     if (!forecast) return "N/A";
 
-    if (forecast.overall_aqi != null && !isNaN(forecast.overall_aqi)) return forecast.overall_aqi;
+    const overall = getOverallAqi(forecast);
+    if (overall !== null) return overall;
 
     const isPm25 = selected === "pm25" || selected === "pm2.5";
     let v = null;
@@ -1055,7 +1057,7 @@ function processHourlySnapshotOptimized(hourlySnapshot, filteredIndices) {
             if (forecasted_value !== "N/A") {
                 const no2AqiVal  = snapshotData.no2_aqi  ?? snapshotData.NO2_AQI;
                 const o3AqiVal   = snapshotData.o3_aqi   ?? snapshotData.O3_AQI;
-                const pm25AqiVal = snapshotData.pm25_aqi ?? snapshotData.PM25_NowCast_AQI;
+                const pm25AqiVal = getPollutantAqis(snapshotData).find(p => p.code === 'pm25')?.aqi;
                 const obsOptions = {
                     no2: { unit: "μg/m³", value: snapshotData.no2 || "N/A" },
                     no2_aqi: { unit: "AQI", value: no2AqiVal || "N/A" },
@@ -1252,7 +1254,7 @@ function processHourlySnapshot(hourlySnapshot, filteredIndices) {
             if (forecasted_value !== "N/A") {
                 const no2AqiVal  = snapshotData.no2_aqi  ?? snapshotData.NO2_AQI;
                 const o3AqiVal   = snapshotData.o3_aqi   ?? snapshotData.O3_AQI;
-                const pm25AqiVal = snapshotData.pm25_aqi ?? snapshotData.PM25_NowCast_AQI;
+                const pm25AqiVal = getPollutantAqis(snapshotData).find(p => p.code === 'pm25')?.aqi;
                 const obsOptions = {
                     no2: { unit: "μg/m³", value: snapshotData.no2 || "N/A" },
                     no2_aqi: { unit: "AQI", value: no2AqiVal || "N/A" },
@@ -1691,8 +1693,9 @@ function add_the_banner(site, param) {
         let aqiValue = '--';
         let source = '';
         
-        if (forecast.overall_aqi !== undefined && forecast.overall_aqi !== null && !isNaN(forecast.overall_aqi)) {
-            aqiValue = parseInt(forecast.overall_aqi);
+        const overallAqi = getOverallAqi(forecast);
+        if (overallAqi !== null) {
+            aqiValue = overallAqi;
             source = "NASA GEOS CF, NASA Pandora";
         } else {
             if (site.forecasted_value !== undefined && site.forecasted_value !== null &&
@@ -2014,11 +2017,7 @@ function readApiBaker(options = {}) {
                     masterData.master_o3_aqi.push(null);
                 }
                 
-                if (forecast.overall_aqi !== undefined && forecast.overall_aqi !== null) {
-                    masterData.master_overall_aqi.push(Math.round(forecast.overall_aqi));
-                } else {
-                    masterData.master_overall_aqi.push(null);
-                }
+                masterData.master_overall_aqi.push(getOverallAqi(forecast));
             });
             
             // Hero
@@ -3476,7 +3475,7 @@ function readAirNow(options = {}) {
                     masterData.master_observation.push(observationValue);
 
                     // overall
-                    const aqiValue = (forecast.overall_aqi !== undefined && forecast.overall_aqi !== null) ? forecast.overall_aqi : calculateAqiForPm25(observationValue);
+                    const aqiValue = getOverallAqi(forecast) ?? calculateAqiForPm25(observationValue);
                     masterData.master_aqi.push(aqiValue);
                 });
             }

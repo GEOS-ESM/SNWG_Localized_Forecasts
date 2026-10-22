@@ -1605,8 +1605,8 @@
             sitesData.forEach(site => {
                 const forecast = site.current_forecast;
                 if (!forecast) return;
-                const raw = forecast.overall_aqi != null ? forecast.overall_aqi
-                          : (typeof getAqiFromForecast === 'function' ? getAqiFromForecast(forecast, site.species) : null);
+                const raw = typeof getAqiFromForecast === 'function' ? getAqiFromForecast(forecast, site.species)
+                          : forecast.overall_aqi;
                 if (raw == null || raw === 'N/A') return;
                 const aqi = parseInt(raw);
                 if (isNaN(aqi)) return;
